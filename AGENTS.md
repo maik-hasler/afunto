@@ -1,11 +1,11 @@
-# Einsatzbereit
+# Afunto
 
 English-source UI strings and code. See `CONTRIBUTING.md`'s Language Convention for the full breakdown.
 
 ## Monorepo Structure
 
 ```
-einsatzbereit/
+afunto/
 ├── backend/        .NET 10 Clean Architecture API        → backend/AGENTS.md
 ├── frontend/       Vite SPA + React 19 + Tailwind CSS 4  → frontend/AGENTS.md
 ├── keycloak/       Custom Keycloak image + realm config  → keycloak/AGENTS.md

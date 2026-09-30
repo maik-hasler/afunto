@@ -178,7 +178,7 @@ describe("OrganizationProfilePage missing organization", () => {
 		await screen.findByTestId("organization-load-failure");
 
 		await waitFor(() =>
-			expect(document.title).toBe("Organization not found | Einsatzbereit"),
+			expect(document.title).toBe("Organization not found | Afunto"),
 		);
 	});
 

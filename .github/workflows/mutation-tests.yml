@@ -41,7 +41,7 @@ jobs:
 
       # Run from the test project directory on purpose. Stryker picks up
       # stryker-config.json from the working directory, and - more importantly -
-      # from backend/ it would find Einsatzbereit.slnx, switch to solution mode,
+      # from backend/ it would find Afunto.slnx, switch to solution mode,
       # and try to build the whole solution, which drags in VisualTests and its
       # ~290 MiB Playwright browser download for a run that never opens a
       # browser. From here it builds Application.UnitTests.csproj and nothing

@@ -36,10 +36,10 @@ const manifestIcons = [
 
 const deManifest = {
 	id: "/",
-	name: "Einsatzbereit",
-	short_name: "Einsatzbereit",
+	name: "Afunto",
+	short_name: "Afunto",
 	description:
-		"Einsatzbereit verbindet engagierte Freiwillige mit regionalen Hilfsangeboten. Finde lokale Einsätze, hilf spontan und mach einen Unterschied in deiner Gemeinde.",
+		"Afunto verbindet engagierte Freiwillige mit regionalen Hilfsangeboten. Finde lokale Einsätze, hilf spontan und mach einen Unterschied in deiner Gemeinde.",
 	lang: "de",
 	start_url: "/",
 	display: "standalone",
@@ -117,10 +117,10 @@ const deManifest = {
 
 const enManifest = {
 	id: "/",
-	name: "Einsatzbereit",
-	short_name: "Einsatzbereit",
+	name: "Afunto",
+	short_name: "Afunto",
 	description:
-		"Einsatzbereit connects committed volunteers with regional volunteer opportunities. Find local opportunities, help spontaneously, and make a difference in your community.",
+		"Afunto connects committed volunteers with regional volunteer opportunities. Find local opportunities, help spontaneously, and make a difference in your community.",
 	lang: "en",
 	start_url: "/",
 	display: "standalone",

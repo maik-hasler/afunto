@@ -37,7 +37,7 @@ describe("PwaUpdatePrompt", () => {
 		renderWithProviders(<PwaUpdatePrompt />);
 
 		expect(
-			screen.getByText("A new version of Einsatzbereit is available."),
+			screen.getByText("A new version of Afunto is available."),
 		).toBeInTheDocument();
 	});
 

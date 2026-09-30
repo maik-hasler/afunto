@@ -11,7 +11,7 @@ public static class MetaHtmlBuilder
 		string imageUrl)
 	{
 		var fallbackDescription =
-			"Einsatzbereit verbindet engagierte Freiwillige mit regionalen Hilfsangeboten.";
+			"Afunto verbindet engagierte Freiwillige mit regionalen Hilfsangeboten.";
 		var encodedTitle = HtmlEscape(title);
 		var encodedDescription = HtmlEscape(
 			Truncate(string.IsNullOrWhiteSpace(description) ? fallbackDescription : description));

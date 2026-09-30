@@ -10,10 +10,10 @@ namespace VisualTests;
 [ClassDataSource<AspireFixture>(Shared = SharedType.PerTestSession)]
 public class KeycloakThemeTests(AspireFixture fixture) : VisualTestBase(fixture)
 {
-	private const string Realm = "einsatzbereit";
+	private const string Realm = "afunto";
 	private const string FrontendClientId = "frontend";
 
-	private const string SiteUrl = "https://einsatzbereit.maik-hasler.de";
+	private const string SiteUrl = "https://afunto.maik-hasler.de";
 
 	private const string ThrowawayPassword = "Throwaway123";
 
@@ -385,7 +385,7 @@ public class KeycloakThemeTests(AspireFixture fixture) : VisualTestBase(fixture)
 		await Expect(Page.Locator("#kc-logout")).ToBeVisibleAsync(new() { Timeout = 15_000 });
 		var logoutTitle = await Page.TitleAsync();
 
-		loginTitle.Should().Contain("Einsatzbereit");
+		loginTitle.Should().Contain("Afunto");
 		new[] { loginTitle, registerTitle, logoutTitle }.Distinct().Should().HaveCount(3,
 			"each page should carry its own pageTitle rather than inheriting login.ftl's");
 	}

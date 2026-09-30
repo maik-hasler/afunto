@@ -1,6 +1,6 @@
 # Repo map - read before any review run
 
-Verified facts about einsatzbereit as of 2026-09. If the repo has visibly
+Verified facts about afunto as of 2026-09. If the repo has visibly
 moved on (new top-level dirs, different stack), trust the repo over this
 file and note the drift in the report's parking lot.
 

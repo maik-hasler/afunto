@@ -8,12 +8,12 @@ Person(volunteer, "Volunteer Vera", "Searches for regional volunteer opportuniti
 Person(organizer, "Organizer Olaf", "Creates volunteer opportunities for their organization")
 Person(admin, "Platform Admin", "Moderates reported content and administers users and organizations")
 
-System(einsatzbereit, "Einsatzbereit", "Manages regional volunteer opportunities and volunteer registrations")
+System(afunto, "Afunto", "Manages regional volunteer opportunities and volunteer registrations")
 
-Rel(volunteer, einsatzbereit, "Search and sign up for opportunities, give feedback")
-Rel(organizer, einsatzbereit, "Manages organization's volunteer opportunities and sign-ups")
-Rel(admin, einsatzbereit, "Reviews abuse reports, disables or restores content and accounts")
-Rel(einsatzbereit, volunteer, "Notifies about matches, confirmations and reminders")
-Rel(einsatzbereit, organizer, "Notifies about sign-ups and withdrawals")
+Rel(volunteer, afunto, "Search and sign up for opportunities, give feedback")
+Rel(organizer, afunto, "Manages organization's volunteer opportunities and sign-ups")
+Rel(admin, afunto, "Reviews abuse reports, disables or restores content and accounts")
+Rel(afunto, volunteer, "Notifies about matches, confirmations and reminders")
+Rel(afunto, organizer, "Notifies about sign-ups and withdrawals")
 
 @enduml

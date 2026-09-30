@@ -29,7 +29,7 @@ internal sealed class GetOpportunityCheckInPinQueryHandler(
 		// This is the organizer's one way to learn the current PIN before announcing it at
 		// the venue, so it has to rotate here too - not just on the volunteer's submission
 		// path - or the screen would keep showing a previous occurrence's PIN until someone
-		// happened to try checking in first (einsatzbereit#2202).
+		// happened to try checking in first (afunto#2202).
 		if (opportunity.EnsureCurrentCheckInPin(DateTimeOffset.UtcNow, pinGenerator))
 			await unitOfWork.SaveChangesAsync(cancellationToken);
 

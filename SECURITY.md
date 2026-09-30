@@ -28,7 +28,7 @@ notes unless you'd prefer to stay anonymous.
 
 ## Scope
 
-Use this policy for vulnerabilities in Einsatzbereit's own code (backend,
+Use this policy for vulnerabilities in Afunto's own code (backend,
 frontend, or the Keycloak realm configuration) as well as in a dependency -
 there is currently no automated dependency vulnerability scan, so a report
 is the only way a dependency CVE affecting this project gets noticed.

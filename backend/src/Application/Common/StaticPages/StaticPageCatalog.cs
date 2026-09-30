@@ -7,7 +7,7 @@ namespace Application.Common.StaticPages;
 /// to know about them: the sitemap listed database-backed entity URLs and no
 /// static page at all - not even the site root - and every static route shared
 /// index.html's single hardcoded set of Open Graph tags, which name the homepage
-/// as their canonical URL (einsatzbereit#2331). One catalog feeds both, so a new
+/// as their canonical URL (afunto#2331). One catalog feeds both, so a new
 /// static route cannot be added to one and forgotten in the other.
 /// </para>
 /// <para>
@@ -24,46 +24,46 @@ public static class StaticPageCatalog
 		new(
 			"home",
 			"/",
-			"Einsatzbereit - Spontan Freiwilligenarbeit leisten. Finde deinen Einsatz.",
-			"Einsatzbereit verbindet engagierte Freiwillige mit regionalen Hilfsangeboten. "
+			"Afunto - Spontan Freiwilligenarbeit leisten. Finde deinen Einsatz.",
+			"Afunto verbindet engagierte Freiwillige mit regionalen Hilfsangeboten. "
 			+ "Finde lokale Einsätze, hilf spontan und mach einen Unterschied in deiner Gemeinde."),
 		new(
 			"opportunities",
 			"/opportunities",
-			"Einsätze finden - Einsatzbereit",
+			"Einsätze finden - Afunto",
 			"Finde einen Einsatz in deiner Nähe und pack mit an. "
 			+ "Die meisten dauern nur wenige Stunden."),
 		new(
 			"organizations",
 			"/organizations",
-			"Organisationen - Einsatzbereit",
-			"Finde Organisationen auf Einsatzbereit, die du schon kennst."),
+			"Organisationen - Afunto",
+			"Finde Organisationen auf Afunto, die du schon kennst."),
 		new(
 			"help",
 			"/help",
-			"Hilfe - Einsatzbereit",
-			"Antworten auf häufige Fragen für Freiwillige und Organisationen auf Einsatzbereit."),
+			"Hilfe - Afunto",
+			"Antworten auf häufige Fragen für Freiwillige und Organisationen auf Afunto."),
 		new(
 			"contact",
 			"/contact",
-			"Kontakt - Einsatzbereit",
+			"Kontakt - Afunto",
 			"Melde ein Problem oder finde die richtige Stelle für deine Frage."),
 		new(
 			"imprint",
 			"/imprint",
-			"Impressum - Einsatzbereit",
-			"Anbieterkennzeichnung und Kontaktdaten des Betreibers von Einsatzbereit."),
+			"Impressum - Afunto",
+			"Anbieterkennzeichnung und Kontaktdaten des Betreibers von Afunto."),
 		new(
 			"privacy-policy",
 			"/privacy-policy",
-			"Datenschutzerklärung - Einsatzbereit",
-			"Wie Einsatzbereit personenbezogene Daten erhebt, verarbeitet und schützt, "
+			"Datenschutzerklärung - Afunto",
+			"Wie Afunto personenbezogene Daten erhebt, verarbeitet und schützt, "
 			+ "und welche Rechte du dabei hast."),
 		new(
 			"terms-of-use",
 			"/terms-of-use",
-			"Nutzungsbedingungen - Einsatzbereit",
-			"Die Bedingungen für die Nutzung von Einsatzbereit."),
+			"Nutzungsbedingungen - Afunto",
+			"Die Bedingungen für die Nutzung von Afunto."),
 	];
 
 	public static StaticPage? Find(string slug) =>

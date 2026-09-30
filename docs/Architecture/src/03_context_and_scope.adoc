@@ -25,7 +25,7 @@ include::../images/business-context.puml[]
 |Platform Admin
 |Keeps the platform usable for the other two: works through abuse reports, disables or restores accounts, organizations and opportunities, and reads the audit trail of those actions.
 
-|Einsatzbereit
+|Afunto
 |Connects volunteers with organizations by managing regional volunteer opportunities and registrations, and notifies both sides when something concerning them changes.
 |===
 

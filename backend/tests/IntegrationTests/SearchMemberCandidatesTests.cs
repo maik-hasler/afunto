@@ -130,7 +130,7 @@ public class SearchMemberCandidatesTests(
 	}
 
 	private static async Task<Guid> CreateOrganizationAsync(
-		EinsatzbereitApi client, CancellationToken cancellationToken)
+		AfuntoApi client, CancellationToken cancellationToken)
 	{
 		var organization = await client.CreateOrganizationAsync(
 			new CreateOrganizationRequest { Name = $"Member search {Guid.NewGuid()}" },

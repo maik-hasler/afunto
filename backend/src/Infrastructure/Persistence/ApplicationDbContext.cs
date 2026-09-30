@@ -518,7 +518,7 @@ internal sealed class ApplicationDbContext(
 	{
 		// Open always blocks (still under review); Dismissed blocks indefinitely so a
 		// reporter cannot force a moderator to re-adjudicate the same claim on a loop
-		// (einsatzbereit#2212); anything else (Actioned) only blocks for a cooldown window,
+		// (afunto#2212); anything else (Actioned) only blocks for a cooldown window,
 		// so a target that reoffends after being actioned can still be re-reported later.
 		var cutoff = DateTimeOffset.UtcNow.AddDays(-Report.DuplicateWindowDays);
 

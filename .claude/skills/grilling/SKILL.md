@@ -104,5 +104,5 @@ turned on one of them:
 Vendored from [`mattpocock/skills`](https://github.com/mattpocock/skills)
 (`skills/productivity/grilling`), MIT, full terms in `LICENSE` alongside this
 file. "Why this exists here", "Questions this repo has paid for" and
-"Boundaries" are einsatzbereit-specific; the method above is upstream's, kept
+"Boundaries" are afunto-specific; the method above is upstream's, kept
 close to verbatim so it can be re-synced.

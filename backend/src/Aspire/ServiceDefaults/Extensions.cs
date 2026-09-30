@@ -14,9 +14,9 @@ namespace Microsoft.Extensions.Hosting;
 
 public static class ServiceDefaultsExtensions
 {
-	private const string EmailMeterName = "Einsatzbereit.Email";
+	private const string EmailMeterName = "Afunto.Email";
 
-	private const string OutboxMeterName = "Einsatzbereit.Outbox";
+	private const string OutboxMeterName = "Afunto.Outbox";
 
 	public static TBuilder AddServiceDefaults<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
 	{

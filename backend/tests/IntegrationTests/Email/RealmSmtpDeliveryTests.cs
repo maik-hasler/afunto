@@ -7,7 +7,7 @@ namespace IntegrationTests.Email;
 [ClassDataSource<IntegrationTestFixture>(Shared = SharedType.PerTestSession)]
 public class RealmSmtpDeliveryTests(IntegrationTestFixture fixture)
 {
-	private const string Realm = "einsatzbereit";
+	private const string Realm = "afunto";
 
 	[Test]
 	public async Task SendVerifyEmail_DeliversToMailpit_ThroughRealmSmtpConfig(

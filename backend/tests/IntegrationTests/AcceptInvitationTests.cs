@@ -15,7 +15,7 @@ public class AcceptInvitationTests(IntegrationTestFixture fixture)
 	{
 		// Keycloak bakes role claims into the access token at issue time, so
 		// the token the invitee used to accept still doesn't hold the
-		// organisator role the acceptance itself just granted (einsatzbereit#2206).
+		// organisator role the acceptance itself just granted (afunto#2206).
 		var (_, inviterUsername, inviterPassword) = await fixture.CreateEphemeralUserAsync(cancellationToken);
 		var (inviteeId, inviteeUsername, inviteePassword) = await fixture.CreateEphemeralUserAsync(cancellationToken);
 
@@ -46,7 +46,7 @@ public class AcceptInvitationTests(IntegrationTestFixture fixture)
 		// Refreshing the token - what the frontend's auth.signinSilent() does
 		// right after accepting - re-issues it with the organisator role
 		// Keycloak just granted, so the invitee's very next request carries
-		// it (einsatzbereit#2206).
+		// it (afunto#2206).
 		var (_, inviterUsername, inviterPassword) = await fixture.CreateEphemeralUserAsync(cancellationToken);
 		var (inviteeId, inviteeUsername, inviteePassword) = await fixture.CreateEphemeralUserAsync(cancellationToken);
 

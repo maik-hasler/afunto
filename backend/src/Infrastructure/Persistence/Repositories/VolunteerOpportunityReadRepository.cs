@@ -382,7 +382,7 @@ internal sealed class VolunteerOpportunityReadRepository(
 	/// <c>true</c> for the organizer-facing lists, where the tally is a record of everything
 	/// that was ever signed up for. <c>false</c> for anything a volunteer reads as
 	/// "spots left": seats in a slot that has already ended can never be booked, so counting
-	/// them advertised capacity that does not exist (einsatzbereit#2318).
+	/// them advertised capacity that does not exist (afunto#2318).
 	/// </param>
 	private async Task<(Dictionary<Guid, int?> MaxParticipants, Dictionary<Guid, int> ParticipantCounts)>
 		LoadParticipantStatsAsync(
@@ -559,7 +559,7 @@ internal sealed class VolunteerOpportunityReadRepository(
 
 		// Deliberately viewer-relative: "how many *others* have joined". It is therefore not
 		// a capacity figure - an absolute "spots left" label must be derived from the
-		// viewer-independent TimeSlotDetail.BookedCount above (einsatzbereit#2318).
+		// viewer-independent TimeSlotDetail.BookedCount above (afunto#2318).
 		var currentParticipantCount = await dbContext.EngagementsQuery
 			.CountAsync(e =>
 				e.OpportunityId == opportunityId_ &&
@@ -634,7 +634,7 @@ internal sealed class VolunteerOpportunityReadRepository(
 
 		// Published doesn't mean still open - an opportunity whose only time slots have
 		// ended, or whose IndividualContact deadline has passed, must not keep surfacing
-		// on the organization's public profile (einsatzbereit#2212). Matches the predicate
+		// on the organization's public profile (afunto#2212). Matches the predicate
 		// ApplyPubliclyListedFilters already applies to the browse listing.
 		if (status == OpportunityStatus.Published)
 			orgQuery = orgQuery.Where(vo =>

@@ -22,7 +22,7 @@ public class GetPublicOrganizationProfileTests(
 		await PublishSlotBasedOpportunityAsync(
 			client, organizationId, "Slot based", slotStart, cancellationToken);
 
-		var profile = await new EinsatzbereitApi(fixture.CreateHttpClient())
+		var profile = await new AfuntoApi(fixture.CreateHttpClient())
 			.GetPublicOrganizationProfileAsync(organizationId, cancellationToken);
 
 		var summary = profile.OpenOpportunities.Should().ContainSingle().Which;
@@ -42,7 +42,7 @@ public class GetPublicOrganizationProfileTests(
 		await PublishInterestBasedOpportunityAsync(
 			client, organizationId, "Interest based", deadline, cancellationToken);
 
-		var profile = await new EinsatzbereitApi(fixture.CreateHttpClient())
+		var profile = await new AfuntoApi(fixture.CreateHttpClient())
 			.GetPublicOrganizationProfileAsync(organizationId, cancellationToken);
 
 		var summary = profile.OpenOpportunities.Should().ContainSingle().Which;
@@ -62,7 +62,7 @@ public class GetPublicOrganizationProfileTests(
 			client, organizationId, "Categorised", DateTimeOffset.UtcNow.AddDays(7),
 			cancellationToken, category: "Environment", maxParticipants: 10);
 
-		var profile = await new EinsatzbereitApi(fixture.CreateHttpClient())
+		var profile = await new AfuntoApi(fixture.CreateHttpClient())
 			.GetPublicOrganizationProfileAsync(organizationId, cancellationToken);
 
 		var summary = profile.OpenOpportunities.Should().ContainSingle().Which;
@@ -82,7 +82,7 @@ public class GetPublicOrganizationProfileTests(
 			client, organizationId, "Expired interest based", DateTimeOffset.UtcNow.AddDays(30), cancellationToken);
 		await SetExpiredValidUntilDirectlyAsync(opportunity.Id, cancellationToken);
 
-		var profile = await new EinsatzbereitApi(fixture.CreateHttpClient())
+		var profile = await new AfuntoApi(fixture.CreateHttpClient())
 			.GetPublicOrganizationProfileAsync(organizationId, cancellationToken);
 
 		profile.OpenOpportunities.Should().BeEmpty();
@@ -97,16 +97,16 @@ public class GetPublicOrganizationProfileTests(
 		await PublishSlotBasedOpportunityAsync(
 			client, organizationId, "Half expired", DateTimeOffset.UtcNow.AddDays(7),
 			cancellationToken, maxParticipants: 10);
-		var opportunityId = (await new EinsatzbereitApi(fixture.CreateHttpClient())
+		var opportunityId = (await new AfuntoApi(fixture.CreateHttpClient())
 			.GetPublicOrganizationProfileAsync(organizationId, cancellationToken))
 			.OpenOpportunities.Should().ContainSingle().Which.Id;
 		await AddEndedTimeSlotDirectlyAsync(opportunityId, cancellationToken);
 
-		var profile = await new EinsatzbereitApi(fixture.CreateHttpClient())
+		var profile = await new AfuntoApi(fixture.CreateHttpClient())
 			.GetPublicOrganizationProfileAsync(organizationId, cancellationToken);
 
 		// The ended slot's 10 seats can never be booked, so advertising 20 would promise
-		// capacity that does not exist (einsatzbereit#2318).
+		// capacity that does not exist (afunto#2318).
 		profile.OpenOpportunities.Should().ContainSingle().Which
 			.TotalMaxParticipants.Should().Be(10);
 	}
@@ -139,7 +139,7 @@ public class GetPublicOrganizationProfileTests(
 	}
 
 	private static async Task<Guid> CreateOrganizationAsync(
-		EinsatzbereitApi client, CancellationToken cancellationToken)
+		AfuntoApi client, CancellationToken cancellationToken)
 	{
 		var organization = await client.CreateOrganizationAsync(
 			new CreateOrganizationRequest { Name = $"Card contract {Guid.NewGuid():N}" },
@@ -148,7 +148,7 @@ public class GetPublicOrganizationProfileTests(
 	}
 
 	private static async Task PublishSlotBasedOpportunityAsync(
-		EinsatzbereitApi client,
+		AfuntoApi client,
 		Guid organizationId,
 		string title,
 		DateTimeOffset slotStart,
@@ -185,7 +185,7 @@ public class GetPublicOrganizationProfileTests(
 	}
 
 	private static async Task<CreateVolunteerOpportunityResponse> PublishInterestBasedOpportunityAsync(
-		EinsatzbereitApi client,
+		AfuntoApi client,
 		Guid organizationId,
 		string title,
 		DateTimeOffset validUntil,

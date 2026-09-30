@@ -17,7 +17,7 @@ public class GetVolunteerOpportunityDetailsTests(IntegrationTestFixture fixture)
 		var orgId = await CreateOrganizationAsync(olafClient, cancellationToken);
 		var opportunity = await CreateDraftOpportunityAsync(olafClient, orgId, cancellationToken);
 
-		var anonymousClient = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var anonymousClient = new AfuntoApi(fixture.CreateHttpClient());
 
 		var act = () => anonymousClient.GetVolunteerOpportunityDetailsAsync(opportunity.Id, cancellationToken);
 
@@ -64,7 +64,7 @@ public class GetVolunteerOpportunityDetailsTests(IntegrationTestFixture fixture)
 		var opportunity = await CreateDraftOpportunityAsync(olafClient, orgId, cancellationToken);
 		await olafClient.PublishVolunteerOpportunityAsync(opportunity.Id, cancellationToken);
 
-		var anonymousClient = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var anonymousClient = new AfuntoApi(fixture.CreateHttpClient());
 
 		var details = await anonymousClient.GetVolunteerOpportunityDetailsAsync(opportunity.Id, cancellationToken);
 
@@ -95,7 +95,7 @@ public class GetVolunteerOpportunityDetailsTests(IntegrationTestFixture fixture)
 	}
 
 	private static async Task<Guid> CreateOrganizationAsync(
-		EinsatzbereitApi client, CancellationToken cancellationToken)
+		AfuntoApi client, CancellationToken cancellationToken)
 	{
 		var uniqueName = $"DetailsTestOrg_{Guid.NewGuid()}";
 		var org = await client.CreateOrganizationAsync(
@@ -104,7 +104,7 @@ public class GetVolunteerOpportunityDetailsTests(IntegrationTestFixture fixture)
 	}
 
 	private static async Task<CreateVolunteerOpportunityResponse> CreateDraftOpportunityAsync(
-		EinsatzbereitApi client, Guid orgId, CancellationToken cancellationToken) =>
+		AfuntoApi client, Guid orgId, CancellationToken cancellationToken) =>
 		await client.CreateVolunteerOpportunityAsync(
 			new CreateVolunteerOpportunityRequest
 			{

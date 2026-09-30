@@ -25,7 +25,7 @@ internal sealed class AcceptInvitationCommandHandler(
 
 		// InvitationExpiryJob only sweeps Pending invitations to Expired periodically, so a
 		// Pending invitation past its ExpiresOn can still reach here in the gap before the
-		// next sweep - Accept() itself only checks Status, not the date (einsatzbereit#2212).
+		// next sweep - Accept() itself only checks Status, not the date (afunto#2212).
 		if (invitation.Status == InvitationStatus.Pending && invitation.ExpiresOn <= DateTimeOffset.UtcNow)
 			throw new ResultFailureException(Error.Conflict("OrganizationInvitation.Expired", "This invitation has expired."));
 

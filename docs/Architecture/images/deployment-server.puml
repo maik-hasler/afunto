@@ -6,20 +6,20 @@ title Deployment View - Deployed Runtime
 
 Deployment_Node(runtime, "Container runtime", "Released images, configured via environment variables at container start") {
 
-	Deployment_Node(fe_node, "frontend", "einsatzbereit-frontend image") {
+	Deployment_Node(fe_node, "frontend", "afunto-frontend image") {
 		Container(fe, "Single Page Application", "static assets served by nginx")
 	}
 
-	Deployment_Node(be_node, "backend", "einsatzbereit-backend image") {
+	Deployment_Node(be_node, "backend", "afunto-backend image") {
 		Container(be, "Backend API", "ASP.NET Core (.NET 10)")
 	}
 
-	Deployment_Node(kc_node, "keycloak", "einsatzbereit-keycloak image") {
+	Deployment_Node(kc_node, "keycloak", "afunto-keycloak image") {
 		Container(kc, "Identity Provider", "Keycloak, committed realm and theme")
 	}
 
 	Deployment_Node(pg_node, "postgres", "postgres:18") {
-		ContainerDb(pg, "Application Database", "einsatzbereit + keycloak databases, internal only")
+		ContainerDb(pg, "Application Database", "afunto + keycloak databases, internal only")
 	}
 }
 

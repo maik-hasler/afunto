@@ -14,9 +14,9 @@ namespace Application.VolunteerOpportunities.AdminShadowDeleteVolunteerOpportuni
 /// <summary>
 /// Admin-only takedown: unlike <see cref="DeleteVolunteerOpportunity.v1.DeleteVolunteerOpportunityCommandHandler"/>,
 /// this bypasses <c>OwnershipGuard</c> entirely - the endpoint's
-/// <c>EinsatzbereitAdminPolicy</c> gate is the only authorization check - and
+/// <c>AfuntoAdminPolicy</c> gate is the only authorization check - and
 /// shadow-deletes rather than removing the row, so a report-driven takedown is
-/// restorable (see einsatzbereit#1075).
+/// restorable (see afunto#1075).
 /// </summary>
 internal sealed class AdminShadowDeleteVolunteerOpportunityCommandHandler(
 	IApplicationDbContext dbContext,

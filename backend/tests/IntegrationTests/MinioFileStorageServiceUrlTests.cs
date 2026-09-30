@@ -12,7 +12,7 @@ public class MinioFileStorageServiceUrlTests
 			Endpoint = "http://minio:9000",
 			AccessKey = "access-key",
 			SecretKey = "secret-key",
-			BucketName = "einsatzbereit",
+			BucketName = "afunto",
 			PublicEndpoint = "https://storage.example.com",
 		}));
 
@@ -23,7 +23,7 @@ public class MinioFileStorageServiceUrlTests
 
 		var result = sut.GetPublicUrl("user-avatars/user-1/abc.png");
 
-		result.Should().Be("https://storage.example.com/einsatzbereit/public/user-avatars/user-1/abc.png");
+		result.Should().Be("https://storage.example.com/afunto/public/user-avatars/user-1/abc.png");
 	}
 
 	[Test]

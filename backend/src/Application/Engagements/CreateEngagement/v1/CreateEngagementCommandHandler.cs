@@ -44,7 +44,7 @@ internal sealed class CreateEngagementCommandHandler(
 
 		// HasEngagementAsync matches on the time slot too, so a slot sign-up only
 		// clashes with the same slot - a second slot of the same opportunity is
-		// fine. Saying "this opportunity" there was simply wrong (einsatzbereit#2323).
+		// fine. Saying "this opportunity" there was simply wrong (afunto#2323).
 		if (alreadySignedUp)
 			throw new ResultFailureException(request.TimeSlotId is not null
 				? Error.Conflict("Engagement.AlreadySignedUpForTimeSlot", "Conflict: you are already signed up for this time slot.")

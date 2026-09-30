@@ -56,7 +56,7 @@ describe("OrgAppLayout org-load failures", () => {
 		).toBeInTheDocument();
 		expect(screen.queryByRole("button", { name: "Try again" })).toBeNull();
 		await waitFor(() =>
-			expect(document.title).toBe("Organization not found | Einsatzbereit"),
+			expect(document.title).toBe("Organization not found | Afunto"),
 		);
 	});
 

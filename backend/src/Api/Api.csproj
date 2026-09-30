@@ -20,7 +20,7 @@
 	</ItemGroup>
 
 	<PropertyGroup>
-		<Description>API for the Einsatzbereit application</Description>
+		<Description>API for the Afunto application</Description>
 		<OpenApiDocumentsDirectory>$(MSBuildProjectDirectory)/wwwroot</OpenApiDocumentsDirectory>
 		<OpenApiGenerateDocumentsOnBuild>true</OpenApiGenerateDocumentsOnBuild>
 	</PropertyGroup>

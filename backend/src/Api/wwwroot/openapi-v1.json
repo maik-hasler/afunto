@@ -1,8 +1,8 @@
 {
   "openapi": "3.1.1",
   "info": {
-    "title": "Einsatzbereit API",
-    "description": "API for the Einsatzbereit application",
+    "title": "Afunto API",
+    "description": "API for the Afunto application",
     "version": "v1"
   },
   "paths": {

@@ -1,4 +1,4 @@
-export const APP_NAME = "Einsatzbereit";
+export const APP_NAME = "Afunto";
 
 const SOCIAL_TITLE_SELECTORS = [
 	'meta[property="og:title"]',

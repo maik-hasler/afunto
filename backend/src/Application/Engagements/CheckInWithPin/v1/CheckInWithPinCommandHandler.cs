@@ -47,7 +47,7 @@ internal sealed class CheckInWithPinCommandHandler(
 
 		// Rotates the opportunity's PIN onto whichever occurrence is current before
 		// comparing, so a PIN learned from a past occurrence never matches here even if
-		// nobody has looked at the organizer's check-in screen since (einsatzbereit#2202).
+		// nobody has looked at the organizer's check-in screen since (afunto#2202).
 		opportunity.EnsureCurrentCheckInPin(now, pinGenerator);
 
 		if (!PinsMatch(opportunity.CheckInPin, request.Pin))

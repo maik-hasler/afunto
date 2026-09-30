@@ -64,7 +64,7 @@ public static class ServiceCollectionExtensions
 				sp.GetServices<ISaveChangesInterceptor>());
 
 			options.UseNpgsql(
-				sp.GetRequiredService<IOptions<ConnectionStringOptions>>().Value.Einsatzbereit,
+				sp.GetRequiredService<IOptions<ConnectionStringOptions>>().Value.Afunto,
 				npg =>
 				{
 					npg.MigrationsAssembly("Infrastructure");

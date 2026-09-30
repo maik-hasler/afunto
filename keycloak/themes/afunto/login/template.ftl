@@ -6,9 +6,9 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta name="color-scheme" content="light">
 
-	<title>${msg(pageTitle, realm.displayName!'Einsatzbereit')} - Einsatzbereit</title>
+	<title>${msg(pageTitle, realm.displayName!'Afunto')} - Afunto</title>
 	<link rel="icon" type="image/svg+xml" href="${url.resourcesPath}/img/favicon.svg">
-	<link rel="stylesheet" href="${url.resourcesPath}/css/einsatzbereit.css">
+	<link rel="stylesheet" href="${url.resourcesPath}/css/afunto.css">
 </head>
 <body>
 <div class="auth-page">
@@ -37,7 +37,7 @@
 		<div class="auth-card">
 
 			<a class="auth-brand" href="${properties.siteUrl}">
-				<img src="${url.resourcesPath}/img/logo.svg" alt="Einsatzbereit" class="auth-logo">
+				<img src="${url.resourcesPath}/img/logo.svg" alt="Afunto" class="auth-logo">
 			</a>
 
 			<div class="card-header">

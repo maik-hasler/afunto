@@ -92,7 +92,7 @@ describe("HomePage FAQ", () => {
 		renderWithProviders(<HomePage />);
 
 		expect(
-			await screen.findByText("Does using Einsatzbereit cost anything?"),
+			await screen.findByText("Does using Afunto cost anything?"),
 		).toBeInTheDocument();
 		expect(screen.getByRole("link", { name: /Help/ })).toBeInTheDocument();
 	});

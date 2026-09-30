@@ -16,7 +16,7 @@ namespace VisualTests;
 
 public class AspireFixture : IAsyncInitializer, IAsyncDisposable
 {
-	private const string Realm = "einsatzbereit";
+	private const string Realm = "afunto";
 
 	public const string BootTimingFileName = "aspire-boot-seconds.txt";
 
@@ -56,8 +56,8 @@ public class AspireFixture : IAsyncInitializer, IAsyncDisposable
 		await WarmKeycloakLoginPageAsync();
 		await WaitForBackendReadyAsync();
 
-		_connectionString = await _app.GetConnectionStringAsync("einsatzbereit")
-			?? throw new InvalidOperationException("Connection string 'einsatzbereit' not found.");
+		_connectionString = await _app.GetConnectionStringAsync("afunto")
+			?? throw new InvalidOperationException("Connection string 'afunto' not found.");
 
 		_keycloakClient = _app.CreateHttpClient("keycloak");
 

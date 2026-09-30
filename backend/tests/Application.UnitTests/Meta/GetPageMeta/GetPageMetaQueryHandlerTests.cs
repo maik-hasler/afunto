@@ -9,7 +9,7 @@ namespace Application.UnitTests.Meta.GetPageMeta;
 // connection IP (Api/Common/RateLimiting), and RateLimitingTests and
 // MapTileRateLimitingTests each burn a full window on purpose, so the suite's
 // shared anonymous budget has no headroom - adding even two requests to it
-// made unrelated anonymous tests fail with 429 (einsatzbereit#2331). The
+// made unrelated anonymous tests fail with 429 (afunto#2331). The
 // endpoint's own wiring is the same shape as the two sibling meta endpoints,
 // which are integration-tested, and is held by EndpointConventionTests.
 public class GetPageMetaQueryHandlerTests
@@ -17,21 +17,21 @@ public class GetPageMetaQueryHandlerTests
 	private readonly GetPageMetaQueryHandler _sut = new();
 
 	[Test]
-	[Arguments("home", "https://einsatzbereit.example/")]
-	[Arguments("opportunities", "https://einsatzbereit.example/opportunities")]
-	[Arguments("organizations", "https://einsatzbereit.example/organizations")]
-	[Arguments("help", "https://einsatzbereit.example/help")]
-	[Arguments("contact", "https://einsatzbereit.example/contact")]
-	[Arguments("imprint", "https://einsatzbereit.example/imprint")]
-	[Arguments("privacy-policy", "https://einsatzbereit.example/privacy-policy")]
-	[Arguments("terms-of-use", "https://einsatzbereit.example/terms-of-use")]
+	[Arguments("home", "https://afunto.example/")]
+	[Arguments("opportunities", "https://afunto.example/opportunities")]
+	[Arguments("organizations", "https://afunto.example/organizations")]
+	[Arguments("help", "https://afunto.example/help")]
+	[Arguments("contact", "https://afunto.example/contact")]
+	[Arguments("imprint", "https://afunto.example/imprint")]
+	[Arguments("privacy-policy", "https://afunto.example/privacy-policy")]
+	[Arguments("terms-of-use", "https://afunto.example/terms-of-use")]
 	public async Task Handle_ShouldPointCanonicalAndOgUrl_AtThePageItself(
 		string slug,
 		string expectedUrl,
 		CancellationToken cancellationToken)
 	{
 		var html = await _sut.Handle(
-			new GetPageMetaQuery(slug, "https://einsatzbereit.example"), cancellationToken);
+			new GetPageMetaQuery(slug, "https://afunto.example"), cancellationToken);
 
 		html.Should().NotBeNull();
 		html.Should().Contain($"""<link rel="canonical" href="{expectedUrl}" />""");
@@ -43,7 +43,7 @@ public class GetPageMetaQueryHandlerTests
 		CancellationToken cancellationToken)
 	{
 		var html = await _sut.Handle(
-			new GetPageMetaQuery("help", "https://einsatzbereit.example"), cancellationToken);
+			new GetPageMetaQuery("help", "https://afunto.example"), cancellationToken);
 
 		var page = StaticPageCatalog.Find("help");
 		page.Should().NotBeNull();
@@ -56,20 +56,20 @@ public class GetPageMetaQueryHandlerTests
 	public async Task Handle_ShouldFallBackToTheSiteImage(CancellationToken cancellationToken)
 	{
 		var html = await _sut.Handle(
-			new GetPageMetaQuery("imprint", "https://einsatzbereit.example"), cancellationToken);
+			new GetPageMetaQuery("imprint", "https://afunto.example"), cancellationToken);
 
 		html.Should().Contain(
-			"""<meta property="og:image" content="https://einsatzbereit.example/og-image.png" />""");
+			"""<meta property="og:image" content="https://afunto.example/og-image.png" />""");
 	}
 
 	[Test]
 	public async Task Handle_ShouldTrimTrailingSlash_FromBaseUrl(CancellationToken cancellationToken)
 	{
 		var html = await _sut.Handle(
-			new GetPageMetaQuery("contact", "https://einsatzbereit.example/"), cancellationToken);
+			new GetPageMetaQuery("contact", "https://afunto.example/"), cancellationToken);
 
 		html.Should().Contain(
-			"""<meta property="og:url" content="https://einsatzbereit.example/contact" />""");
+			"""<meta property="og:url" content="https://afunto.example/contact" />""");
 	}
 
 	[Test]
@@ -81,7 +81,7 @@ public class GetPageMetaQueryHandlerTests
 		CancellationToken cancellationToken)
 	{
 		var html = await _sut.Handle(
-			new GetPageMetaQuery(slug, "https://einsatzbereit.example"), cancellationToken);
+			new GetPageMetaQuery(slug, "https://afunto.example"), cancellationToken);
 
 		html.Should().BeNull();
 	}

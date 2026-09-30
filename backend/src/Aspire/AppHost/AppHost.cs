@@ -33,16 +33,16 @@ var minio = builder.AddContainer("minio", "quay.io/minio/minio", "RELEASE.2025-0
 
 var minioApiEndpoint = minio.GetEndpoint("api");
 
-var database = postgres.AddDatabase("einsatzbereit");
+var database = postgres.AddDatabase("afunto");
 
 var keycloakRealmPath = Path.GetFullPath(
 	Path.Combine(builder.AppHostDirectory, "..", "..", "..", "..", "keycloak", "realms"));
 
 var keycloakThemePath = Path.GetFullPath(
-	Path.Combine(builder.AppHostDirectory, "..", "..", "..", "..", "keycloak", "themes", "einsatzbereit"));
+	Path.Combine(builder.AppHostDirectory, "..", "..", "..", "..", "keycloak", "themes", "afunto"));
 
 var localRealm = JsonNode.Parse(
-	File.ReadAllText(Path.Combine(keycloakRealmPath, "einsatzbereit-realm.json")))!;
+	File.ReadAllText(Path.Combine(keycloakRealmPath, "afunto-realm.json")))!;
 if (localRealm["clients"] is JsonArray realmClients)
 {
 	foreach (var client in realmClients)
@@ -91,28 +91,28 @@ localRealm["smtpServer"] = new JsonObject
 {
 	["host"] = "mailpit",
 	["port"] = "1025",
-	["from"] = "noreply@einsatzbereit.local",
-	["fromDisplayName"] = "Einsatzbereit",
+	["from"] = "noreply@afunto.local",
+	["fromDisplayName"] = "Afunto",
 	["ssl"] = "false",
 	["starttls"] = "false",
 	["auth"] = "false",
 };
 
 var keycloakRealmImportPath = Path.Combine(
-	Path.GetTempPath(), "einsatzbereit-aspire-realm-import");
+	Path.GetTempPath(), "afunto-aspire-realm-import");
 Directory.CreateDirectory(keycloakRealmImportPath);
 File.WriteAllText(
-	Path.Combine(keycloakRealmImportPath, "einsatzbereit-realm.json"),
+	Path.Combine(keycloakRealmImportPath, "afunto-realm.json"),
 	localRealm.ToJsonString());
 
 var keycloak = builder.AddContainer("keycloak", "quay.io/keycloak/keycloak", "26.7.4")
 	.WithEnvironment("KC_DB", "dev-file")
 	.WithBindMount(keycloakRealmImportPath, "/opt/keycloak/data/import", isReadOnly: true)
-	.WithBindMount(keycloakThemePath, "/opt/keycloak/themes/einsatzbereit", isReadOnly: true)
+	.WithBindMount(keycloakThemePath, "/opt/keycloak/themes/afunto", isReadOnly: true)
 	.WithArgs("start-dev", "--import-realm")
 	.WithHttpEndpoint(port: isTestEnv ? null : 8080, targetPort: 8080, isProxied: false)
 
-	.WithHttpHealthCheck("/realms/einsatzbereit/.well-known/openid-configuration");
+	.WithHttpHealthCheck("/realms/afunto/.well-known/openid-configuration");
 
 var keycloakEndpoint = keycloak.GetEndpoint("http");
 
@@ -126,9 +126,9 @@ var backend = builder.AddProject<Projects.Api>("backend")
 	.WaitFor(keycloak)
 	.WaitFor(minio)
 	.WithEnvironment("Authentication__Authority",
-		ReferenceExpression.Create($"{keycloakEndpoint}/realms/einsatzbereit"))
+		ReferenceExpression.Create($"{keycloakEndpoint}/realms/afunto"))
 	.WithEnvironment("Authentication__ValidIssuers__0",
-		ReferenceExpression.Create($"{keycloakEndpoint}/realms/einsatzbereit"))
+		ReferenceExpression.Create($"{keycloakEndpoint}/realms/afunto"))
 	.WithEnvironment("Keycloak__BaseUrl",
 		ReferenceExpression.Create($"{keycloakEndpoint}"))
 	.WithEnvironment("Keycloak__ClientSecret", "backend-secret")
@@ -137,7 +137,7 @@ var backend = builder.AddProject<Projects.Api>("backend")
 	.WithEnvironment("Storage__Endpoint", ReferenceExpression.Create($"{minioApiEndpoint}"))
 	.WithEnvironment("Storage__AccessKey", "minio")
 	.WithEnvironment("Storage__SecretKey", "minio123")
-	.WithEnvironment("Storage__BucketName", "einsatzbereit")
+	.WithEnvironment("Storage__BucketName", "afunto")
 	.WithEnvironment("RateLimiting__Write__PermitLimit", "10000")
 	.WithEnvironment("RateLimiting__Read__AuthenticatedPermitLimit", "10000")
 
@@ -195,7 +195,7 @@ var frontend = builder.AddViteApp("frontend", "../../../../frontend")
 	.WaitFor(backend)
 	.WithEnvironment("VITE_API_URL", backend.GetEndpoint("http"))
 	.WithEnvironment("VITE_KEYCLOAK_AUTHORITY_URL",
-		ReferenceExpression.Create($"{keycloakEndpoint}/realms/einsatzbereit"))
+		ReferenceExpression.Create($"{keycloakEndpoint}/realms/afunto"))
 	.WithEnvironment("STORAGE_PUBLIC_URL", ReferenceExpression.Create($"{minioApiEndpoint}"))
 
 	.WithEnvironment("VITE_TOAST_LIFETIME_MS", isTestEnv ? "0" : "5000");

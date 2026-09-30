@@ -84,7 +84,7 @@ public class VolunteerOpportunityOwnershipTests(IntegrationTestFixture fixture)
 	}
 
 	private static async Task<Guid> CreateOrganizationAsync(
-		EinsatzbereitApi client, CancellationToken cancellationToken)
+		AfuntoApi client, CancellationToken cancellationToken)
 	{
 		var uniqueName = $"OwnershipTestOrg_{Guid.NewGuid()}";
 		var org = await client.CreateOrganizationAsync(
@@ -93,7 +93,7 @@ public class VolunteerOpportunityOwnershipTests(IntegrationTestFixture fixture)
 	}
 
 	private static async Task<CreateVolunteerOpportunityResponse> CreateOpportunityAsync(
-		EinsatzbereitApi client, Guid orgId, CancellationToken cancellationToken, string? checkInPin = null)
+		AfuntoApi client, Guid orgId, CancellationToken cancellationToken, string? checkInPin = null)
 	{
 		return await client.CreateVolunteerOpportunityAsync(
 			new CreateVolunteerOpportunityRequest

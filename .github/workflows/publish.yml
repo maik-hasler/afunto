@@ -161,7 +161,7 @@ jobs:
         run: dotnet run --project tests/IntegrationTests --no-restore --no-build
 
   # Sharded exactly as dotnet.yml's visual-tests job is - see that job's comment
-  # for why (einsatzbereit#2145). The two must stay in step: this is the same
+  # for why (afunto#2145). The two must stay in step: this is the same
   # suite gating a release that the PR gate runs, so a split that only existed on
   # one side would mean the release path and the PR path disagree about how long
   # the gate takes and which tests ran together.
@@ -286,7 +286,7 @@ jobs:
           docker network create backend-smoke-test
 
           docker run -d --name smoke-postgres --network backend-smoke-test \
-            -e POSTGRES_USER=einsatzbereit -e POSTGRES_PASSWORD=einsatzbereit -e POSTGRES_DB=einsatzbereit \
+            -e POSTGRES_USER=afunto -e POSTGRES_PASSWORD=afunto -e POSTGRES_DB=afunto \
             postgres:18-alpine
 
           IMPORT_DIR="$RUNNER_TEMP/kc-import"
@@ -310,17 +310,17 @@ jobs:
         run: |
           echo "Waiting for Postgres..."
           for i in $(seq 1 60); do
-            docker exec smoke-postgres pg_isready -U einsatzbereit >/dev/null 2>&1 && break
+            docker exec smoke-postgres pg_isready -U afunto >/dev/null 2>&1 && break
             if [ "$i" = 60 ]; then echo "::error::Postgres never became ready"; exit 1; fi
             sleep 2
           done
 
-          echo "Waiting for Keycloak to serve the einsatzbereit realm..."
+          echo "Waiting for Keycloak to serve the afunto realm..."
           for i in $(seq 1 90); do
             code=$(curl -fsS -o /dev/null -w "%{http_code}" \
-              http://localhost:18080/realms/einsatzbereit/.well-known/openid-configuration || echo 000)
+              http://localhost:18080/realms/afunto/.well-known/openid-configuration || echo 000)
             [ "$code" = "200" ] && break
-            if [ "$i" = 90 ]; then echo "::error::Keycloak never served the einsatzbereit realm"; exit 1; fi
+            if [ "$i" = 90 ]; then echo "::error::Keycloak never served the afunto realm"; exit 1; fi
             sleep 2
           done
 
@@ -348,20 +348,20 @@ jobs:
           # Program.cs's comment on RequireHttpsMetadata.
           docker run -d --name smoke-backend --network backend-smoke-test -p 18081:8080 \
             -e ASPNETCORE_ENVIRONMENT=Production \
-            -e ConnectionStrings__einsatzbereit="Host=smoke-postgres;Database=einsatzbereit;Username=einsatzbereit;Password=einsatzbereit" \
+            -e ConnectionStrings__afunto="Host=smoke-postgres;Database=afunto;Username=afunto;Password=afunto" \
             -e Keycloak__ClientSecret=smoke-test-secret \
             -e Keycloak__BaseUrl=http://smoke-keycloak:8080 \
-            -e Keycloak__Realm=einsatzbereit \
-            -e Authentication__Authority=http://smoke-keycloak:8080/realms/einsatzbereit \
+            -e Keycloak__Realm=afunto \
+            -e Authentication__Authority=http://smoke-keycloak:8080/realms/afunto \
             -e Authentication__RequireHttpsMetadata=false \
-            -e Authentication__ValidIssuers__0=http://smoke-keycloak:8080/realms/einsatzbereit \
+            -e Authentication__ValidIssuers__0=http://smoke-keycloak:8080/realms/afunto \
             -e Cors__Origins__0=http://localhost \
             -e Smtp__Host=localhost \
             -e Smtp__Port=1025 \
             -e Storage__Endpoint=http://smoke-minio:9000 \
             -e Storage__AccessKey=minio \
             -e Storage__SecretKey=minio123 \
-            -e Storage__BucketName=einsatzbereit \
+            -e Storage__BucketName=afunto \
             -e Database__MigrateOnStartup=true \
             backend-health-check:latest
 
@@ -497,7 +497,7 @@ jobs:
     needs: [backend-fast-tests, backend-integration-tests, backend-visual-tests]
     uses: ./.github/workflows/frontend-checks.yml
     with:
-      vite_keycloak_authority_url: https://login.example.test/realms/einsatzbereit
+      vite_keycloak_authority_url: https://login.example.test/realms/afunto
       vite_keycloak_client_id: frontend
       keycloak_origin: https://login.example.test
       vite_api_url: https://api.example.test
@@ -727,7 +727,7 @@ jobs:
           # suffix sorts *above* the bare version it precedes - the first stable tag
           # (e.g. v1.0.0) sorts below all its own RCs and lands last in the descending
           # list below, so PREV_TAG comes back empty and RANGE falls back to the entire
-          # repo history (einsatzbereit#1679). This tells git "-rc" is a prerelease
+          # repo history (afunto#1679). This tells git "-rc" is a prerelease
           # marker instead, so v1.0.0 sorts above v1.0.0-rc.N as expected.
           git config versionsort.suffix "-rc"
 

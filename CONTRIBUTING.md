@@ -1,6 +1,6 @@
-# Contributing to Einsatzbereit
+# Contributing to Afunto
 
-Thank you for your interest in contributing to Einsatzbereit!
+Thank you for your interest in contributing to Afunto!
 Every contribution counts - bug reports, ideas, documentation, or code.
 
 ## Language Convention
@@ -9,7 +9,7 @@ Every contribution counts - bug reports, ideas, documentation, or code.
 |---|---|
 | UI source strings (i18n keys in `frontend/src/locales/en.json`) | English - add or edit new keys here first |
 | UI German translation (`frontend/src/locales/de.json`) | German - keep in parity with `en.json` via `pnpm i18n:check` |
-| End-user-facing app and documentation | German (Einsatzbereit's primary audience is German-speaking; the UI negotiates the visitor's browser language at runtime and falls back to German - `<html lang="de">` - only when that can't be detected, see `frontend/src/i18n.ts`) |
+| End-user-facing app and documentation | German (Afunto's primary audience is German-speaking; the UI negotiates the visitor's browser language at runtime and falls back to German - `<html lang="de">` - only when that can't be detected, see `frontend/src/i18n.ts`) |
 | Installed-app metadata (the web app manifest in `frontend/vite.config.ts`) | Localized per active i18next language - a separate `manifest.de.webmanifest`/`manifest.en.webmanifest` is built at build time (`deManifest`/`enManifest`), and `frontend/src/i18n.ts` swaps `index.html`'s `<link rel="manifest">` between them as the visitor's language changes. German remains the default (`manifest.de.webmanifest`) for a visitor whose language hasn't resolved yet |
 | Code, commits, issues, pull requests | English |
 
@@ -29,8 +29,8 @@ A PR that adds or changes UI text must update both `en.json` (the source) and `d
 Requirements: [.NET 10 SDK](https://dotnet.microsoft.com/download), [Docker](https://docs.docker.com/get-docker/), [pnpm](https://pnpm.io/installation).
 
 ```bash
-git clone https://github.com/maik-hasler/einsatzbereit.git
-cd einsatzbereit
+git clone https://github.com/maik-hasler/afunto.git
+cd afunto
 dotnet run --project backend/src/Aspire/AppHost
 ```
 

@@ -14,7 +14,7 @@ internal sealed class MinioFileStorageService : IFileStorageService
 	// Not covered by the bucket policy set up in EnsureBucketReadyAsync (which
 	// only grants anonymous reads under PublicPrefix), so moving an object here
 	// makes it unreachable by its old public URL without discarding it - see
-	// einsatzbereit#2198.
+	// afunto#2198.
 	private const string QuarantinePrefix = "quarantined/";
 
 	private readonly IMinioClient _minio;

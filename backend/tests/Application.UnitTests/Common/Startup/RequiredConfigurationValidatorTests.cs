@@ -25,10 +25,10 @@ public class RequiredConfigurationValidatorTests
 	{
 		var missing = RequiredConfigurationValidator.FindMissing(
 			isDevelopment: false,
-			connectionString: "Host=postgres;Database=einsatzbereit",
+			connectionString: "Host=postgres;Database=afunto",
 			keycloakClientSecret: "real-secret",
-			authenticationAuthority: "https://login.example.com/realms/einsatzbereit",
-			corsOrigins: ["https://einsatzbereit.example.com"],
+			authenticationAuthority: "https://login.example.com/realms/afunto",
+			corsOrigins: ["https://afunto.example.com"],
 			smtpHost: "smtp.example.com",
 			smtpPort: "587");
 
@@ -45,12 +45,12 @@ public class RequiredConfigurationValidatorTests
 			isDevelopment: false,
 			connectionString: connectionString,
 			keycloakClientSecret: "real-secret",
-			authenticationAuthority: "https://login.example.com/realms/einsatzbereit",
-			corsOrigins: ["https://einsatzbereit.example.com"],
+			authenticationAuthority: "https://login.example.com/realms/afunto",
+			corsOrigins: ["https://afunto.example.com"],
 			smtpHost: "smtp.example.com",
 			smtpPort: "587");
 
-		missing.Should().ContainSingle().Which.Should().Be("ConnectionStrings:einsatzbereit");
+		missing.Should().ContainSingle().Which.Should().Be("ConnectionStrings:afunto");
 	}
 
 	[Test]
@@ -61,10 +61,10 @@ public class RequiredConfigurationValidatorTests
 	{
 		var missing = RequiredConfigurationValidator.FindMissing(
 			isDevelopment: false,
-			connectionString: "Host=postgres;Database=einsatzbereit",
+			connectionString: "Host=postgres;Database=afunto",
 			keycloakClientSecret: keycloakClientSecret,
-			authenticationAuthority: "https://login.example.com/realms/einsatzbereit",
-			corsOrigins: ["https://einsatzbereit.example.com"],
+			authenticationAuthority: "https://login.example.com/realms/afunto",
+			corsOrigins: ["https://afunto.example.com"],
 			smtpHost: "smtp.example.com",
 			smtpPort: "587");
 
@@ -79,10 +79,10 @@ public class RequiredConfigurationValidatorTests
 	{
 		var missing = RequiredConfigurationValidator.FindMissing(
 			isDevelopment: false,
-			connectionString: "Host=postgres;Database=einsatzbereit",
+			connectionString: "Host=postgres;Database=afunto",
 			keycloakClientSecret: "real-secret",
 			authenticationAuthority: authenticationAuthority,
-			corsOrigins: ["https://einsatzbereit.example.com"],
+			corsOrigins: ["https://afunto.example.com"],
 			smtpHost: "smtp.example.com",
 			smtpPort: "587");
 
@@ -94,9 +94,9 @@ public class RequiredConfigurationValidatorTests
 	{
 		var missing = RequiredConfigurationValidator.FindMissing(
 			isDevelopment: false,
-			connectionString: "Host=postgres;Database=einsatzbereit",
+			connectionString: "Host=postgres;Database=afunto",
 			keycloakClientSecret: "real-secret",
-			authenticationAuthority: "https://login.example.com/realms/einsatzbereit",
+			authenticationAuthority: "https://login.example.com/realms/afunto",
 			corsOrigins: null,
 			smtpHost: "smtp.example.com",
 			smtpPort: "587");
@@ -109,9 +109,9 @@ public class RequiredConfigurationValidatorTests
 	{
 		var missing = RequiredConfigurationValidator.FindMissing(
 			isDevelopment: false,
-			connectionString: "Host=postgres;Database=einsatzbereit",
+			connectionString: "Host=postgres;Database=afunto",
 			keycloakClientSecret: "real-secret",
-			authenticationAuthority: "https://login.example.com/realms/einsatzbereit",
+			authenticationAuthority: "https://login.example.com/realms/afunto",
 			corsOrigins: [],
 			smtpHost: "smtp.example.com",
 			smtpPort: "587");
@@ -127,10 +127,10 @@ public class RequiredConfigurationValidatorTests
 	{
 		var missing = RequiredConfigurationValidator.FindMissing(
 			isDevelopment: false,
-			connectionString: "Host=postgres;Database=einsatzbereit",
+			connectionString: "Host=postgres;Database=afunto",
 			keycloakClientSecret: "real-secret",
-			authenticationAuthority: "https://login.example.com/realms/einsatzbereit",
-			corsOrigins: ["https://einsatzbereit.example.com"],
+			authenticationAuthority: "https://login.example.com/realms/afunto",
+			corsOrigins: ["https://afunto.example.com"],
 			smtpHost: smtpHost,
 			smtpPort: "587");
 
@@ -145,10 +145,10 @@ public class RequiredConfigurationValidatorTests
 	{
 		var missing = RequiredConfigurationValidator.FindMissing(
 			isDevelopment: false,
-			connectionString: "Host=postgres;Database=einsatzbereit",
+			connectionString: "Host=postgres;Database=afunto",
 			keycloakClientSecret: "real-secret",
-			authenticationAuthority: "https://login.example.com/realms/einsatzbereit",
-			corsOrigins: ["https://einsatzbereit.example.com"],
+			authenticationAuthority: "https://login.example.com/realms/afunto",
+			corsOrigins: ["https://afunto.example.com"],
 			smtpHost: "smtp.example.com",
 			smtpPort: smtpPort);
 
@@ -168,7 +168,7 @@ public class RequiredConfigurationValidatorTests
 			smtpPort: null);
 
 		missing.Should().BeEquivalentTo(
-			"ConnectionStrings:einsatzbereit",
+			"ConnectionStrings:afunto",
 			"Keycloak:ClientSecret",
 			"Authentication:Authority",
 			"Cors:Origins",

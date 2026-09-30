@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Infrastructure.Persistence.Migrations
 {
 	/// <inheritdoc />
-	// einsatzbereit#1724: ix_engagement_volunteer_id_opportunity_id and
+	// afunto#1724: ix_engagement_volunteer_id_opportunity_id and
 	// ix_engagement_volunteer_id_time_slot_id previously disagreed - a volunteer
 	// signed up for two time slots of the same recurring opportunity legitimately
 	// holds two rows sharing (volunteer_id, opportunity_id), differing only by

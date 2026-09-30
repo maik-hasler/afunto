@@ -4,7 +4,7 @@ internal sealed class MapTileOptions
 {
 	public string BaseUrl { get; set; } = "https://tile.openstreetmap.org";
 
-	public string UserAgent { get; set; } = "Einsatzbereit/1.0 (https://github.com/maik-hasler/einsatzbereit)";
+	public string UserAgent { get; set; } = "Afunto/1.0 (https://github.com/maik-hasler/afunto)";
 
 	public int TimeoutSeconds { get; set; } = 5;
 

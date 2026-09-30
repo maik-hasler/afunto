@@ -5,7 +5,7 @@ description: >
   wrong behaviour or wrong data, including the security smells no CI gate
   covers. Use when the maintainer types /bug-hunt, or asks to hunt bugs,
   audit a slice, check correctness, or look for security problems in
-  einsatzbereit - naming a slice (Engagements, Organizations,
+  afunto - naming a slice (Engagements, Organizations,
   VolunteerOpportunities, ...) if they have one in mind. Not for reviewing
   a diff (that is /self-review) and not for anything the running app would
   show you (that is /walkthrough).

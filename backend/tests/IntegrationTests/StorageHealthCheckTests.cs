@@ -15,7 +15,7 @@ public class StorageHealthCheckTests(IntegrationTestFixture fixture)
 			Endpoint = fixture.GetMinioEndpoint(),
 			AccessKey = "minio",
 			SecretKey = "minio123",
-			BucketName = "einsatzbereit",
+			BucketName = "afunto",
 		}));
 
 		var act = () => storage.PingAsync(cancellationToken);
@@ -31,7 +31,7 @@ public class StorageHealthCheckTests(IntegrationTestFixture fixture)
 			Endpoint = "http://127.0.0.1:1",
 			AccessKey = "minio",
 			SecretKey = "minio123",
-			BucketName = "einsatzbereit",
+			BucketName = "afunto",
 		}));
 
 		var act = () => storage.PingAsync(cancellationToken);

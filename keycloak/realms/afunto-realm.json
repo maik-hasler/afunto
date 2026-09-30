@@ -1,11 +1,11 @@
 {
-  "realm": "einsatzbereit",
+  "realm": "afunto",
   "enabled": true,
-  "displayName": "Einsatzbereit",
-  "displayNameHtml": "<b>Einsatzbereit</b>",
+  "displayName": "Afunto",
+  "displayNameHtml": "<b>Afunto</b>",
   "organizationsEnabled": true,
   "sslRequired": "external",
-  "loginTheme": "einsatzbereit",
+  "loginTheme": "afunto",
   "registrationAllowed": true,
   "registrationEmailAsUsername": false,
   "resetPasswordAllowed": true,
@@ -48,7 +48,7 @@
     "host": "${KC_SMTP_HOST}",
     "port": "${KC_SMTP_PORT}",
     "from": "${KC_SMTP_FROM}",
-    "fromDisplayName": "Einsatzbereit",
+    "fromDisplayName": "Afunto",
     "ssl": "false",
     "starttls": "true",
     "auth": "true",
@@ -64,7 +64,7 @@
   "roles": {
     "realm": [
       {
-        "name": "default-roles-einsatzbereit",
+        "name": "default-roles-afunto",
         "description": "${role_default-roles}",
         "composite": true,
         "composites": {
@@ -96,7 +96,7 @@
     ]
   },
   "defaultRole": {
-    "name": "default-roles-einsatzbereit",
+    "name": "default-roles-afunto",
     "description": "${role_default-roles}",
     "composite": true,
     "clientRole": false
@@ -140,7 +140,7 @@
           "protocolMapper": "oidc-hardcoded-claim-mapper",
           "config": {
             "claim.name": "realm",
-            "claim.value": "einsatzbereit",
+            "claim.value": "afunto",
             "jsonType.label": "String",
             "id.token.claim": "true",
             "access.token.claim": "true",
@@ -192,7 +192,7 @@
           "protocolMapper": "oidc-hardcoded-claim-mapper",
           "config": {
             "claim.name": "realm",
-            "claim.value": "einsatzbereit",
+            "claim.value": "afunto",
             "jsonType.label": "String",
             "id.token.claim": "true",
             "access.token.claim": "true",
@@ -235,11 +235,11 @@
       }
     ]
   },
-  "browserFlow": "einsatzbereit browser",
-  "registrationFlow": "einsatzbereit registration",
+  "browserFlow": "afunto browser",
+  "registrationFlow": "afunto registration",
   "authenticationFlows": [
     {
-      "alias": "einsatzbereit browser",
+      "alias": "afunto browser",
       "description": "Single-step browser login (username + password on one page)",
       "providerId": "basic-flow",
       "topLevel": true,
@@ -258,13 +258,13 @@
           "requirement": "ALTERNATIVE",
           "priority": 20,
           "autheticatorFlow": true,
-          "flowAlias": "einsatzbereit browser forms",
+          "flowAlias": "afunto browser forms",
           "userSetupAllowed": false
         }
       ]
     },
     {
-      "alias": "einsatzbereit browser forms",
+      "alias": "afunto browser forms",
       "description": "Username and password together",
       "providerId": "basic-flow",
       "topLevel": false,
@@ -281,7 +281,7 @@
       ]
     },
     {
-      "alias": "einsatzbereit registration",
+      "alias": "afunto registration",
       "description": "Registration flow - Terms of Use required (#1079)",
       "providerId": "basic-flow",
       "topLevel": true,
@@ -293,13 +293,13 @@
           "requirement": "REQUIRED",
           "priority": 10,
           "autheticatorFlow": true,
-          "flowAlias": "einsatzbereit registration form",
+          "flowAlias": "afunto registration form",
           "userSetupAllowed": false
         }
       ]
     },
     {
-      "alias": "einsatzbereit registration form",
+      "alias": "afunto registration form",
       "description": "Registration form - Terms of Use required (#1079)",
       "providerId": "form-flow",
       "topLevel": false,

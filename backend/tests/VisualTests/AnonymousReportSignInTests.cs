@@ -38,7 +38,7 @@ public class AnonymousReportSignInTests(AspireFixture fixture) : VisualTestBase(
 		await reportButton.ClickAsync();
 
 		await Expect(Page.Locator("#username")).ToBeVisibleAsync(new() { Timeout = 30_000 });
-		await Expect(Page).ToHaveURLAsync(new Regex(@"/realms/einsatzbereit/protocol/openid-connect/auth"));
+		await Expect(Page).ToHaveURLAsync(new Regex(@"/realms/afunto/protocol/openid-connect/auth"));
 	}
 
 	[Test]
@@ -64,6 +64,6 @@ public class AnonymousReportSignInTests(AspireFixture fixture) : VisualTestBase(
 		await reportButton.ClickAsync();
 
 		await Expect(Page.Locator("#username")).ToBeVisibleAsync(new() { Timeout = 30_000 });
-		await Expect(Page).ToHaveURLAsync(new Regex(@"/realms/einsatzbereit/protocol/openid-connect/auth"));
+		await Expect(Page).ToHaveURLAsync(new Regex(@"/realms/afunto/protocol/openid-connect/auth"));
 	}
 }

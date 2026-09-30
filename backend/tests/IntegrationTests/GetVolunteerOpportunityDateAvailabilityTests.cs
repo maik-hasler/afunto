@@ -327,17 +327,17 @@ public class GetVolunteerOpportunityDateAvailabilityTests(IntegrationTestFixture
 	// from its own X-Forwarded-For (so neighbours' requests cannot exhaust its rate-limit
 	// bucket) and, for the timezone cases, its own X-Timezone - per-test headers a shared
 	// helper has no business setting.
-	private EinsatzbereitApi CreateAnonymousClient(string clientIp, string? timezone = null)
+	private AfuntoApi CreateAnonymousClient(string clientIp, string? timezone = null)
 	{
 		var httpClient = fixture.CreateHttpClient();
 		httpClient.DefaultRequestHeaders.Add("X-Forwarded-For", clientIp);
 		if (timezone is not null)
 			httpClient.DefaultRequestHeaders.Add("X-Timezone", timezone);
-		return new EinsatzbereitApi(httpClient);
+		return new AfuntoApi(httpClient);
 	}
 
 	private static async Task<Guid> CreateOrganizationAsync(
-		EinsatzbereitApi client, CancellationToken cancellationToken)
+		AfuntoApi client, CancellationToken cancellationToken)
 	{
 		var organization = await client.CreateOrganizationAsync(
 			new CreateOrganizationRequest { Name = $"Testorg_{Guid.NewGuid()}" }, cancellationToken);
@@ -345,7 +345,7 @@ public class GetVolunteerOpportunityDateAvailabilityTests(IntegrationTestFixture
 	}
 
 	private static async Task<CreateVolunteerOpportunityResponse> CreateOpportunityWithTimeSlotAsync(
-		EinsatzbereitApi client,
+		AfuntoApi client,
 		Guid orgId,
 		string title,
 		DateTimeOffset slotStart,

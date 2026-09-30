@@ -671,7 +671,7 @@ public class NotificationTests(IntegrationTestFixture fixture)
 	}
 
 	private static async Task<Guid> CreateOrganizationAsync(
-		EinsatzbereitApi client, CancellationToken cancellationToken)
+		AfuntoApi client, CancellationToken cancellationToken)
 	{
 		var org = await client.CreateOrganizationAsync(
 			new CreateOrganizationRequest { Name = $"NotifTestOrg_{Guid.NewGuid()}" },
@@ -680,7 +680,7 @@ public class NotificationTests(IntegrationTestFixture fixture)
 	}
 
 	private static async Task<CreateVolunteerOpportunityResponse> CreateOpportunityAsync(
-		EinsatzbereitApi client, Guid orgId, string title, CancellationToken cancellationToken, string? titleEn = null)
+		AfuntoApi client, Guid orgId, string title, CancellationToken cancellationToken, string? titleEn = null)
 	{
 		return await client.CreateVolunteerOpportunityAsync(
 			new CreateVolunteerOpportunityRequest

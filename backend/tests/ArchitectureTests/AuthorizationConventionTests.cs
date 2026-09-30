@@ -30,12 +30,12 @@ public sealed class AuthorizationConventionTests
 		var adminRoutesWithoutAdminPolicy = EndpointTestHelper.GetAllRouteEndpoints(app)
 			.Where(e => e.RoutePattern.RawText?.Contains("/admin/") == true)
 			.Where(e => e.Metadata.OfType<IAuthorizeData>()
-				.All(a => a.Policy != AuthorizationPolicies.EinsatzbereitAdminPolicy))
+				.All(a => a.Policy != AuthorizationPolicies.AfuntoAdminPolicy))
 			.Select(e => e.RoutePattern.RawText)
 			.ToList();
 
 		adminRoutesWithoutAdminPolicy.Should().BeEmpty(
-			$"every /admin/ route must require {nameof(AuthorizationPolicies.EinsatzbereitAdminPolicy)} - " +
+			$"every /admin/ route must require {nameof(AuthorizationPolicies.AfuntoAdminPolicy)} - " +
 			"any other policy (or none at all) would let a non-admin user reach it");
 	}
 }

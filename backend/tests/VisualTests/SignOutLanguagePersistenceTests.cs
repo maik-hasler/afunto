@@ -29,7 +29,7 @@ public class SignOutLanguagePersistenceTests(AspireFixture fixture) : VisualTest
 		await Expect(Page.Locator("html")).ToHaveAttributeAsync("lang", "de");
 
 		var explicitChoice = await Page.EvaluateAsync<string?>(
-			"() => localStorage.getItem('einsatzbereit:language-explicit')");
+			"() => localStorage.getItem('afunto:language-explicit')");
 		var storedLanguage = await Page.EvaluateAsync<string?>(
 			"() => localStorage.getItem('i18nextLng')");
 

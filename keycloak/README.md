@@ -23,7 +23,7 @@ Optimized multi-stage image, configured entirely through environment variables a
 
 `KEYCLOAK_BACKEND_SECRET` and the `KC_SMTP_*` values must match the backend's own `Keycloak__ClientSecret` and `Smtp__*` settings - see `keycloak/AGENTS.md` for how the realm resolves `${VAR}` placeholders at import time.
 
-`KC_BOOTSTRAP_ADMIN_USERNAME`/`KC_BOOTSTRAP_ADMIN_PASSWORD` only bootstrap a login for Keycloak's own **master** realm admin console - not a user in the `einsatzbereit` application realm. The demo users the realm file ships for local dev (`vera`/`olaf`/`admin` - see the root `README.md`'s Test users table) are disabled in this released image. To create a real administrator: sign in to the admin console (`/admin/master/console`) with the bootstrap credentials, switch to the `einsatzbereit` realm, create a user there (or promote one who self-registered through the app), and assign the `admin` realm role on that user's Role mapping tab.
+`KC_BOOTSTRAP_ADMIN_USERNAME`/`KC_BOOTSTRAP_ADMIN_PASSWORD` only bootstrap a login for Keycloak's own **master** realm admin console - not a user in the `afunto` application realm. The demo users the realm file ships for local dev (`vera`/`olaf`/`admin` - see the root `README.md`'s Test users table) are disabled in this released image. To create a real administrator: sign in to the admin console (`/admin/master/console`) with the bootstrap credentials, switch to the `afunto` realm, create a user there (or promote one who self-registered through the app), and assign the `admin` realm role on that user's Role mapping tab.
 
 ## Local development
 

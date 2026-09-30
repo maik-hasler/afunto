@@ -9,7 +9,7 @@
     "openApiToCSharpClient": {
       "output": "ApiClient.cs",
       "namespace": "IntegrationTests",
-      "className": "EinsatzbereitApi",
+      "className": "AfuntoApi",
       "injectHttpClient": true,
       "disposeHttpClient": false,
       "generateClientInterfaces": false,

@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://einsatzbereit.maik-hasler.de/sitemap.xml
+Sitemap: https://afunto.maik-hasler.de/sitemap.xml

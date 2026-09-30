@@ -40,7 +40,7 @@ public class OutputCachingTests(IntegrationTestFixture fixture)
 		var second = await httpClient.GetAsync("/v1/sitemap.xml", cancellationToken);
 
 		second.Headers.TryGetValues("Age", out _).Should().BeTrue(
-			"the sitemap is a public, non-personalized endpoint and should be output-cached (einsatzbereit#1092)");
+			"the sitemap is a public, non-personalized endpoint and should be output-cached (afunto#1092)");
 	}
 
 	[Test]
@@ -168,7 +168,7 @@ public class OutputCachingTests(IntegrationTestFixture fixture)
 	}
 
 	private static async Task<Guid> CreateOrganizationAsync(
-		EinsatzbereitApi client, string name, CancellationToken cancellationToken)
+		AfuntoApi client, string name, CancellationToken cancellationToken)
 	{
 		var uniqueName = $"{name}_{Guid.NewGuid()}";
 		var organization = await client.CreateOrganizationAsync(

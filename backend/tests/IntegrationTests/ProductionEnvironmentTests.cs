@@ -45,7 +45,7 @@ public class ProductionEnvironmentTests(ProductionEnvironmentFixture fixture)
 	public async Task GetPublicOrganizationsDirectory_ShouldReturnSeededOrganizations_WhenSeedOnStartupIsEnabled(
 		CancellationToken cancellationToken)
 	{
-		var directory = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var directory = new AfuntoApi(fixture.CreateHttpClient());
 
 		var page = await directory.GetPublicOrganizationsAsync(1, 10, cancellationToken: cancellationToken);
 

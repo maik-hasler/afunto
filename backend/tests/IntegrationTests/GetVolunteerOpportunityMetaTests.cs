@@ -60,7 +60,7 @@ public class GetVolunteerOpportunityMetaTests(IntegrationTestFixture fixture)
 	}
 
 	private static async Task<Guid> CreateOrganizationAsync(
-		EinsatzbereitApi client, CancellationToken cancellationToken)
+		AfuntoApi client, CancellationToken cancellationToken)
 	{
 		var uniqueName = $"Testorg_{Guid.NewGuid()}";
 		var organization = await client.CreateOrganizationAsync(
@@ -69,7 +69,7 @@ public class GetVolunteerOpportunityMetaTests(IntegrationTestFixture fixture)
 	}
 
 	private static Task<CreateVolunteerOpportunityResponse> CreateOpportunityAsync(
-		EinsatzbereitApi client, Guid orgId, bool isDraft, CancellationToken cancellationToken) =>
+		AfuntoApi client, Guid orgId, bool isDraft, CancellationToken cancellationToken) =>
 		client.CreateVolunteerOpportunityAsync(new CreateVolunteerOpportunityRequest
 		{
 			TitleDe = "Strandreinigung Musterstadt",

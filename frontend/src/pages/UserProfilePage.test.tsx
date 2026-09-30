@@ -81,7 +81,7 @@ describe("UserProfilePage missing profile", () => {
 		await screen.findByTestId("user-profile-load-failure");
 
 		await waitFor(() =>
-			expect(document.title).toBe("Profile not found | Einsatzbereit"),
+			expect(document.title).toBe("Profile not found | Afunto"),
 		);
 	});
 

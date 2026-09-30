@@ -62,7 +62,7 @@ body:
       placeholder: |
         - Browser / Version:
         - Operating System:
-        - Einsatzbereit Version / Branch:
+        - Afunto Version / Branch:
 
   - type: textarea
     id: extra

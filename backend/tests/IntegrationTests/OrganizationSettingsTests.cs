@@ -34,7 +34,7 @@ public class OrganizationSettingsTests(
 	public async Task GetOrganizationDetails_ShouldReturn401_WhenNotAuthenticated(
 		CancellationToken cancellationToken)
 	{
-		var client = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var client = new AfuntoApi(fixture.CreateHttpClient());
 
 		var act = () => client.GetOrganizationDetailsAsync(Guid.NewGuid(), cancellationToken);
 
@@ -147,7 +147,7 @@ public class OrganizationSettingsTests(
 	public async Task UpdateOrganization_ShouldReturn401_WhenNotAuthenticated(
 		CancellationToken cancellationToken)
 	{
-		var client = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var client = new AfuntoApi(fixture.CreateHttpClient());
 
 		var act = () => client.UpdateOrganizationAsync(
 			Guid.NewGuid(),
@@ -193,7 +193,7 @@ public class OrganizationSettingsTests(
 	public async Task RemoveMember_ShouldReturn401_WhenNotAuthenticated(
 		CancellationToken cancellationToken)
 	{
-		var client = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var client = new AfuntoApi(fixture.CreateHttpClient());
 
 		var act = () => client.RemoveMemberAsync(Guid.NewGuid(), Guid.NewGuid(), cancellationToken);
 
@@ -910,7 +910,7 @@ public class OrganizationSettingsTests(
 	public async Task DeleteOrganization_ShouldReturn401_WhenNotAuthenticated(
 		CancellationToken cancellationToken)
 	{
-		var client = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var client = new AfuntoApi(fixture.CreateHttpClient());
 
 		var act = () => client.DeleteOrganizationAsync(Guid.NewGuid(), cancellationToken);
 

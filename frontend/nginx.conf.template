@@ -30,7 +30,7 @@ map $host $csp_header_silent_renew {
 # Recognizes social-preview and search-engine crawlers by User-Agent so a shared or
 # crawled deep link to a specific opportunity/organization gets that entity's own
 # title/description/image instead of the site-wide metadata frontend/index.html
-# hardcodes (einsatzbereit#1680) - real browsers never match this and are served the
+# hardcodes (afunto#1680) - real browsers never match this and are served the
 # unmodified SPA shell below, same as today.
 map $http_user_agent $is_social_bot {
 	default 0;
@@ -47,7 +47,7 @@ server {
 	# are never stored - true for the backend's in-memory rate limiter and scoped
 	# HttpLogging, but nginx's base image (nginx:1.31-alpine) otherwise applies its
 	# default access-log format, which includes the client IP, and container stdout
-	# is routinely collected (einsatzbereit#1730). Disabled here to keep that claim
+	# is routinely collected (afunto#1730). Disabled here to keep that claim
 	# accurate.
 	access_log off;
 
@@ -66,7 +66,7 @@ server {
 	# The homepage's own preview. Split out from `location /` above because that
 	# one is a prefix match covering every SPA path, and only the site root should
 	# resolve to the "home" entry of the backend's StaticPageCatalog
-	# (einsatzbereit#2331).
+	# (afunto#2331).
 	location = / {
 		if ($is_social_bot) {
 			rewrite ^ /__meta/pages/home last;
@@ -88,11 +88,11 @@ server {
 	# nginx's default mime.types has no .webmanifest entry, so it falls back to
 	# default_type (application/octet-stream) instead of the
 	# application/manifest+json the W3C Web App Manifest spec requires
-	# (einsatzbereit#1966) - most browsers are lenient about it, but a strict
+	# (afunto#1966) - most browsers are lenient about it, but a strict
 	# installability check (some Lighthouse configs, some non-Chromium engines)
 	# can refuse to treat a non-application/manifest+json response as a valid
 	# manifest. Matches both locale manifests (manifest.de.webmanifest,
-	# manifest.en.webmanifest, einsatzbereit#1923) rather than one exact
+	# manifest.en.webmanifest, afunto#1923) rather than one exact
 	# filename, since index.html's <link rel="manifest"> is swapped between
 	# them at runtime (frontend/src/i18n.ts) as the visitor's language changes.
 	location ~ ^/manifest\.(de|en)\.webmanifest$ {
@@ -142,7 +142,7 @@ server {
 	}
 
 	# Shared/crawled deep links to a specific opportunity or organization
-	# (einsatzbereit#1680) - a social-preview crawler or search engine (see
+	# (afunto#1680) - a social-preview crawler or search engine (see
 	# $is_social_bot above) gets rewritten to the internal /__meta/... location
 	# below instead, which proxies to the backend's per-entity HTML. Everyone
 	# else (i.e. every real browser) falls through to try_files exactly as
@@ -154,7 +154,7 @@ server {
 		try_files $uri $uri/ /index.html;
 	}
 
-	# The same treatment for the static routes (einsatzbereit#2331). Those used to
+	# The same treatment for the static routes (afunto#2331). Those used to
 	# fall straight through to index.html, whose og:url/canonical is one hardcoded
 	# string pointing at the site root - so /help pasted into Slack, WhatsApp or a
 	# Facebook post previewed as the homepage and declared the homepage canonical.
@@ -170,7 +170,7 @@ server {
 	# Internal-only rewrite target for the bot branch above - proxied rather than
 	# served as a static file since it needs the opportunity/organization's
 	# current title/description/banner from the database. Same cross-subdomain
-	# proxy rationale as /sitemap.xml below (einsatzbereit#1092).
+	# proxy rationale as /sitemap.xml below (afunto#1092).
 	location ~ ^/__meta/(volunteer-opportunities|organizations)/([0-9a-fA-F-]+)$ {
 		internal;
 		resolver ${DNS_RESOLVER} valid=10s;
@@ -195,7 +195,7 @@ server {
 	# reject its entries - but the backend and this frontend are reached under
 	# different hostnames, and the sitemap's content is DB-backed (published
 	# opportunities/organizations), so it can't be a static file here either
-	# (einsatzbereit#1092). Proxied instead, over the container network both
+	# (afunto#1092). Proxied instead, over the container network both
 	# already share.
 	#
 	# proxy_pass's target is a variable ($backend_upstream), not a literal
@@ -209,7 +209,7 @@ server {
 	# DNS server) but are templated from BACKEND_UPSTREAM/DNS_RESOLVER at
 	# container start (99-runtime-config.sh) rather than hardcoded, since
 	# nothing guarantees that service name on every deployment
-	# (einsatzbereit#2196).
+	# (afunto#2196).
 	location = /sitemap.xml {
 		resolver ${DNS_RESOLVER} valid=10s;
 		set $backend_upstream ${BACKEND_UPSTREAM};

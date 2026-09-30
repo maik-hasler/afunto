@@ -29,7 +29,7 @@ public class GetSitemapTests(IntegrationTestFixture fixture)
 
 		// The static routes are listed unconditionally, so an empty database no
 		// longer means an empty urlset - only that no entity URL is in it
-		// (einsatzbereit#2331).
+		// (afunto#2331).
 		xml.Should().NotContain("/organizations/").And.NotContain("/volunteer-opportunities/");
 		foreach (var page in StaticPageCatalog.All)
 			xml.Should().Contain($"{page.Path}</loc>");
@@ -101,7 +101,7 @@ public class GetSitemapTests(IntegrationTestFixture fixture)
 	private static string SitemapRoute() => $"/v1/sitemap.xml?_={Guid.NewGuid()}";
 
 	private static async Task<Guid> CreateOrganizationAsync(
-		EinsatzbereitApi client, CancellationToken cancellationToken)
+		AfuntoApi client, CancellationToken cancellationToken)
 	{
 		var uniqueName = $"Testorg_{Guid.NewGuid()}";
 		var organization = await client.CreateOrganizationAsync(
@@ -110,7 +110,7 @@ public class GetSitemapTests(IntegrationTestFixture fixture)
 	}
 
 	private static Task<CreateVolunteerOpportunityResponse> CreatePublishedOpportunityAsync(
-		EinsatzbereitApi client, Guid orgId, CancellationToken cancellationToken) =>
+		AfuntoApi client, Guid orgId, CancellationToken cancellationToken) =>
 		client.CreateVolunteerOpportunityAsync(new CreateVolunteerOpportunityRequest
 		{
 			TitleDe = "Published opportunity",
@@ -127,7 +127,7 @@ public class GetSitemapTests(IntegrationTestFixture fixture)
 		}, cancellationToken);
 
 	private static Task<CreateVolunteerOpportunityResponse> CreateDraftOpportunityAsync(
-		EinsatzbereitApi client, Guid orgId, CancellationToken cancellationToken) =>
+		AfuntoApi client, Guid orgId, CancellationToken cancellationToken) =>
 		client.CreateVolunteerOpportunityAsync(new CreateVolunteerOpportunityRequest
 		{
 			TitleDe = "Draft opportunity",
@@ -145,7 +145,7 @@ public class GetSitemapTests(IntegrationTestFixture fixture)
 		}, cancellationToken);
 
 	private async Task<CreateVolunteerOpportunityResponse> CreateOpportunityWithExpiredTimeSlotAsync(
-		EinsatzbereitApi client, Guid orgId, CancellationToken cancellationToken)
+		AfuntoApi client, Guid orgId, CancellationToken cancellationToken)
 	{
 		var opportunity = await client.CreateVolunteerOpportunityAsync(new CreateVolunteerOpportunityRequest
 		{

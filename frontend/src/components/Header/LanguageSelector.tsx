@@ -60,7 +60,7 @@ export default function LanguageSelector({
 		setOpen(false);
 		if (code === currentCode) return;
 		await i18n.changeLanguage(code);
-		localStorage.setItem("einsatzbereit:language-explicit", "true");
+		localStorage.setItem("afunto:language-explicit", "true");
 		await warnIfEmailLanguageDiffers(code);
 	}
 
