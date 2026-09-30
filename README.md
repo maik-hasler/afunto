@@ -37,7 +37,7 @@
 
 Volunteering doesn't have to mean a long-term commitment - sometimes an afternoon is enough, sometimes a week. The hard part is usually finding out where help is needed right now, whether that's a large NGO or a local sports tournament. Existing platforms tend to be too complex, too generic, or simply unused.
 
-Afunto makes concrete needs visible: what, where, when. Organizations post opportunities with real time slots, and volunteers sign up for exactly the slot that fits their schedule - not every week, but now and then ("af un to", Low German for "every now and then").
+Afunto makes concrete needs visible: what, where, when. Organizations post opportunities with real time slots, and volunteers sign up for exactly the slot that fits their schedule - not every week, just now and then. That is where the name comes from: "af un to" is Low German for "now and then".
 
 The app itself is served in German by default, since Afunto's primary audience is German-speaking, with English available as a secondary UI language via a language selector. Code, commits, and documentation for contributors stay in English throughout.
 

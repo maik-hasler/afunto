@@ -20,11 +20,11 @@ Examples:
 
 Every component receives the same version tag:
 
-| Component | Image                                        |
-|-----------|----------------------------------------------|
-| Backend   | `ghcr.io/<owner>/afunto-backend`      |
-| Frontend  | `ghcr.io/<owner>/afunto-frontend`     |
-| Keycloak  | `ghcr.io/<owner>/afunto-keycloak`     |
+| Component | Image                             |
+|-----------|-----------------------------------|
+| Backend   | `ghcr.io/<owner>/afunto-backend`  |
+| Frontend  | `ghcr.io/<owner>/afunto-frontend` |
+| Keycloak  | `ghcr.io/<owner>/afunto-keycloak` |
 
 ## Platform Support
 

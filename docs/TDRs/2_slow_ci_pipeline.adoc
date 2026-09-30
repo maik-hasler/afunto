@@ -5,6 +5,11 @@
 - *Date:* 2026-07-18 (last re-measured 2026-08-20, issues #2145 and #2147)
 - *Status:* In Progress
 
+[NOTE]
+====
+*Product renamed from Einsatzbereit to Afunto.* Dated entries below use the new names for things that carried the old one at the time: `Afunto.slnx` was `Einsatzbereit.slnx`.
+====
+
 === Description
 
 The backend CI workflow (`.github/workflows/dotnet.yml`) is the slowest quality gate on the project. It runs on every pull request and every push to `main` that touches `backend/**`, `frontend/**`, or `keycloak/**`, and it must pass before a change can be merged or released. The workflow builds the backend and then runs four test projects sequentially in a single job; the two that boot the full Aspire stack under Docker - `IntegrationTests` and especially `VisualTests` (TUnit.Playwright) - dominate its runtime.

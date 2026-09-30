@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 188 56" fill="none">
   <style>
     :root {
-      --eb-primary: #226947;
+      --af-primary: #226947;
     }
-    .m { stroke: var(--eb-primary, #226947); fill: none; }
-    .w { fill:   var(--eb-primary, #226947); }
+    .m { stroke: var(--af-primary, #226947); fill: none; }
+    .w { fill:   var(--af-primary, #226947); }
   </style>
 
   <circle class="m" cx="28" cy="28" r="25" stroke-width="3"/>

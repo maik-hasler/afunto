@@ -6,6 +6,8 @@ ifndef::imagesdir[:imagesdir: ../images]
 Afunto is an open-source platform that connects engaged volunteers with regional needs.
 Volunteering and concrete societal benefit are always at the forefront.
 
+The name is Low German: _af un to_ means "now and then" - volunteering when it fits, without a standing commitment.
+
 The platform follows three guiding principles:
 
 * *Volunteering first:* Every decision - whether a feature, an architectural choice, or a process - serves the goal of making voluntary engagement easier.

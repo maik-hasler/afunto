@@ -81,7 +81,7 @@ if (!literal) {
 	// with no active SSO session. A pattern anchored with `$` directly after ".html" (no
 	// allowance for a query string) only ever matches a bare, query-less request this flow
 	// never actually sends - which is exactly the bug this check exists to catch (found live
-	// on afunto.maik-hasler.de: DevTools showed the redirect blocked by
+	// on the staging host: DevTools showed the redirect blocked by
 	// frame-ancestors 'none', because the service worker served cached index.html instead of
 	// the real silent-renew.html).
 	const successRedirect =

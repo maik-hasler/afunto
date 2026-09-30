@@ -37,9 +37,7 @@ describe("HelpPage", () => {
 
 		const details = container.querySelectorAll("details");
 		expect(details.length).toBeGreaterThanOrEqual(4);
-		await userEvent.click(
-			screen.getByText("Does using Afunto cost anything?"),
-		);
+		await userEvent.click(screen.getByText("Does using Afunto cost anything?"));
 		expect(details[0].textContent?.length ?? 0).toBeGreaterThan(
 			"Does using Afunto cost anything?".length,
 		);

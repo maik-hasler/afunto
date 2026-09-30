@@ -8,6 +8,8 @@
 [NOTE]
 ====
 *Restored 2026-08-26 (issue #2214).* This record was deleted outright by issue #2165 (2026-08-22) when deployment, staging and observability moved out of this repository's scope, instead of being marked resolved - the arc42 convention this repository otherwise follows for a record that no longer applies. Its original content, through the 2026-08-21 "deploy ownership moved to mgmt-hetzner" update below, is unchanged; the Resolution section at the end is new.
+
+*Since then, the product was renamed from Einsatzbereit to Afunto.* The names in this record changed with it, even where they describe earlier events: `deploy-afunto.yaml` was `deploy-einsatzbereit.yaml`, `afunto-staging`/`afunto-production` were `einsatzbereit-staging`/`einsatzbereit-production`, and `afunto.maik-hasler.de` was `einsatzbereit.maik-hasler.de`.
 ====
 
 === Description

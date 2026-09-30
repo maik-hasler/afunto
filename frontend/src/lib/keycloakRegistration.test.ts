@@ -50,9 +50,7 @@ describe("signinRedirectForRegistration", () => {
 			redirect_uri: string;
 			metadataSeed: { authorization_endpoint: string };
 		};
-		expect(options.authority).toBe(
-			"https://keycloak.example/realms/afunto",
-		);
+		expect(options.authority).toBe("https://keycloak.example/realms/afunto");
 		expect(options.client_id).toBe("frontend");
 		expect(options.scope).toBe("openid profile email");
 		expect(options.redirect_uri).toBe(`${window.location.origin}/callback`);

@@ -9,8 +9,8 @@ keycloak/
 ├── Dockerfile              Multi-stage build (builder + optimized runtime)
 ├── README.md               Runtime env vars documentation
 ├── realms/
-│   └── afunto-realm.json    Realm config - source of truth for auth setup
-└── themes/afunto/login/     Custom login theme (see "Login Theme" below)
+│   └── afunto-realm.json   Realm config - source of truth for auth setup
+└── themes/afunto/login/    Custom login theme (see "Login Theme" below)
 ```
 
 ## Login Theme

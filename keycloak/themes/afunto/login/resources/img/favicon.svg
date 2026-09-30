@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="3 3 50 50" fill="none">
   <style>
-    :root { --eb-primary: #3EAF78; }
-    .m { stroke: var(--eb-primary, #3EAF78); fill: none; }
+    :root { --af-primary: #3EAF78; }
+    .m { stroke: var(--af-primary, #3EAF78); fill: none; }
   </style>
 
   <circle class="m" cx="28" cy="28" r="24" stroke-width="1.6"/>
