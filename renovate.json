@@ -46,6 +46,15 @@
       ],
       "groupName": "TUnit",
       "groupSlug": "tunit"
+    },
+    {
+      "description": "Chainguard rebuilds the free minio image as `latest` every day; take the new digest weekly instead of daily",
+      "matchDepNames": [
+        "cgr.dev/chainguard/minio"
+      ],
+      "schedule": [
+        "* 6 * * 1"
+      ]
     }
   ],
   "customManagers": [
@@ -90,11 +99,10 @@
         "/^\\.github/workflows/publish\\.yml$/"
       ],
       "matchStrings": [
-        "quay\\.io/minio/minio:(?<currentValue>RELEASE\\.[\\d-]+T[\\d-]+Z(?:\\.hotfix\\.[0-9a-f]+)?)",
-        "quay\\.io/minio/minio\",\\s*\"(?<currentValue>RELEASE\\.[\\d-]+T[\\d-]+Z(?:\\.hotfix\\.[0-9a-f]+)?)"
+        "cgr\\.dev/chainguard/minio(?::|\",\\s*\")(?<currentValue>latest)@(?<currentDigest>sha256:[a-f0-9]{64})"
       ],
       "datasourceTemplate": "docker",
-      "depNameTemplate": "quay.io/minio/minio"
+      "depNameTemplate": "cgr.dev/chainguard/minio"
     },
     {
       "customType": "regex",

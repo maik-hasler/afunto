@@ -63,7 +63,7 @@ Local development is optimized for fast iteration. All services run on `localhos
 |Captures outbound email (web UI on 1080, SMTP on 1025)
 
 |MinIO
-|`quay.io/minio/minio`
+|`cgr.dev/chainguard/minio`
 |9000 / 9001
 |S3-compatible object storage (API on 9000, console on 9001)
 |===

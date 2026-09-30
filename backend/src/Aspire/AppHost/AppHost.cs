@@ -24,7 +24,15 @@ var mailpit = builder.AddContainer("mailpit", "ghcr.io/axllent/mailpit", "v1.31.
 	.WithHttpEndpoint(port: isTestEnv ? null : 1080, targetPort: 8025, name: "webui", isProxied: false)
 	.WithEndpoint(port: isTestEnv ? null : 1025, targetPort: 1025, name: "smtp", scheme: "tcp", isProxied: false);
 
-var minio = builder.AddContainer("minio", "quay.io/minio/minio", "RELEASE.2025-09-07T16-13-09Z.hotfix.7aa24e772")
+// MinIO no longer publishes images: Docker Hub deleted minio/minio on
+// 2026-09-11 and quay.io/minio/minio refuses anonymous pulls since
+// 2026-09-24. Chainguard still builds the server (AGPL, from its fork of the
+// archived repo) and serves it anonymously, but only as `latest` - hence the
+// digest. Unlike upstream, the image declares no VOLUME for /data, and on
+// overlayfs MinIO then fails its tmp cleanup with EXDEV; the anonymous volume
+// restores what the old image did implicitly.
+var minio = builder.AddContainer("minio", "cgr.dev/chainguard/minio", "latest@sha256:4692462f35d97d7e82c30371d82f057703c5d9489bcae726010594c812f2d285")
+	.WithVolume("/data")
 	.WithArgs("server", "/data", "--console-address", ":9001")
 	.WithEnvironment("MINIO_ROOT_USER", "minio")
 	.WithEnvironment("MINIO_ROOT_PASSWORD", "minio123")
