@@ -171,7 +171,7 @@ public static class ServiceCollectionExtensions
 			});
 
 		services.ConfigureOptions<StorageSettingsSetup>();
-		services.AddSingleton<IFileStorageService, MinioFileStorageService>();
+		services.AddSingleton<IFileStorageService, S3FileStorageService>();
 
 		services.ConfigureOptions<KeycloakOptionsSetup>();
 

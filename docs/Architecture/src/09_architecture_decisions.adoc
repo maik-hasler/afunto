@@ -96,7 +96,7 @@ The following table lists the relevant architecture decisions. Each decision lin
 
 |13
 |Object storage
-|Run RustFS instead of MinIO; keep the app code, the S3 client and the URL scheme, and pin the storage contract in integration tests.
+|Run RustFS instead of MinIO, reach it through AWSSDK.S3, keep the URL scheme, and pin the storage contract in integration tests.
 |Accepted
 |2026-10-02
 |link:ADRs/13_object_storage_on_rustfs.html[Object storage]

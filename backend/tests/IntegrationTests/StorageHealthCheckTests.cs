@@ -10,7 +10,7 @@ public class StorageHealthCheckTests(IntegrationTestFixture fixture)
 	[Test]
 	public async Task PingAsync_ShouldSucceed_WhenStorageIsReachable(CancellationToken cancellationToken)
 	{
-		var storage = new MinioFileStorageService(Options.Create(new StorageSettings
+		using var storage = new S3FileStorageService(Options.Create(new StorageSettings
 		{
 			Endpoint = fixture.GetStorageEndpoint(),
 			AccessKey = "storage",
@@ -26,7 +26,7 @@ public class StorageHealthCheckTests(IntegrationTestFixture fixture)
 	[Test]
 	public async Task PingAsync_ShouldThrow_WhenStorageIsUnreachable(CancellationToken cancellationToken)
 	{
-		var storage = new MinioFileStorageService(Options.Create(new StorageSettings
+		using var storage = new S3FileStorageService(Options.Create(new StorageSettings
 		{
 			Endpoint = "http://127.0.0.1:1",
 			AccessKey = "storage",

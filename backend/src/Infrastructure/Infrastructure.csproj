@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<ItemGroup>
-		<PackageReference Include="Minio" />
+		<PackageReference Include="AWSSDK.S3" />
 		<PackageReference Include="MailKit" />
 		<PackageReference Include="MimeKit" />
 		<PackageReference Include="EFCore.NamingConventions" />

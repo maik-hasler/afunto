@@ -11,7 +11,7 @@
 		<PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="[10.0.12]" />
 		<PackageVersion Include="Microsoft.Extensions.ApiDescription.Server" Version="[10.0.12]" PrivateAssets="All" />
 		<PackageVersion Include="NSwag.MSBuild" Version="[14.7.1]" PrivateAssets="All" />
-		<PackageVersion Include="Minio" Version="[7.0.0]" />
+		<PackageVersion Include="AWSSDK.S3" Version="[4.0.104.1]" />
 		<PackageVersion Include="MailKit" Version="[4.18.0]" />
 		<PackageVersion Include="MimeKit" Version="[4.18.1]" />
 		<PackageVersion Include="EFCore.NamingConventions" Version="[10.0.1]" />
