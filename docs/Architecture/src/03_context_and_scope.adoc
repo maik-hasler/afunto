@@ -74,7 +74,7 @@ include::../images/technical-context.puml[]
 |Outbound
 |The backend sends notification and reminder emails via SMTP (Mailpit locally, a real SMTP relay otherwise).
 
-|Backend → Object storage (MinIO / S3)
+|Backend → Object storage (RustFS / S3)
 |Outbound
 |The backend stores binary assets (organization logos, user avatars, opportunity banners) in S3-compatible object storage.
 

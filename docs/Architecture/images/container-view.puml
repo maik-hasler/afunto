@@ -15,7 +15,7 @@ System_Boundary(afunto, "Afunto") {
 		Container_Ext(keycloak, "Identity Provider", "Keycloak 26.7.4 [third party]", "Handles authentication via OIDC. Manages users, roles, and organizations. Issues signed JWT access tokens.")
 }
 
-System_Ext(objectstore, "Object storage (MinIO / S3)", "Stores binary assets: logos, avatars, banners")
+System_Ext(objectstore, "Object storage (RustFS / S3)", "Stores binary assets: logos, avatars, banners")
 System_Ext(smtp, "SMTP mail server", "Outbound notification and reminder emails")
 System_Ext(nominatim, "OpenStreetMap Nominatim", "Address geocoding (public, rate-limited)")
 

@@ -30,7 +30,7 @@ fi
 # and Keycloak origins (scheme+host, no path), derived from the same env vars
 # as config.js above rather than hardcoded, so whoever runs this image is not
 # silently locked to somebody else's origins. img-src additionally needs the
-# MinIO storage origin (STORAGE_PUBLIC_URL, matching
+# object storage origin (STORAGE_PUBLIC_URL, matching
 # the backend's Storage__PublicEndpoint) since uploaded org logos/opportunity
 # banners/avatars are served from there, not from the API origin. Unlike the
 # three required above, STORAGE_PUBLIC_URL keeps a fallback: a missing value

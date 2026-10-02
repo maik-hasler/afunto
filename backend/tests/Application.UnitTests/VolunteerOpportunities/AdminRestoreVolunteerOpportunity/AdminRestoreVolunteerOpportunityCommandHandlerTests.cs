@@ -158,7 +158,7 @@ public class AdminRestoreVolunteerOpportunityCommandHandlerTests
 			.Returns($"opportunity-banners/{opportunityId}.png");
 		_fileStorage
 			.UnquarantineAsync($"opportunity-banners/{opportunityId}.png", Arg.Any<CancellationToken>())
-			.ThrowsAsync(new InvalidOperationException("MinIO unavailable"));
+			.ThrowsAsync(new InvalidOperationException("Storage unavailable"));
 
 		// Act
 		Func<Task> act = async () => await _sut.Handle(new AdminRestoreVolunteerOpportunityCommand(opportunityId, DefaultAdminUserId), cancellationToken);

@@ -24,22 +24,17 @@ var mailpit = builder.AddContainer("mailpit", "ghcr.io/axllent/mailpit", "v1.31.
 	.WithHttpEndpoint(port: isTestEnv ? null : 1080, targetPort: 8025, name: "webui", isProxied: false)
 	.WithEndpoint(port: isTestEnv ? null : 1025, targetPort: 1025, name: "smtp", scheme: "tcp", isProxied: false);
 
-// MinIO no longer publishes images: Docker Hub deleted minio/minio on
-// 2026-09-11 and quay.io/minio/minio refuses anonymous pulls since
-// 2026-09-24. Chainguard still builds the server (AGPL, from its fork of the
-// archived repo) and serves it anonymously, but only as `latest` - hence the
-// digest. Unlike upstream, the image declares no VOLUME for /data, and on
-// overlayfs MinIO then fails its tmp cleanup with EXDEV; the anonymous volume
-// restores what the old image did implicitly.
-var minio = builder.AddContainer("minio", "cgr.dev/chainguard/minio", "latest@sha256:4692462f35d97d7e82c30371d82f057703c5d9489bcae726010594c812f2d285")
-	.WithVolume("/data")
-	.WithArgs("server", "/data", "--console-address", ":9001")
-	.WithEnvironment("MINIO_ROOT_USER", "minio")
-	.WithEnvironment("MINIO_ROOT_PASSWORD", "minio123")
+// S3-compatible object storage, see ADR-13 for why RustFS replaced MinIO. The
+// resource is named for its role, not the product, so a future swap touches
+// only this block.
+var storage = builder.AddContainer("storage", "rustfs/rustfs", "1.0.0")
+	.WithEnvironment("RUSTFS_ACCESS_KEY", "storage")
+	.WithEnvironment("RUSTFS_SECRET_KEY", "storage123")
 	.WithHttpEndpoint(port: isTestEnv ? null : 9000, targetPort: 9000, name: "api", isProxied: false)
-	.WithHttpEndpoint(port: isTestEnv ? null : 9001, targetPort: 9001, name: "console", isProxied: false);
+	.WithHttpEndpoint(port: isTestEnv ? null : 9001, targetPort: 9001, name: "console", isProxied: false)
+	.WithHttpHealthCheck("/health", endpointName: "api");
 
-var minioApiEndpoint = minio.GetEndpoint("api");
+var storageApiEndpoint = storage.GetEndpoint("api");
 
 var database = postgres.AddDatabase("afunto");
 
@@ -132,7 +127,7 @@ var backend = builder.AddProject<Projects.Api>("backend")
 	.WithReference(database)
 	.WaitFor(database)
 	.WaitFor(keycloak)
-	.WaitFor(minio)
+	.WaitFor(storage)
 	.WithEnvironment("Authentication__Authority",
 		ReferenceExpression.Create($"{keycloakEndpoint}/realms/afunto"))
 	.WithEnvironment("Authentication__ValidIssuers__0",
@@ -142,9 +137,9 @@ var backend = builder.AddProject<Projects.Api>("backend")
 	.WithEnvironment("Keycloak__ClientSecret", "backend-secret")
 	.WithEnvironment("Smtp__Host", mailpitSmtpEndpoint.Property(EndpointProperty.Host))
 	.WithEnvironment("Smtp__Port", mailpitSmtpEndpoint.Property(EndpointProperty.Port))
-	.WithEnvironment("Storage__Endpoint", ReferenceExpression.Create($"{minioApiEndpoint}"))
-	.WithEnvironment("Storage__AccessKey", "minio")
-	.WithEnvironment("Storage__SecretKey", "minio123")
+	.WithEnvironment("Storage__Endpoint", ReferenceExpression.Create($"{storageApiEndpoint}"))
+	.WithEnvironment("Storage__AccessKey", "storage")
+	.WithEnvironment("Storage__SecretKey", "storage123")
 	.WithEnvironment("Storage__BucketName", "afunto")
 	.WithEnvironment("RateLimiting__Write__PermitLimit", "10000")
 	.WithEnvironment("RateLimiting__Read__AuthenticatedPermitLimit", "10000")
@@ -204,7 +199,7 @@ var frontend = builder.AddViteApp("frontend", "../../../../frontend")
 	.WithEnvironment("VITE_API_URL", backend.GetEndpoint("http"))
 	.WithEnvironment("VITE_KEYCLOAK_AUTHORITY_URL",
 		ReferenceExpression.Create($"{keycloakEndpoint}/realms/afunto"))
-	.WithEnvironment("STORAGE_PUBLIC_URL", ReferenceExpression.Create($"{minioApiEndpoint}"))
+	.WithEnvironment("STORAGE_PUBLIC_URL", ReferenceExpression.Create($"{storageApiEndpoint}"))
 
 	.WithEnvironment("VITE_TOAST_LIFETIME_MS", isTestEnv ? "0" : "5000");
 

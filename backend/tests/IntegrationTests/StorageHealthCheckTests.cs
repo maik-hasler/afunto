@@ -8,13 +8,13 @@ namespace IntegrationTests;
 public class StorageHealthCheckTests(IntegrationTestFixture fixture)
 {
 	[Test]
-	public async Task PingAsync_ShouldSucceed_WhenMinioIsReachable(CancellationToken cancellationToken)
+	public async Task PingAsync_ShouldSucceed_WhenStorageIsReachable(CancellationToken cancellationToken)
 	{
 		var storage = new MinioFileStorageService(Options.Create(new StorageSettings
 		{
-			Endpoint = fixture.GetMinioEndpoint(),
-			AccessKey = "minio",
-			SecretKey = "minio123",
+			Endpoint = fixture.GetStorageEndpoint(),
+			AccessKey = "storage",
+			SecretKey = "storage123",
 			BucketName = "afunto",
 		}));
 
@@ -24,13 +24,13 @@ public class StorageHealthCheckTests(IntegrationTestFixture fixture)
 	}
 
 	[Test]
-	public async Task PingAsync_ShouldThrow_WhenMinioIsUnreachable(CancellationToken cancellationToken)
+	public async Task PingAsync_ShouldThrow_WhenStorageIsUnreachable(CancellationToken cancellationToken)
 	{
 		var storage = new MinioFileStorageService(Options.Create(new StorageSettings
 		{
 			Endpoint = "http://127.0.0.1:1",
-			AccessKey = "minio",
-			SecretKey = "minio123",
+			AccessKey = "storage",
+			SecretKey = "storage123",
 			BucketName = "afunto",
 		}));
 

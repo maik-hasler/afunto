@@ -350,7 +350,7 @@ public class DeleteOrganizationCommandHandlerTests
 			.Returns($"organization-logos/{orgId}.png");
 		_fileStorage
 			.DeleteAsync($"organization-logos/{orgId}.png", Arg.Any<CancellationToken>())
-			.ThrowsAsync(new InvalidOperationException("MinIO unavailable"));
+			.ThrowsAsync(new InvalidOperationException("Storage unavailable"));
 		var command = new DeleteOrganizationCommand(orgId, DefaultRequestingUserId);
 
 		// Act

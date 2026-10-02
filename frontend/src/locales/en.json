@@ -928,7 +928,7 @@
       "section3cLinkOsm": "OpenStreetMap Foundation Privacy Policy",
       "section3cLinkNominatim": "Nominatim Usage Policy",
       "section4Title": "Uploaded images",
-      "section4Body": "When you upload a profile picture, or your organization adds a logo or an opportunity banner image, the file is stored on our self-hosted, S3-compatible object storage (MinIO). From the moment it is uploaded, the file is accessible via a public URL with no access restriction and no login required. A backup copy is additionally stored off-host, see the \"Hosting and backups\" section.",
+      "section4Body": "When you upload a profile picture, or your organization adds a logo or an opportunity banner image, the file is stored on our self-hosted, S3-compatible object storage (RustFS). From the moment it is uploaded, the file is accessible via a public URL with no access restriction and no login required. A backup copy is additionally stored off-host, see the \"Hosting and backups\" section.",
       "section5Title": "Transactional emails",
       "section5Body": "We send emails that are necessary to operate your account and use the platform: to confirm your email address and to reset your password (via our authentication service, Keycloak), and notifications about sign-ups, confirmations, cancellations, reminders, and invitations. These are sent through an SMTP delivery provider with whom a data processing agreement under Art. 28 GDPR is in place. The legal basis is performance of the usage agreement with you (Art. 6(1)(b) GDPR). Notifications that are not required to operate your account can be unsubscribed from in your profile settings or via the unsubscribe link in the respective email.",
       "section6Title": "Hosting and backups",

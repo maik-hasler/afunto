@@ -62,8 +62,8 @@ Local development is optimized for fast iteration. All services run on `localhos
 |1080 / 1025
 |Captures outbound email (web UI on 1080, SMTP on 1025)
 
-|MinIO
-|`cgr.dev/chainguard/minio`
+|RustFS
+|`rustfs/rustfs`
 |9000 / 9001
 |S3-compatible object storage (API on 9000, console on 9001)
 |===

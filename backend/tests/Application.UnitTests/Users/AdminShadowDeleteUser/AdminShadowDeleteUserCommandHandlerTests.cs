@@ -162,7 +162,7 @@ public class AdminShadowDeleteUserCommandHandlerTests
 			.Returns("user-avatars/avatar.png");
 		_fileStorage
 			.QuarantineAsync("user-avatars/avatar.png", Arg.Any<CancellationToken>())
-			.ThrowsAsync(new InvalidOperationException("MinIO unavailable"));
+			.ThrowsAsync(new InvalidOperationException("Storage unavailable"));
 
 		// Act
 		Func<Task> act = async () => await _sut.Handle(new AdminShadowDeleteUserCommand(userId, DefaultAdminUserId), cancellationToken);

@@ -9,7 +9,7 @@ public class MinioFileStorageServiceUrlTests
 	private static MinioFileStorageService CreateSut() =>
 		new(Options.Create(new StorageSettings
 		{
-			Endpoint = "http://minio:9000",
+			Endpoint = "http://storage:9000",
 			AccessKey = "access-key",
 			SecretKey = "secret-key",
 			BucketName = "afunto",

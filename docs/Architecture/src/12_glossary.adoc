@@ -88,7 +88,7 @@ These are the terms the domain model in <<section-concepts>> is built from. They
 |A template for documenting software and system architectures, structured into 12 chapters. Widely used in German-speaking countries. See https://arc42.org.
 
 |Aspire (.NET Aspire)
-|.NET's local orchestration framework. The AppHost project provisions PostgreSQL, pgAdmin, Keycloak, MinIO, Mailpit, the backend API, and the Vite frontend with a single `dotnet run`.
+|.NET's local orchestration framework. The AppHost project provisions PostgreSQL, pgAdmin, Keycloak, RustFS, Mailpit, the backend API, and the Vite frontend with a single `dotnet run`.
 
 |CQRS
 |Command Query Responsibility Segregation. An architectural pattern that separates read operations (queries) from write operations (commands).

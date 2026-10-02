@@ -17,7 +17,7 @@ System_Ext(keycloak, "Keycloak", "Identity provider (OIDC, JWT), self-hosted")
 System_Ext(postgres, "PostgreSQL", "Application and realm database, self-hosted")
 System_Ext(nominatim, "OpenStreetMap Nominatim", "Address geocoding (public, rate-limited)")
 System_Ext(smtp, "SMTP mail server", "Outbound notification and reminder emails")
-System_Ext(objectstore, "Object storage (MinIO / S3)", "Binary assets: logos, avatars, banners")
+System_Ext(objectstore, "Object storage (RustFS / S3)", "Binary assets: logos, avatars, banners")
 
 Rel(volunteer, browser, "Opens")
 Rel(organizer, browser, "Opens")

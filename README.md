@@ -57,7 +57,7 @@ The app itself is served in German by default, since Afunto's primary audience i
 - **Achievements and badges** awarded for volunteering milestones, shown on the profile.
 - **Organization invitations** to join and manage an organization's membership.
 - **Reporting and moderation** for opportunities, organizations, and users, backed by a full admin audit log.
-- **Image uploads** for avatars, organization logos, and opportunity banners, stored in MinIO object storage.
+- **Image uploads** for avatars, organization logos, and opportunity banners, stored in S3-compatible object storage (RustFS).
 - **Installable as a PWA** with offline support for previously visited pages.
 
 ---
@@ -70,7 +70,7 @@ The app itself is served in German by default, since Afunto's primary audience i
 | Auth | Keycloak 26.7.4 (OIDC, JWT, Keycloak Organizations) |
 | Frontend | Vite SPA, React 19, React Router v8, Tailwind CSS 4, react-oidc-context, Leaflet/react-leaflet |
 | API client | TypeScript client generated from the backend OpenAPI spec by `@hey-api/openapi-ts`, and a C# one for the integration tests by NSwag - neither is hand-edited |
-| Object storage | MinIO (avatars, organization logos, opportunity banners) |
+| Object storage | RustFS, S3-compatible (avatars, organization logos, opportunity banners) |
 | Tests | TUnit + Aspire.Hosting.Testing + Respawn + NetArchTest (Application.UnitTests, IntegrationTests, ArchitectureTests), Vitest (frontend pure-logic units), Playwright + axe-core (E2E and accessibility, `backend/tests/VisualTests`) |
 | CI | GitHub Actions (build and test on every PR, Docker images to GHCR on tag push) |
 | Dependency updates | Renovate |
@@ -135,7 +135,7 @@ Three images are published to GHCR on every tagged release (see [Versioning & Re
 Bring your own:
 
 - **PostgreSQL** (18, or compatible) - the backend needs its own database, separate from Keycloak's own (see `keycloak/README.md`)
-- **An S3-compatible object store** (e.g. MinIO) - organization logos, user avatars, and opportunity banners
+- **An S3-compatible object store** (e.g. RustFS) - organization logos, user avatars, and opportunity banners
 - **An SMTP relay** - outgoing notification and reminder email
 - **Keycloak** - the `afunto-keycloak` image, or any Keycloak instance importing the same realm
 
@@ -168,7 +168,7 @@ Required variables crash the container at startup outside Development (`Required
 | `Smtp__Username` | No | SMTP auth username | - |
 | `Smtp__Password` | No | SMTP auth password | - |
 | `Smtp__EnableSsl` | No | Use STARTTLS when connecting to the relay | `true` |
-| `Storage__Endpoint` | No | S3-compatible endpoint the backend writes to | `http://minio:9000` |
+| `Storage__Endpoint` | No | S3-compatible endpoint the backend writes to | `http://storage:9000` |
 | `Storage__AccessKey` | No | Access key for the bucket-scoped service account | - |
 | `Storage__SecretKey` | No | Secret key for the bucket-scoped service account | - |
 | `Storage__BucketName` | No | Bucket for avatars, logos, and opportunity banners | `afunto` |

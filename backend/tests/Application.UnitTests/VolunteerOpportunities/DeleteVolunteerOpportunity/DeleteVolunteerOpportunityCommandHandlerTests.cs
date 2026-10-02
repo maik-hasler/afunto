@@ -368,7 +368,7 @@ public class DeleteVolunteerOpportunityCommandHandlerTests
 			.Returns($"opportunity-banners/{opportunityId}.png");
 		_fileStorage
 			.DeleteAsync($"opportunity-banners/{opportunityId}.png", Arg.Any<CancellationToken>())
-			.ThrowsAsync(new InvalidOperationException("MinIO unavailable"));
+			.ThrowsAsync(new InvalidOperationException("Storage unavailable"));
 
 		// Act
 		Func<Task> act = async () => await _sut.Handle(new DeleteVolunteerOpportunityCommand(opportunityId, DefaultRequestingUserId), cancellationToken);

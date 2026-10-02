@@ -310,7 +310,7 @@ jobs:
         run: |
           docker pull quay.io/keycloak/keycloak:26.7.4
           docker pull ghcr.io/axllent/mailpit:v1.31.2
-          docker pull cgr.dev/chainguard/minio:latest@sha256:4692462f35d97d7e82c30371d82f057703c5d9489bcae726010594c812f2d285
+          docker pull rustfs/rustfs:1.0.0
 
       - name: Test - IntegrationTests (Aspire + Docker)
         working-directory: backend
@@ -374,7 +374,7 @@ jobs:
         run: |
           docker pull quay.io/keycloak/keycloak:26.7.4
           docker pull ghcr.io/axllent/mailpit:v1.31.2
-          docker pull cgr.dev/chainguard/minio:latest@sha256:4692462f35d97d7e82c30371d82f057703c5d9489bcae726010594c812f2d285
+          docker pull rustfs/rustfs:1.0.0
 
       - name: Resolve shard filter
         id: shard

@@ -102,9 +102,9 @@ public class IntegrationTestFixture
 	public HttpClient CreateHttpClient() =>
 		_app.CreateHttpClient("backend", "http");
 
-	public string GetMinioEndpoint()
+	public string GetStorageEndpoint()
 	{
-		using var client = _app.CreateHttpClient("minio", "api");
+		using var client = _app.CreateHttpClient("storage", "api");
 		return client.BaseAddress!.ToString();
 	}
 

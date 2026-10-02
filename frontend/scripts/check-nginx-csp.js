@@ -37,7 +37,7 @@ if (!mapMatch) {
 	if (!imgSrcMatch || !imgSrcMatch[1].includes("${CSP_STORAGE_ORIGIN}")) {
 		fail(
 			"img-src directive is missing ${CSP_STORAGE_ORIGIN} - uploaded org logos/opportunity banners/avatars " +
-				"are served from the MinIO storage origin and will be blocked by the browser without it.",
+				"are served from the object storage origin and will be blocked by the browser without it.",
 		);
 	}
 	if (!imgSrcMatch || !imgSrcMatch[1].split(" ").includes("blob:")) {

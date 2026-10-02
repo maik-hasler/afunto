@@ -46,15 +46,6 @@
       ],
       "groupName": "TUnit",
       "groupSlug": "tunit"
-    },
-    {
-      "description": "Chainguard rebuilds the free minio image as `latest` every day; take the new digest weekly instead of daily",
-      "matchDepNames": [
-        "cgr.dev/chainguard/minio"
-      ],
-      "schedule": [
-        "* 6 * * 1"
-      ]
     }
   ],
   "customManagers": [
@@ -99,10 +90,11 @@
         "/^\\.github/workflows/publish\\.yml$/"
       ],
       "matchStrings": [
-        "cgr\\.dev/chainguard/minio(?::|\",\\s*\")(?<currentValue>latest)@(?<currentDigest>sha256:[a-f0-9]{64})"
+        "rustfs/rustfs:(?<currentValue>[\\d]+\\.[\\d]+\\.[\\d]+)",
+        "rustfs/rustfs\",\\s*\"(?<currentValue>[\\d]+\\.[\\d]+\\.[\\d]+)"
       ],
       "datasourceTemplate": "docker",
-      "depNameTemplate": "cgr.dev/chainguard/minio"
+      "depNameTemplate": "rustfs/rustfs"
     },
     {
       "customType": "regex",
