@@ -1,15 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="3 3 50 50" fill="none">
-  <style>
-    :root { --af-primary: #3EAF78; }
-    .m { stroke: var(--af-primary, #3EAF78); fill: none; }
-  </style>
-
-  <circle class="m" cx="28" cy="28" r="24" stroke-width="1.6"/>
-  <circle class="m" cx="28" cy="15" r="3"  stroke-width="1.6"/>
-  <path   class="m" d="M18,17 L28,24 L38,17"
-          stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-  <line   class="m" x1="28" y1="18" x2="28" y2="31"
-          stroke-width="1.6" stroke-linecap="round"/>
-  <path   class="m" d="M20,42 L28,31 L36,42"
-          stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="8 5 40 40" fill="none">
+<style>:root{--af-primary:#226947}</style>
+<circle cx="28" cy="14" r="4.5" stroke="var(--af-primary, #226947)" stroke-width="3.2"/><path d="M17,19 L28,26 L39,19" stroke="var(--af-primary, #226947)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M28,19 L28,32" stroke="var(--af-primary, #226947)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19,43 L28,32 L37,43" stroke="var(--af-primary, #226947)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
