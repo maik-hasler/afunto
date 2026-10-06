@@ -1,4 +1,4 @@
-const STORAGE_KEY = "einsatzbereit:auth-recovery";
+const STORAGE_KEY = "afunto:auth-recovery";
 
 // One automatic sign-in redirect is allowed per recovery episode. A second
 // consecutive 401 without a successful authenticated call landing in

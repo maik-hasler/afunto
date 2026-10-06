@@ -23,7 +23,7 @@ internal sealed class GetOpportunityCheckInPinEndpoint
 			.ProducesProblem(StatusCodes.Status401Unauthorized)
 			.ProducesProblem(StatusCodes.Status403Forbidden)
 			.ProducesProblem(StatusCodes.Status404NotFound)
-			.RequireAuthorization(AuthorizationPolicies.EinsatzbereitOrganisatorPolicy)
+			.RequireAuthorization(AuthorizationPolicies.AfuntoOrganisatorPolicy)
 			.RequireRateLimiting(RateLimitingPolicies.Read)
 			.MapToApiVersion(1);
 

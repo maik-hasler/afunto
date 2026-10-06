@@ -1,7 +1,7 @@
 ---
 name: walkthrough
 description: >
-  Use einsatzbereit as a real person would, in German, then prove every
+  Use afunto as a real person would, in German, then prove every
   suspicion against the source before filing it - the pass that finds
   duplicate notifications, dead-end states, inconsistent copy and
   accessibility failures no linter can see. Use when the maintainer types

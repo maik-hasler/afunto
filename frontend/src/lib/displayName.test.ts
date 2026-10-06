@@ -41,7 +41,7 @@ describe("display name override", () => {
 	});
 
 	it("ignores a stored value that is not a name for a subject", async () => {
-		sessionStorage.setItem("einsatzbereit.display-name", "{oh no");
+		sessionStorage.setItem("afunto.display-name", "{oh no");
 
 		vi.resetModules();
 		const fresh = await import("./displayName");
@@ -55,7 +55,7 @@ describe("display name override", () => {
 		clearDisplayNameOverride();
 
 		expect(getDisplayNameOverride(SUB)).toBeNull();
-		expect(sessionStorage.getItem("einsatzbereit.display-name")).toBeNull();
+		expect(sessionStorage.getItem("afunto.display-name")).toBeNull();
 	});
 
 	it("treats a blank name as no override rather than storing an empty pill", () => {

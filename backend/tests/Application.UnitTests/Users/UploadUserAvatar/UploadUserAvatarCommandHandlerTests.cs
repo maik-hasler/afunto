@@ -146,7 +146,7 @@ public class UploadUserAvatarCommandHandlerTests
 			.Returns("user-avatars/old-key/old.png");
 		_fileStorage
 			.DeleteAsync("user-avatars/old-key/old.png", Arg.Any<CancellationToken>())
-			.ThrowsAsync(new InvalidOperationException("MinIO unavailable"));
+			.ThrowsAsync(new InvalidOperationException("Storage unavailable"));
 		var command = new UploadUserAvatarCommand(userId, PngBytes, "image/png");
 
 		// Act

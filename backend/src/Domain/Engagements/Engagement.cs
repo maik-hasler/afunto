@@ -181,7 +181,7 @@ public sealed class Engagement
 		// Only a withdrawal is the volunteer's own action - an organizer-side Cancel()
 		// must not consume the same budget, or repeated unpublish/republish or bulk
 		// cancellation cycles by the organizer would eventually lock the volunteer out
-		// of a slot they never withdrew from (einsatzbereit#2212).
+		// of a slot they never withdrew from (afunto#2212).
 		var wasWithdrawnByVolunteer = Status == EngagementStatus.Withdrawn;
 
 		TimeSlotId = timeSlotId;
@@ -216,7 +216,7 @@ public sealed class Engagement
 		// EndDateTime are always null for them) and are exempt - there is no single
 		// occurrence for "around" to mean anything. A ScheduledSlots engagement always
 		// has both, denormalized onto it at sign-up time (CreateEngagementCommandHandler),
-		// so this is the one check that actually closes einsatzbereit#2202: without it,
+		// so this is the one check that actually closes afunto#2202: without it,
 		// CheckIn had no time constraint at all and a volunteer could check themselves
 		// into (and then leave feedback for) an occurrence months in the future.
 		if (TimeSlotStartDateTime.HasValue && TimeSlotEndDateTime.HasValue)
@@ -263,7 +263,7 @@ public sealed class Engagement
 
 		// Check-in opens TimeSlot.CheckInWindowBefore ahead of the start, so gating
 		// feedback on IsCheckedIn alone let a volunteer who checked in early rate an
-		// occurrence that had not happened yet (einsatzbereit#2323). Individual-contact
+		// occurrence that had not happened yet (afunto#2323). Individual-contact
 		// engagements carry no slot window and stay exempt, same as CheckIn above.
 		if (TimeSlotEndDateTime.HasValue && now < TimeSlotEndDateTime.Value)
 			return Result.Failure(Error.Validation(

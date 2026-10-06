@@ -2,20 +2,20 @@
 
 !include <C4/C4_Container>
 
-title Container View - Einsatzbereit
+title Container View - Afunto
 
 Person(volunteer, "Volunteer", "Searches for and registers to volunteer opportunities")
 Person(organizer, "Organizer", "Creates and manages volunteer opportunities")
 Person(admin, "Platform Admin", "Moderates reported content, administers users and organizations")
 
-System_Boundary(einsatzbereit, "Einsatzbereit") {
+System_Boundary(afunto, "Afunto") {
 		Container(frontend, "Single Page Application", "React 19, Vite, TypeScript, Tailwind CSS 4", "Provides the web UI for volunteers, organizers and platform admins. Handles OIDC login and token management.")
 		Container(backend, "Backend API", ".NET 10, ASP.NET Core Minimal API", "Implements business logic. Exposes versioned REST API. Validates JWT tokens. Manages data via EF Core.")
 		ContainerDb_Ext(db, "Application Database", "PostgreSQL 18 [third party]", "Stores volunteer opportunities, organizations, engagements, and user associations.")
 		Container_Ext(keycloak, "Identity Provider", "Keycloak 26.7.4 [third party]", "Handles authentication via OIDC. Manages users, roles, and organizations. Issues signed JWT access tokens.")
 }
 
-System_Ext(objectstore, "Object storage (MinIO / S3)", "Stores binary assets: logos, avatars, banners")
+System_Ext(objectstore, "Object storage (RustFS / S3)", "Stores binary assets: logos, avatars, banners")
 System_Ext(smtp, "SMTP mail server", "Outbound notification and reminder emails")
 System_Ext(nominatim, "OpenStreetMap Nominatim", "Address geocoding (public, rate-limited)")
 

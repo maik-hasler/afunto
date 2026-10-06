@@ -2,20 +2,20 @@
 
 ## Overview
 
-Custom Keycloak 26.7.4 image with the `einsatzbereit` realm pre-baked. Built and published to GHCR via the `publish-keycloak` job in `.github/workflows/publish.yml`; `.github/workflows/keycloak-realm-import.yml` guards that the committed realm still imports cleanly on that Keycloak version before the image is ever built.
+Custom Keycloak 26.7.4 image with the `afunto` realm pre-baked. Built and published to GHCR via the `publish-keycloak` job in `.github/workflows/publish.yml`; `.github/workflows/keycloak-realm-import.yml` guards that the committed realm still imports cleanly on that Keycloak version before the image is ever built.
 
 ```
 keycloak/
 ├── Dockerfile              Multi-stage build (builder + optimized runtime)
 ├── README.md               Runtime env vars documentation
 ├── realms/
-│   └── einsatzbereit-realm.json    Realm config - source of truth for auth setup
-└── themes/einsatzbereit/login/     Custom login theme (see "Login Theme" below)
+│   └── afunto-realm.json   Realm config - source of truth for auth setup
+└── themes/afunto/login/    Custom login theme (see "Login Theme" below)
 ```
 
 ## Login Theme
 
-**Directory:** `themes/einsatzbereit/login/`, selected by the realm's `loginTheme`. `parent=base`, so any template not overridden here falls through to Keycloak's own - which is how the pages a real signup walks through ended up rendering stock markup inside this theme's card (#1758).
+**Directory:** `themes/afunto/login/`, selected by the realm's `loginTheme`. `parent=base`, so any template not overridden here falls through to Keycloak's own - which is how the pages a real signup walks through ended up rendering stock markup inside this theme's card (#1758).
 
 The theme now overrides every template a visitor can reach with this realm's settings:
 
@@ -41,11 +41,11 @@ Two constraints that are easy to trip over:
 
 Colors, radii, shadows and the control recipes are mirrored from the frontend's `@theme` block and `lib/formClasses.ts` / `lib/surfaceClasses.ts` - change them there first, then here. `resources/img/logo.svg` and `favicon.svg` are byte-identical copies of `frontend/public/`; re-copy rather than hand-editing.
 
-Covered by `backend/tests/VisualTests/KeycloakThemeTests.cs`, which drives Keycloak's origin directly and creates throwaway users to reach the required-action pages (`AspireFixture.CreateThrowawayUserAsync`). Not covered, and deliberately: the TOTP/WebAuthn/identity-provider/consent templates, none of which this realm can reach. They fall back to base markup, over the class-hook mappings in `theme.properties` and the fallback rules at the end of `einsatzbereit.css`, so they degrade to plain rather than to unstyled.
+Covered by `backend/tests/VisualTests/KeycloakThemeTests.cs`, which drives Keycloak's origin directly and creates throwaway users to reach the required-action pages (`AspireFixture.CreateThrowawayUserAsync`). Not covered, and deliberately: the TOTP/WebAuthn/identity-provider/consent templates, none of which this realm can reach. They fall back to base markup, over the class-hook mappings in `theme.properties` and the fallback rules at the end of `afunto.css`, so they degrade to plain rather than to unstyled.
 
 ## Realm Configuration
 
-**File:** `realms/einsatzbereit-realm.json`  
+**File:** `realms/afunto-realm.json`  
 Imported on container startup. This file IS the auth configuration - edit here, not in the Keycloak UI (UI changes don't persist across container restarts in dev).
 
 ### Roles (realm-level)
@@ -54,9 +54,9 @@ Imported on container startup. This file IS the auth configuration - edit here, 
 |---|---|
 | `user` | Default - can browse opportunities |
 | `organisator` | Can create and manage volunteer opportunities |
-| `admin` | Full admin access - composite role, includes `user` + `organisator` so admin tokens also satisfy `EinsatzbereitDefaultUserPolicy`/`EinsatzbereitOrganisatorPolicy` |
+| `admin` | Full admin access - composite role, includes `user` + `organisator` so admin tokens also satisfy `AfuntoDefaultUserPolicy`/`AfuntoOrganisatorPolicy` |
 
-The realm's `defaultRole` (`default-roles-einsatzbereit`, composite over `user`) is what Keycloak grants automatically to every newly created user, including self-registrations through the public `/protocol/openid-connect/registrations` form (#1723 - without it, self-registered accounts got no realm role at all and every `EinsatzbereitDefaultUserPolicy`-gated endpoint 403'd for them). Deliberately does not also compose Keycloak's built-in `offline_access`/`uma_authorization`/account-client roles the way a full UI export would - this realm's import is a hand-authored partial file, and those built-ins are not yet provisioned at the point a partial import resolves `roles.realm` composites, so referencing them there fails `--import-realm` outright (confirmed via `keycloak-realm-import.yml` against the pinned Keycloak version: `Unable to find composite realm role: uma_authorization`). None of the app's clients request the `offline_access`/`uma_authorization` scopes anyway, so nothing is lost by leaving them out. It does **not** apply to the three seeded test users above or `service-account-backend` - those are created via this file's `users` array during realm import, which bypasses Keycloak's normal user-creation code path and only grants the `realmRoles`/`clientRoles` listed explicitly on each entry.
+The realm's `defaultRole` (`default-roles-afunto`, composite over `user`) is what Keycloak grants automatically to every newly created user, including self-registrations through the public `/protocol/openid-connect/registrations` form (#1723 - without it, self-registered accounts got no realm role at all and every `AfuntoDefaultUserPolicy`-gated endpoint 403'd for them). Deliberately does not also compose Keycloak's built-in `offline_access`/`uma_authorization`/account-client roles the way a full UI export would - this realm's import is a hand-authored partial file, and those built-ins are not yet provisioned at the point a partial import resolves `roles.realm` composites, so referencing them there fails `--import-realm` outright (confirmed via `keycloak-realm-import.yml` against the pinned Keycloak version: `Unable to find composite realm role: uma_authorization`). None of the app's clients request the `offline_access`/`uma_authorization` scopes anyway, so nothing is lost by leaving them out. It does **not** apply to the three seeded test users above or `service-account-backend` - those are created via this file's `users` array during realm import, which bypasses Keycloak's normal user-creation code path and only grants the `realmRoles`/`clientRoles` listed explicitly on each entry.
 
 ### Clients
 
@@ -66,7 +66,7 @@ The realm's `defaultRole` (`default-roles-einsatzbereit`, composite over `user`)
 - Redirect URIs / web origins / post-logout redirect URIs: the committed realm carries the `${KC_FRONTEND_URL}` placeholder, resolved from an env var of that name at container start, and nothing else - the same file ships baked into the released Keycloak image (`Dockerfile`), so a `http://localhost:*` entry here would be live wherever that image runs (#1190). `AppHost.cs` overlays `http://localhost:*` (and `webOrigins: ["*"]`, since Aspire's dynamic port can't be matched by a fixed origin) back in for local Aspire/Playwright runs only - see its comment above the realm-patching block
 - Protocol mappers:
   - `realm-roles` - injects `roles: [...]` into id_token, access_token, userinfo
-  - `realm-name` - injects hardcoded claim `realm: "einsatzbereit"` (used by backend auth policies)
+  - `realm-name` - injects hardcoded claim `realm: "afunto"` (used by backend auth policies)
   - `backend-audience` - adds `backend` client to audience in access tokens
 
 **`frontend-test`** (public OIDC client, integration tests only)
@@ -105,7 +105,7 @@ Multi-stage Dockerfile:
 
 See `README.md` for the required runtime environment variables.
 
-The Aspire AppHost (`backend/src/Aspire/AppHost/AppHost.cs`) launches Keycloak with `KC_DB=dev-file` for local dev - Keycloak owns its own embedded H2 store there. The shared Postgres container hosts only the application `einsatzbereit` database.
+The Aspire AppHost (`backend/src/Aspire/AppHost/AppHost.cs`) launches Keycloak with `KC_DB=dev-file` for local dev - Keycloak owns its own embedded H2 store there. The shared Postgres container hosts only the application `afunto` database.
 
 ## Updating the Realm
 
@@ -114,7 +114,7 @@ editor for producing a valid export, which is why step 3 writes it back.
 
 1. Make changes in the running Keycloak UI at http://localhost:8080
 2. Export the realm: Admin UI → Realm Settings → Action → Partial Export (include clients, groups, roles)
-3. Replace `realms/einsatzbereit-realm.json` with the export
+3. Replace `realms/afunto-realm.json` with the export
 4. Restart the Keycloak container to verify the import works
 
 ## Release Tagging

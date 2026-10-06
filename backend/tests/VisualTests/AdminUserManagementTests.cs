@@ -9,7 +9,7 @@ namespace VisualTests;
 [ClassDataSource<AspireFixture>(Shared = SharedType.PerTestSession)]
 public class AdminUserManagementTests(AspireFixture fixture) : VisualTestBase(fixture)
 {
-	private const string Realm = "einsatzbereit";
+	private const string Realm = "afunto";
 	private const int MobileWidth = 390;
 	private const int MobileHeight = 844;
 

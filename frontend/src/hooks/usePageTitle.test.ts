@@ -20,7 +20,7 @@ describe("static document title", () => {
 	};
 
 	it("is the bare app name, not a translated sentence", () => {
-		expect(staticTitle()).toBe("Einsatzbereit");
+		expect(staticTitle()).toBe("Afunto");
 	});
 
 	it("matches what usePageTitle resets document.title to", () => {

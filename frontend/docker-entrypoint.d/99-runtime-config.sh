@@ -15,7 +15,7 @@ config="/usr/share/nginx/html/config.js"
 # OPERATOR_NAME/ADDRESS/EMAIL/SITE_URL carry this deployment's legal identity
 # (Impressum, GDPR controller, contact) - templated the same way as the origins
 # above rather than baked in at build time, so a self-hosting operator is never
-# silently stuck with somebody else's name and address (einsatzbereit#2196).
+# silently stuck with somebody else's name and address (afunto#2196).
 # Unset here means empty after envsubst, not a leftover ${...} placeholder -
 # the frontend renders a visible "operator not configured" notice in that case
 # instead of falling back to anyone's real details.
@@ -30,7 +30,7 @@ fi
 # and Keycloak origins (scheme+host, no path), derived from the same env vars
 # as config.js above rather than hardcoded, so whoever runs this image is not
 # silently locked to somebody else's origins. img-src additionally needs the
-# MinIO storage origin (STORAGE_PUBLIC_URL, matching
+# object storage origin (STORAGE_PUBLIC_URL, matching
 # the backend's Storage__PublicEndpoint) since uploaded org logos/opportunity
 # banners/avatars are served from there, not from the API origin. Unlike the
 # three required above, STORAGE_PUBLIC_URL keeps a fallback: a missing value
@@ -43,7 +43,7 @@ fi
 # setup with a "backend" service already gets for free, so this stays a no-op
 # for that shape - but templated rather than hardcoded, since nothing else
 # guarantees a service named exactly "backend" on the frontend's network
-# (einsatzbereit#2196; the compose file that used to guarantee that name was
+# (afunto#2196; the compose file that used to guarantee that name was
 # deleted in #2165).
 : "${BACKEND_UPSTREAM:=http://backend:8080}"
 : "${DNS_RESOLVER:=127.0.0.11}"

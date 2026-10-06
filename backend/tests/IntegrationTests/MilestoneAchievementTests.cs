@@ -47,7 +47,7 @@ public class MilestoneAchievementTests(IntegrationTestFixture fixture)
 	}
 
 	private static async Task<Guid> CreateIndividualContactOpportunityAsync(
-		EinsatzbereitApi olafClient, string label, CancellationToken cancellationToken)
+		AfuntoApi olafClient, string label, CancellationToken cancellationToken)
 	{
 		var suffix = Guid.NewGuid().ToString("N");
 

@@ -177,7 +177,7 @@ public class DeleteMyAccountCommandHandlerTests
 			.Returns($"user-avatars/{DefaultUserId.Value}/abc123.png");
 		_fileStorage
 			.DeleteAsync($"user-avatars/{DefaultUserId.Value}/abc123.png", Arg.Any<CancellationToken>())
-			.ThrowsAsync(new InvalidOperationException("MinIO unavailable"));
+			.ThrowsAsync(new InvalidOperationException("Storage unavailable"));
 		var command = new DeleteMyAccountCommand(DefaultUserId);
 
 		// Act

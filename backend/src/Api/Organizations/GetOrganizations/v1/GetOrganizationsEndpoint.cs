@@ -18,7 +18,7 @@ internal sealed class GetOrganizationsEndpoint
 			.Produces<IReadOnlyList<OrganizationSummaryDto>>()
 			.ProducesProblem(StatusCodes.Status401Unauthorized)
 			.ProducesProblem(StatusCodes.Status500InternalServerError)
-			.RequireAuthorization(AuthorizationPolicies.EinsatzbereitDefaultUserPolicy)
+			.RequireAuthorization(AuthorizationPolicies.AfuntoDefaultUserPolicy)
 			.RequireRateLimiting(RateLimitingPolicies.Read)
 			.MapToApiVersion(1);
 	}

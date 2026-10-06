@@ -74,7 +74,7 @@ public class CreateOrganizationTests(
 	public async Task CreateOrganization_ShouldReturn401_WhenNotAuthenticated(
 		CancellationToken cancellationToken)
 	{
-		var client = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var client = new AfuntoApi(fixture.CreateHttpClient());
 
 		var act = () => client.CreateOrganizationAsync(
 			new CreateOrganizationRequest { Name = "Unauthorized Org" }, cancellationToken);
@@ -191,7 +191,7 @@ public class CreateOrganizationTests(
 	{
 		// Keycloak bakes role claims into the access token at issue time, so
 		// the very token that just created the organization - and so far has
-		// never held the organisator role - still doesn't hold it (einsatzbereit#2206).
+		// never held the organisator role - still doesn't hold it (afunto#2206).
 		var (_, username, password) = await fixture.CreateEphemeralUserAsync(cancellationToken);
 		var client = await fixture.CreateAuthenticatedClientAsync(username, password);
 
@@ -212,7 +212,7 @@ public class CreateOrganizationTests(
 		// Refreshing the token - what the frontend's auth.signinSilent() does
 		// right after organization creation - re-issues it with the
 		// organisator role Keycloak just granted, so the caller's very next
-		// request carries it (einsatzbereit#2206).
+		// request carries it (afunto#2206).
 		var (_, username, password) = await fixture.CreateEphemeralUserAsync(cancellationToken);
 		var client = await fixture.CreateAuthenticatedClientAsync(username, password);
 

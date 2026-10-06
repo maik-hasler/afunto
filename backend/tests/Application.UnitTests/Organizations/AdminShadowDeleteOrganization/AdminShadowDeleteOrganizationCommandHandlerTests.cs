@@ -261,7 +261,7 @@ public class AdminShadowDeleteOrganizationCommandHandlerTests
 			.Returns($"organization-logos/{orgId}.png");
 		_fileStorage
 			.QuarantineAsync($"organization-logos/{orgId}.png", Arg.Any<CancellationToken>())
-			.ThrowsAsync(new InvalidOperationException("MinIO unavailable"));
+			.ThrowsAsync(new InvalidOperationException("Storage unavailable"));
 
 		// Act
 		Func<Task> act = async () => await _sut.Handle(new AdminShadowDeleteOrganizationCommand(orgId, DefaultAdminUserId), cancellationToken);

@@ -135,7 +135,7 @@ public class ListOrganizationsFilterTests(IntegrationTestFixture fixture)
 	}
 
 	private static async Task<Guid> CreateOrganizationAsync(
-		EinsatzbereitApi client, string name, CancellationToken cancellationToken)
+		AfuntoApi client, string name, CancellationToken cancellationToken)
 	{
 		var org = await client.CreateOrganizationAsync(
 			new CreateOrganizationRequest { Name = name }, cancellationToken);

@@ -6,8 +6,13 @@ Accepted
 === Date
 2026-08-22
 
+[NOTE]
+====
+*Product renamed from Einsatzbereit to Afunto.* This record uses the new names for things that carried the old one at the time: `deploy-afunto.yaml` was `deploy-einsatzbereit.yaml`.
+====
+
 === Context
-Through 2026-08 this repository owned not just building the app but deploying and operating it: `docker-compose.yml` defined a shared staging/production host (TDR-3) running a Prometheus/Grafana/Loki/Tempo observability stack (ADR-6), `publish.yml` had `deploy-staging`/`deploy-production` jobs targeting that host, and `reset-staging.yml` could wipe its data. TDR-3's own 2026-08-21 update already recorded a first step away from that: the `deploy-staging`/`deploy-production` jobs had moved, largely unchanged, into a separate `mgmt-hetzner` repository's `deploy-einsatzbereit.yaml`, triggered by hand rather than automatically from this repo's `publish.yml`, specifically so no deploy credential needed to flow into `mgmt-hetzner` from here. Issue #2165 completed that separation the following day.
+Through 2026-08 this repository owned not just building the app but deploying and operating it: `docker-compose.yml` defined a shared staging/production host (TDR-3) running a Prometheus/Grafana/Loki/Tempo observability stack (ADR-6), `publish.yml` had `deploy-staging`/`deploy-production` jobs targeting that host, and `reset-staging.yml` could wipe its data. TDR-3's own 2026-08-21 update already recorded a first step away from that: the `deploy-staging`/`deploy-production` jobs had moved, largely unchanged, into a separate `mgmt-hetzner` repository's `deploy-afunto.yaml`, triggered by hand rather than automatically from this repo's `publish.yml`, specifically so no deploy credential needed to flow into `mgmt-hetzner` from here. Issue #2165 completed that separation the following day.
 
 === Decision
 This repository's scope stops at `publish.yml` pushing versioned images to GitHub Container Registry (see chapter 7's "Image Publishing"). It does not describe, configure, or drive a deployed environment. Concretely, #2165:

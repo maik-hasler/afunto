@@ -20,7 +20,7 @@ internal sealed class GetMyAchievementsEndpoint
 			.Produces<List<AchievementSummary>>()
 			.ProducesProblem(StatusCodes.Status401Unauthorized)
 			.ProducesProblem(StatusCodes.Status500InternalServerError)
-			.RequireAuthorization(AuthorizationPolicies.EinsatzbereitDefaultUserPolicy)
+			.RequireAuthorization(AuthorizationPolicies.AfuntoDefaultUserPolicy)
 			.RequireRateLimiting(RateLimitingPolicies.Read)
 			.MapToApiVersion(1);
 

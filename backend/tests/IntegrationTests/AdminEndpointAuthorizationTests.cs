@@ -14,7 +14,7 @@ public class AdminEndpointAuthorizationTests(
 	public async Task ListOrganizations_ShouldReturn401_WhenNotAuthenticated(
 		CancellationToken cancellationToken)
 	{
-		var client = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var client = new AfuntoApi(fixture.CreateHttpClient());
 
 		var act = () => client.ListOrganizationsAsync(1, 20, cancellationToken: cancellationToken);
 
@@ -38,7 +38,7 @@ public class AdminEndpointAuthorizationTests(
 	public async Task ListUsers_ShouldReturn401_WhenNotAuthenticated(
 		CancellationToken cancellationToken)
 	{
-		var client = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var client = new AfuntoApi(fixture.CreateHttpClient());
 
 		var act = () => client.ListUsersAsync(1, 20, null, cancellationToken);
 
@@ -62,7 +62,7 @@ public class AdminEndpointAuthorizationTests(
 	public async Task SetUserAdminStatus_ShouldReturn401_WhenNotAuthenticated(
 		CancellationToken cancellationToken)
 	{
-		var client = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var client = new AfuntoApi(fixture.CreateHttpClient());
 
 		var act = () => client.SetUserAdminStatusAsync(
 			Guid.NewGuid(), new SetUserAdminStatusRequest { IsAdmin = true }, cancellationToken);
@@ -90,7 +90,7 @@ public class AdminEndpointAuthorizationTests(
 	public async Task SetUserEnabled_ShouldReturn401_WhenNotAuthenticated(
 		CancellationToken cancellationToken)
 	{
-		var client = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var client = new AfuntoApi(fixture.CreateHttpClient());
 
 		var act = () => client.SetUserEnabledAsync(
 			Guid.NewGuid(), new SetUserEnabledRequest { Enabled = false }, cancellationToken);
@@ -118,7 +118,7 @@ public class AdminEndpointAuthorizationTests(
 	public async Task ListAuditLogs_ShouldReturn401_WhenNotAuthenticated(
 		CancellationToken cancellationToken)
 	{
-		var client = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var client = new AfuntoApi(fixture.CreateHttpClient());
 
 		var act = () => client.ListAuditLogsAsync(1, 20, cancellationToken: cancellationToken);
 

@@ -46,6 +46,20 @@
       ],
       "groupName": "TUnit",
       "groupSlug": "tunit"
+    },
+    {
+      "description": "AWS publishes AWSSDK.S3 almost every day. Each bump runs the full pipeline, and a weekly one is enough for an S3 client (ADR-13).",
+      "matchManagers": [
+        "nuget"
+      ],
+      "matchPackageNames": [
+        "AWSSDK.**"
+      ],
+      "groupName": "AWS SDK",
+      "groupSlug": "awssdk",
+      "schedule": [
+        "* 6 * * 1"
+      ]
     }
   ],
   "customManagers": [
@@ -90,11 +104,11 @@
         "/^\\.github/workflows/publish\\.yml$/"
       ],
       "matchStrings": [
-        "quay\\.io/minio/minio:(?<currentValue>RELEASE\\.[\\d-]+T[\\d-]+Z(?:\\.hotfix\\.[0-9a-f]+)?)",
-        "quay\\.io/minio/minio\",\\s*\"(?<currentValue>RELEASE\\.[\\d-]+T[\\d-]+Z(?:\\.hotfix\\.[0-9a-f]+)?)"
+        "rustfs/rustfs:(?<currentValue>[\\d]+\\.[\\d]+\\.[\\d]+)",
+        "rustfs/rustfs\",\\s*\"(?<currentValue>[\\d]+\\.[\\d]+\\.[\\d]+)"
       ],
       "datasourceTemplate": "docker",
-      "depNameTemplate": "quay.io/minio/minio"
+      "depNameTemplate": "rustfs/rustfs"
     },
     {
       "customType": "regex",

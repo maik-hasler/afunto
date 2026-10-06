@@ -25,7 +25,7 @@ public class AuthGuardTests(AspireFixture fixture) : VisualTestBase(fixture)
 
 		await Expect(Page.Locator("#username")).ToBeVisibleAsync(new() { Timeout = 30_000 });
 		await Expect(Page.Locator("#password")).ToBeVisibleAsync();
-		await Expect(Page).ToHaveURLAsync(new Regex(@"/realms/einsatzbereit/protocol/openid-connect/auth"));
+		await Expect(Page).ToHaveURLAsync(new Regex(@"/realms/afunto/protocol/openid-connect/auth"));
 	}
 
 	[Test]
@@ -77,7 +77,7 @@ public class AuthGuardTests(AspireFixture fixture) : VisualTestBase(fixture)
 		await Page.GetByRole(AriaRole.Button, new() { Name = "Register" }).First.ClickAsync();
 
 		await Expect(Page).ToHaveURLAsync(
-			new Regex(@"/realms/einsatzbereit/protocol/openid-connect/registrations"));
+			new Regex(@"/realms/afunto/protocol/openid-connect/registrations"));
 		await Expect(Page.Locator("#kc-register-form")).ToBeVisibleAsync(new() { Timeout = 30_000 });
 	}
 }

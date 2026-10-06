@@ -62,7 +62,7 @@ public sealed class VolunteerOpportunity
 	// across) and for a ScheduledSlots series with no remaining slot to protect.
 	// EnsureCurrentCheckInPin compares this against the occurrence `now` resolves to
 	// and rotates the PIN whenever they differ, so one attended occurrence's PIN does
-	// not double as a working credential for the rest of the series (einsatzbereit#2202).
+	// not double as a working credential for the rest of the series (afunto#2202).
 	public TimeSlotId? CheckInPinTimeSlotId { get; private set; }
 
 	public DateTimeOffset? ValidUntil { get; private set; }
@@ -124,7 +124,7 @@ public sealed class VolunteerOpportunity
 	{
 		// Exactly 6, matching RandomPinGenerator's fixed-width output - a shorter
 		// custom PIN would carry less entropy than the auto-generated default while
-		// sharing the same ICheckInAttemptLimiter attempt budget (einsatzbereit#2202).
+		// sharing the same ICheckInAttemptLimiter attempt budget (afunto#2202).
 		if (pin.Length != 6 || !pin.All(char.IsAsciiDigit))
 			return Result.Failure(Error.Validation("VolunteerOpportunity.InvalidCheckInPin", "Check-in PIN must be 6 digits."));
 

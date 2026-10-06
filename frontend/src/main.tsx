@@ -40,7 +40,7 @@ const oidcConfig = {
 	userStore: createTokenStore(),
 	onSigninCallback: async (user: User | undefined) => {
 		const hasExplicitLanguageChoice =
-			localStorage.getItem("einsatzbereit:language-explicit") === "true";
+			localStorage.getItem("afunto:language-explicit") === "true";
 		const keycloakLocale = user?.profile?.locale;
 		if (
 			!hasExplicitLanguageChoice &&

@@ -13,7 +13,7 @@ public interface IFileStorageService
 
 	// Moves the object out of the publicly-readable prefix instead of deleting
 	// it, so a moderation reversal (UnquarantineAsync) can move it back - see
-	// einsatzbereit#2198.
+	// afunto#2198.
 	Task QuarantineAsync(string objectKey, CancellationToken cancellationToken = default);
 
 	Task UnquarantineAsync(string objectKey, CancellationToken cancellationToken = default);

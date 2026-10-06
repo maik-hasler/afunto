@@ -138,7 +138,7 @@ public class OrganizationOpportunitiesTests(IntegrationTestFixture fixture)
 	public async Task GetOrganizationOpportunities_ShouldReturn401_WhenNotAuthenticated(
 		CancellationToken cancellationToken)
 	{
-		var anonClient = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var anonClient = new AfuntoApi(fixture.CreateHttpClient());
 
 		var act = () => anonClient.GetOrganizationOpportunitiesAsync(Guid.NewGuid(), "Published", 1, 10, cancellationToken);
 
@@ -156,7 +156,7 @@ public class OrganizationOpportunitiesTests(IntegrationTestFixture fixture)
 		var veraToken = await fixture.GetAccessTokenAsync("vera", "vera123");
 		var veraHttpClient = fixture.CreateHttpClient();
 		veraHttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", veraToken);
-		var veraClient = new EinsatzbereitApi(veraHttpClient);
+		var veraClient = new AfuntoApi(veraHttpClient);
 
 		await CreateOrganizationAsync(veraClient, cancellationToken);
 
@@ -177,7 +177,7 @@ public class OrganizationOpportunitiesTests(IntegrationTestFixture fixture)
 		var veraToken = await fixture.GetAccessTokenAsync("vera", "vera123");
 		var veraHttpClient = fixture.CreateHttpClient();
 		veraHttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", veraToken);
-		var veraClient = new EinsatzbereitApi(veraHttpClient);
+		var veraClient = new AfuntoApi(veraHttpClient);
 		var vera = await veraClient.GetUserProfileAsync(cancellationToken);
 
 		await fixture.AddPlainMemberDirectlyAsync(orgId, vera.Id, cancellationToken);
@@ -189,7 +189,7 @@ public class OrganizationOpportunitiesTests(IntegrationTestFixture fixture)
 	}
 
 	private static async Task<Guid> CreateOrganizationAsync(
-		EinsatzbereitApi client, CancellationToken cancellationToken)
+		AfuntoApi client, CancellationToken cancellationToken)
 	{
 		var uniqueName = $"OrgOpportunitiesTestOrg_{Guid.NewGuid()}";
 		var organization = await client.CreateOrganizationAsync(
@@ -198,7 +198,7 @@ public class OrganizationOpportunitiesTests(IntegrationTestFixture fixture)
 	}
 
 	private static Task<CreateVolunteerOpportunityResponse> CreateDraftOpportunityAsync(
-		EinsatzbereitApi client, Guid orgId, string title, CancellationToken cancellationToken) =>
+		AfuntoApi client, Guid orgId, string title, CancellationToken cancellationToken) =>
 		client.CreateVolunteerOpportunityAsync(new CreateVolunteerOpportunityRequest
 		{
 			TitleDe = title,
@@ -215,7 +215,7 @@ public class OrganizationOpportunitiesTests(IntegrationTestFixture fixture)
 		}, cancellationToken);
 
 	private static async Task<CreateVolunteerOpportunityResponse> CreatePublishedOpportunityAsync(
-		EinsatzbereitApi client, Guid orgId, string title, CancellationToken cancellationToken)
+		AfuntoApi client, Guid orgId, string title, CancellationToken cancellationToken)
 	{
 		var opportunity = await client.CreateVolunteerOpportunityAsync(new CreateVolunteerOpportunityRequest
 		{

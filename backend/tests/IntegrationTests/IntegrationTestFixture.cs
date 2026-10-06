@@ -20,7 +20,7 @@ public class IntegrationTestFixture
 	: IAsyncInitializer,
 	IAsyncDisposable
 {
-	private const string Realm = "einsatzbereit";
+	private const string Realm = "afunto";
 	private const string FrontendClientId = "frontend-test";
 	private const string BackendClientId = "backend";
 	private const string BackendClientSecret = "backend-secret";
@@ -78,8 +78,8 @@ public class IntegrationTestFixture
 
 		await WaitForRealmReadyAsync();
 
-		_connectionString = await _app.GetConnectionStringAsync("einsatzbereit")
-			?? throw new InvalidOperationException("Connection string 'einsatzbereit' not found.");
+		_connectionString = await _app.GetConnectionStringAsync("afunto")
+			?? throw new InvalidOperationException("Connection string 'afunto' not found.");
 
 		await using var conn = new NpgsqlConnection(_connectionString);
 		await conn.OpenAsync();
@@ -102,9 +102,9 @@ public class IntegrationTestFixture
 	public HttpClient CreateHttpClient() =>
 		_app.CreateHttpClient("backend", "http");
 
-	public string GetMinioEndpoint()
+	public string GetStorageEndpoint()
 	{
-		using var client = _app.CreateHttpClient("minio", "api");
+		using var client = _app.CreateHttpClient("storage", "api");
 		return client.BaseAddress!.ToString();
 	}
 
@@ -153,14 +153,14 @@ public class IntegrationTestFixture
 	// No CancellationToken parameter either. GetAccessTokenAsync above takes none, so
 	// one here could only be accepted and dropped - exactly what six of the deleted
 	// copies did, taking a token their body never passed on.
-	public async Task<EinsatzbereitApi> CreateAuthenticatedClientAsync(
+	public async Task<AfuntoApi> CreateAuthenticatedClientAsync(
 		string username, string password)
 	{
 		var token = await GetAccessTokenAsync(username, password);
 		var httpClient = CreateHttpClient();
 		httpClient.DefaultRequestHeaders.Authorization =
 			new AuthenticationHeaderValue("Bearer", token);
-		return new EinsatzbereitApi(httpClient);
+		return new AfuntoApi(httpClient);
 	}
 
 	public async Task ResetDatabaseAsync()

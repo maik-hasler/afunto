@@ -27,7 +27,7 @@ ci -> github: Publish docs to GitHub Pages
 dev -> github: Push tag vX.Y.Z (or vX.Y.Z-rc.N)
 github -> ci: Trigger publish.yml
 ci -> ci: Run full test suite
-ci -> ghcr: Build + push backend, frontend, keycloak images\nghcr.io/maik-hasler/einsatzbereit-<component>
+ci -> ghcr: Build + push backend, frontend, keycloak images\nghcr.io/maik-hasler/afunto-<component>
 ci -> github: Create GitHub Release with generated notes
 
 note over ci,ghcr

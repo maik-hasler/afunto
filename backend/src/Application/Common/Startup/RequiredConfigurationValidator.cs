@@ -17,7 +17,7 @@ public static class RequiredConfigurationValidator
 		var missing = new List<string>();
 
 		if (string.IsNullOrWhiteSpace(connectionString))
-			missing.Add("ConnectionStrings:einsatzbereit");
+			missing.Add("ConnectionStrings:afunto");
 
 		if (string.IsNullOrWhiteSpace(keycloakClientSecret))
 			missing.Add("Keycloak:ClientSecret");

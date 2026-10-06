@@ -58,7 +58,7 @@ public class GetVolunteerOpportunityMetaQueryHandlerTests
 			.Returns((VolunteerOpportunityDetails?)null);
 
 		var result = await _sut.Handle(
-			new GetVolunteerOpportunityMetaQuery(Guid.NewGuid(), "https://einsatzbereit.example"),
+			new GetVolunteerOpportunityMetaQuery(Guid.NewGuid(), "https://afunto.example"),
 			cancellationToken);
 
 		result.Should().BeNull();
@@ -75,13 +75,13 @@ public class GetVolunteerOpportunityMetaQueryHandlerTests
 			.Returns(details);
 
 		var html = await _sut.Handle(
-			new GetVolunteerOpportunityMetaQuery(opportunityId, "https://einsatzbereit.example/"),
+			new GetVolunteerOpportunityMetaQuery(opportunityId, "https://afunto.example/"),
 			cancellationToken);
 
 		html.Should().NotBeNull();
-		html.Should().Contain("Strandreinigung - Einsatzbereit");
+		html.Should().Contain("Strandreinigung - Afunto");
 		html.Should().Contain("Wir sammeln gemeinsam Müll am Strand.");
-		html.Should().Contain($"https://einsatzbereit.example/volunteer-opportunities/{opportunityId}");
+		html.Should().Contain($"https://afunto.example/volunteer-opportunities/{opportunityId}");
 	}
 
 	[Test]
@@ -94,10 +94,10 @@ public class GetVolunteerOpportunityMetaQueryHandlerTests
 			.Returns(CreateDetails(bannerImageUrl: null));
 
 		var html = await _sut.Handle(
-			new GetVolunteerOpportunityMetaQuery(opportunityId, "https://einsatzbereit.example"),
+			new GetVolunteerOpportunityMetaQuery(opportunityId, "https://afunto.example"),
 			cancellationToken);
 
-		html.Should().Contain("https://einsatzbereit.example/og-image.png");
+		html.Should().Contain("https://afunto.example/og-image.png");
 	}
 
 	[Test]
@@ -109,7 +109,7 @@ public class GetVolunteerOpportunityMetaQueryHandlerTests
 			.Returns(CreateDetails(bannerImageUrl: "https://storage.example/banners/abc.png"));
 
 		var html = await _sut.Handle(
-			new GetVolunteerOpportunityMetaQuery(opportunityId, "https://einsatzbereit.example"),
+			new GetVolunteerOpportunityMetaQuery(opportunityId, "https://afunto.example"),
 			cancellationToken);
 
 		html.Should().Contain("https://storage.example/banners/abc.png");
@@ -127,7 +127,7 @@ public class GetVolunteerOpportunityMetaQueryHandlerTests
 			.Returns(CreateDetails(description: longDescription));
 
 		var html = await _sut.Handle(
-			new GetVolunteerOpportunityMetaQuery(opportunityId, "https://einsatzbereit.example"),
+			new GetVolunteerOpportunityMetaQuery(opportunityId, "https://afunto.example"),
 			cancellationToken);
 
 		html.Should().Contain(new string('a', 199) + "...");
@@ -145,7 +145,7 @@ public class GetVolunteerOpportunityMetaQueryHandlerTests
 			.Returns(CreateDetails(title: "<script>alert(1)</script> & Friends"));
 
 		var html = await _sut.Handle(
-			new GetVolunteerOpportunityMetaQuery(opportunityId, "https://einsatzbereit.example"),
+			new GetVolunteerOpportunityMetaQuery(opportunityId, "https://afunto.example"),
 			cancellationToken);
 
 		html.Should().NotContain("<script>");

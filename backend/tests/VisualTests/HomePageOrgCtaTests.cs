@@ -20,7 +20,7 @@ public class HomePageOrgCtaTests(AspireFixture fixture) : VisualTestBase(fixture
 			.First.ClickAsync();
 
 		await Expect(Page).ToHaveURLAsync(
-			new Regex(@"/realms/einsatzbereit/protocol/openid-connect/registrations"));
+			new Regex(@"/realms/afunto/protocol/openid-connect/registrations"));
 		await Expect(Page.Locator("#kc-register-form")).ToBeVisibleAsync(new() { Timeout = 30_000 });
 	}
 }

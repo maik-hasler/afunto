@@ -57,7 +57,7 @@ src/
 
 tests/
 ├── Application.UnitTests/      Handler tests, NSubstitute mocks, no DB
-├── IntegrationTests/           Aspire.Hosting.Testing (the AppHost's own Postgres + Keycloak + MinIO + Mailpit), Respawn
+├── IntegrationTests/           Aspire.Hosting.Testing (the AppHost's own Postgres + Keycloak + RustFS + Mailpit), Respawn
 ├── ArchitectureTests/          NetArchTest layer rules + naming conventions
 └── VisualTests/                TUnit.Playwright + Aspire, E2E and axe-core a11y - largest, slowest suite
 ```
@@ -123,9 +123,9 @@ Because dispatch now happens in a fresh scope after commit (not inline inside th
 ### Authorization policies
 | Policy constant | Role |
 |---|---|
-| `EinsatzbereitAdminPolicy` | `admin` |
-| `EinsatzbereitDefaultUserPolicy` | `user` |
-| `EinsatzbereitOrganisatorPolicy` | `organisator` |
+| `AfuntoAdminPolicy` | `admin` |
+| `AfuntoDefaultUserPolicy` | `user` |
+| `AfuntoOrganisatorPolicy` | `organisator` |
 
 ## Organization domain model
 
@@ -188,7 +188,7 @@ dotnet-stryker --project Domain.csproj
 dotnet-stryker --project Application.csproj
 ```
 
-- **Run from `tests/Application.UnitTests/`, not from `backend/`.** Stryker picks up `stryker-config.json` from the working directory, and from `backend/` it finds `Einsatzbereit.slnx`, switches to solution mode, and tries to build the whole solution - which drags in `VisualTests` and its ~290 MiB Playwright browser download for a run that never opens a browser.
+- **Run from `tests/Application.UnitTests/`, not from `backend/`.** Stryker picks up `stryker-config.json` from the working directory, and from `backend/` it finds `Afunto.slnx`, switches to solution mode, and tries to build the whole solution - which drags in `VisualTests` and its ~290 MiB Playwright browser download for a run that never opens a browser.
 - **`test-runner: mtp` is mandatory** and is set in `stryker-config.json`. Stryker's default VSTest runner discovers zero tests against TUnit (Microsoft.Testing.Platform only, no VSTest adapter) and reports a vacuous pass. The MTP runner is still marked preview by Stryker and says so on every run.
 - **`concurrency: 1` is load-bearing, not a performance setting.** That preview MTP runner miscounts above concurrency 1: 30-73 kills per run that concurrency 1 does not report, never the reverse, and a different subset each time. The score comes out ~5 points high and moves ~1 point between identical runs, which makes it useless as a before/after guardrail. At concurrency 1 two runs at the same commit are bit-for-bit identical. Do not raise it.
 - **`Application.UnitTests.csproj` references `Domain.csproj` directly** purely so `--project Domain.csproj` resolves - Stryker only matches the project to mutate against the *direct* ProjectReference list. It is redundant to the compiler; see the comment in the csproj.
@@ -217,7 +217,7 @@ All versions centrally managed in `Directory.Packages.props`.
 | `NSwag.MSBuild` | IntegrationTests - generates that project's C# API client from the OpenAPI document on build |
 | `EFCore.NamingConventions` | Infrastructure - snake_case |
 | `Npgsql.EntityFrameworkCore.PostgreSQL` | Infrastructure - Postgres provider |
-| `Aspire.Hosting.Testing` | IntegrationTests + VisualTests - boots the real AppHost (Postgres, Keycloak, MinIO, Mailpit, API) once per test session |
+| `Aspire.Hosting.Testing` | IntegrationTests + VisualTests - boots the real AppHost (Postgres, Keycloak, RustFS, Mailpit, API) once per test session |
 | `Respawn` | IntegrationTests - DB reset |
 | `NetArchTest.Rules` | ArchitectureTests |
 | `NSubstitute` | Application.UnitTests |

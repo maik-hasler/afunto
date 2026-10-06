@@ -100,7 +100,7 @@ public class EngagementCheckInStatusCodeTests(IntegrationTestFixture fixture)
 	}
 
 	private async Task<Guid> SeedConfirmedPinEngagementAsync(
-		EinsatzbereitApi olaf, EinsatzbereitApi vera, string label,
+		AfuntoApi olaf, AfuntoApi vera, string label,
 		CancellationToken cancellationToken)
 	{
 		var opportunityId = await CreateOpportunityAsync(olaf, label, Pin, cancellationToken);
@@ -113,7 +113,7 @@ public class EngagementCheckInStatusCodeTests(IntegrationTestFixture fixture)
 	}
 
 	private static async Task<Guid> CreateOpportunityAsync(
-		EinsatzbereitApi olaf, string label, string? checkInPin,
+		AfuntoApi olaf, string label, string? checkInPin,
 		CancellationToken cancellationToken)
 	{
 		var suffix = Guid.NewGuid().ToString("N");

@@ -57,7 +57,7 @@ jobs:
           DEMO_USERS_ENABLED: "true"
         run: |
           set -euo pipefail
-          REALM=keycloak/realms/einsatzbereit-realm.json
+          REALM=keycloak/realms/afunto-realm.json
 
           ft_enabled=$(jq -r '.clients[] | select(.clientId == "frontend-test") | .enabled' "$REALM")
           ft_ropc=$(jq -r '.clients[] | select(.clientId == "frontend-test") | .directAccessGrantsEnabled' "$REALM")
@@ -114,7 +114,7 @@ jobs:
             "quay.io/keycloak/keycloak:$KC_VERSION" \
             start-dev --import-realm
 
-          WELL_KNOWN="http://localhost:8080/realms/einsatzbereit/.well-known/openid-configuration"
+          WELL_KNOWN="http://localhost:8080/realms/afunto/.well-known/openid-configuration"
           ready=0
           for i in $(seq 1 60); do
             if curl -fsS "$WELL_KNOWN" >/dev/null 2>&1; then
@@ -137,7 +137,7 @@ jobs:
               | sed -n 's/.*"access_token":"\([^"]*\)".*/\1/p') || true
             clients=$(curl -fsS \
               -H "Authorization: Bearer $token" \
-              "http://localhost:8080/admin/realms/einsatzbereit/clients") || true
+              "http://localhost:8080/admin/realms/afunto/clients") || true
             placeholders=$(printf '%s' "$clients" | grep -o '\${[A-Z_]*}' || true)
           fi
 
@@ -148,7 +148,7 @@ jobs:
           docker rm -f kc-import-check >/dev/null 2>&1 || true
 
           if [ "$ready" != "1" ]; then
-            echo "::error::Keycloak $KC_VERSION did not serve the 'einsatzbereit' realm after --import-realm (see logs above)."
+            echo "::error::Keycloak $KC_VERSION did not serve the 'afunto' realm after --import-realm (see logs above)."
             exit 1
           fi
 
@@ -175,7 +175,7 @@ jobs:
             exit 1
           fi
 
-          echo "Realm 'einsatzbereit' imported and served successfully on Keycloak $KC_VERSION, with all client placeholders resolved and the 'frontend' client's redirectUris covering every URI main.tsx can send."
+          echo "Realm 'afunto' imported and served successfully on Keycloak $KC_VERSION, with all client placeholders resolved and the 'frontend' client's redirectUris covering every URI main.tsx can send."
 
   # The always-running required status check - see dotnet.yml's `required` job.
   required:

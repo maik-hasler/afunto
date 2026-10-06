@@ -173,7 +173,7 @@ describe("shared primitives a11y", () => {
 	it("FaqAccordion has no violations collapsed or expanded", async () => {
 		const items = [
 			{
-				q: "Is Einsatzbereit free?",
+				q: "Is Afunto free?",
 				a: "Yes, for volunteers and organizations.",
 			},
 			{ q: "Do I need an account?", a: "Only to sign up for an opportunity." },

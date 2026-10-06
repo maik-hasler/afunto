@@ -24,7 +24,7 @@ public class OrgAppLayoutErrorStatesTests(AspireFixture fixture) : VisualTestBas
 
 		await Expect(Page.GetByText("You are not a member of this organization.", new() { Exact = false }))
 			.ToBeVisibleAsync();
-		await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Back to Einsatzbereit" }))
+		await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Back to Afunto" }))
 			.ToBeVisibleAsync();
 
 		await Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Try again" }))

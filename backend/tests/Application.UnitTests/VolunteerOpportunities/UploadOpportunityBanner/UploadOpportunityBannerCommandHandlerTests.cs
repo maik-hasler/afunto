@@ -173,7 +173,7 @@ public class UploadOpportunityBannerCommandHandlerTests
 			.Returns($"opportunity-banners/{opportunityId}.jpg");
 		_fileStorage
 			.DeleteAsync($"opportunity-banners/{opportunityId}.jpg", Arg.Any<CancellationToken>())
-			.ThrowsAsync(new InvalidOperationException("MinIO unavailable"));
+			.ThrowsAsync(new InvalidOperationException("Storage unavailable"));
 		var command = new UploadOpportunityBannerCommand(opportunityId, PngBytes, "image/png", DefaultRequestingUserId);
 
 		// Act

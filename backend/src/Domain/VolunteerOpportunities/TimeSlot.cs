@@ -9,7 +9,7 @@ public sealed class TimeSlot
 	// How far around a slot's own window a check-in against it is honoured
 	// (Engagement.CheckIn) - and, for a PINCode opportunity, how long its
 	// current PIN keeps covering this slot before VolunteerOpportunity treats
-	// the next slot as due and rotates (einsatzbereit#2202). Before the start,
+	// the next slot as due and rotates (afunto#2202). Before the start,
 	// so an organizer can check volunteers in as they arrive early; well past
 	// the end, since Manual/QRCode check-in commonly happens during a
 	// post-event wrap-up rather than the instant the slot ends.
@@ -19,7 +19,7 @@ public sealed class TimeSlot
 
 	// An organizer typing a capacity has no upper bound to bump into otherwise,
 	// so a slip of the keyboard persists as a nine-digit figure that reads as a
-	// real number of seats everywhere it is shown (einsatzbereit#2325). Well
+	// real number of seats everywhere it is shown (afunto#2325). Well
 	// above any plausible shift, low enough to catch a typo.
 	public const int MaxParticipantsLimit = 10_000;
 

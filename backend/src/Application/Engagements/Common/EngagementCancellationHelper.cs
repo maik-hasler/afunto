@@ -23,7 +23,7 @@ internal static class EngagementCancellationHelper
 		// notify, so both the state change and the notification below would be wrong to
 		// attempt. Without this guard a single anonymized-but-active engagement (checked
 		// in, then its volunteer's account deleted) would 409 every caller of this helper
-		// forever, with no way to clear it (einsatzbereit#1724).
+		// forever, with no way to clear it (afunto#1724).
 		if (engagement.IsAnonymized)
 		{
 			logger.LogInformation(

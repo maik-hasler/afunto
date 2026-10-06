@@ -7,7 +7,7 @@ internal sealed class EmailMetrics
 {
 	// Registered with the OTel MeterProvider in Aspire/ServiceDefaults/Extensions.cs
 	// (AddMeter) - keep both in sync if this ever changes.
-	public const string MeterName = "Einsatzbereit.Email";
+	public const string MeterName = "Afunto.Email";
 
 	private readonly Counter<long> _sendCounter;
 

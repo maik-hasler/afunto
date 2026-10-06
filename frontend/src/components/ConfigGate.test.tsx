@@ -135,7 +135,7 @@ describe("ConfigGate", () => {
 
 		renderGate();
 
-		expect(document.title).toBe("You are offline | Einsatzbereit");
+		expect(document.title).toBe("You are offline | Afunto");
 	});
 
 	it("swaps to the offline state when the connection drops while unconfigured", () => {

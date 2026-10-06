@@ -75,7 +75,7 @@ describe("administration sections", () => {
 				),
 			);
 			await waitFor(() =>
-				expect(document.title).toBe(`${name} - Administration | Einsatzbereit`),
+				expect(document.title).toBe(`${name} - Administration | Afunto`),
 			);
 		});
 	}
@@ -110,7 +110,7 @@ describe("administration access for a non-admin", () => {
 		expect(screen.getByTestId("location")).toHaveTextContent("/administration");
 
 		await waitFor(() =>
-			expect(document.title).toBe("Admin rights required | Einsatzbereit"),
+			expect(document.title).toBe("Admin rights required | Afunto"),
 		);
 		expect(
 			screen.getByRole("link", { name: "Back to home" }),

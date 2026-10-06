@@ -9,7 +9,7 @@ namespace VisualTests;
 [ClassDataSource<AspireFixture>(Shared = SharedType.PerTestSession)]
 public class EmailDeliveryTests(AspireFixture fixture) : VisualTestBase(fixture)
 {
-	private const string Realm = "einsatzbereit";
+	private const string Realm = "afunto";
 
 	[Test]
 	public async Task CreateEngagement_DeliversConfirmationToMailpit_ThroughBackendSmtpConfig()

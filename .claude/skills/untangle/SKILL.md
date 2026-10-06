@@ -1,7 +1,7 @@
 ---
 name: untangle
 description: >
-  Find code in einsatzbereit that is harder to change safely than the
+  Find code in afunto that is harder to change safely than the
   problem requires, and the comments that mark it or bury it - structural
   hotspots, god files, piled-up hooks, and comments that restate, narrate
   or have gone stale. Use when the maintainer types /untangle, or says a

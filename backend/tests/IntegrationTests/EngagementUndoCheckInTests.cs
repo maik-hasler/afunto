@@ -98,7 +98,7 @@ public class EngagementUndoCheckInTests(IntegrationTestFixture fixture)
 	}
 
 	private static async Task<(Guid OpportunityId, Guid OrganizationId)> CreateOpportunityAsync(
-		EinsatzbereitApi olaf, string label, CancellationToken cancellationToken)
+		AfuntoApi olaf, string label, CancellationToken cancellationToken)
 	{
 		var suffix = Guid.NewGuid().ToString("N");
 		var org = await olaf.CreateOrganizationAsync(
@@ -122,8 +122,8 @@ public class EngagementUndoCheckInTests(IntegrationTestFixture fixture)
 	}
 
 	private static async Task<Guid> CreateAndConfirmEngagementAsync(
-		EinsatzbereitApi vera,
-		EinsatzbereitApi olaf,
+		AfuntoApi vera,
+		AfuntoApi olaf,
 		Guid opportunityId,
 		CancellationToken cancellationToken)
 	{
@@ -136,7 +136,7 @@ public class EngagementUndoCheckInTests(IntegrationTestFixture fixture)
 	}
 
 	private static async Task<EngagementSummary> GetEngagementAsync(
-		EinsatzbereitApi olaf,
+		AfuntoApi olaf,
 		Guid opportunityId,
 		Guid engagementId,
 		CancellationToken cancellationToken)

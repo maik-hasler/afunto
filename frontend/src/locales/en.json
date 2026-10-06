@@ -1,12 +1,12 @@
 {
   "translation": {
     "brand": {
-      "name": "Einsatzbereit",
-      "description": "Einsatzbereit connects committed volunteers with regional needs. Spontaneous, fast, and effective."
+      "name": "Afunto",
+      "description": "Afunto connects committed volunteers with regional needs. Spontaneous, fast, and effective."
     },
     "meta": {
-      "socialTitle": "Einsatzbereit - Volunteer on short notice. Find your opportunity.",
-      "description": "Einsatzbereit connects committed volunteers with regional needs. Find volunteer opportunities near you, help out on short notice, and make a difference in your community."
+      "socialTitle": "Afunto - Volunteer on short notice. Find your opportunity.",
+      "description": "Afunto connects committed volunteers with regional needs. Find volunteer opportunities near you, help out on short notice, and make a difference in your community."
     },
     "common": {
       "edit": "Edit",
@@ -62,7 +62,7 @@
       "contact": "Contact",
       "help": "Help",
       "license": "AGPL-3.0",
-      "copyright": "© {{year}} Einsatzbereit. Licensed under <licenseLink>AGPL-3.0</licenseLink>."
+      "copyright": "© {{year}} Afunto. Licensed under <licenseLink>AGPL-3.0</licenseLink>."
     },
     "landing": {
       "pageTitle": "Find volunteer opportunities near you",
@@ -81,8 +81,8 @@
       "latestLink": "Browse all opportunities",
       "offline": "We will show these opportunities again as soon as your connection is back.",
       "missionLabel": "From the founder",
-      "missionTitle": "Why I built Einsatzbereit",
-      "missionText": "I never had the head space for a traditional volunteer role - work hours and fixed commitments just didn't line up. Still, I wanted to give something back. That idea became Einsatzbereit: volunteering without long-term commitment. Free and open for anyone to see. Built for the Oldenburg region. Usable by everyone.",
+      "missionTitle": "Why I built Afunto",
+      "missionText": "I never had the head space for a traditional volunteer role - work hours and fixed commitments just didn't line up. Still, I wanted to give something back. That idea became Afunto (Low German for \"now and then\"): volunteering without long-term commitment. Free and open for anyone to see. Built for the Oldenburg region. Usable by everyone.",
       "missionAuthor": "Maik Hasler",
       "missionCta": "Find opportunities",
       "orgCtaLabel": "For organizations",
@@ -106,7 +106,7 @@
     "organizationsPage": {
       "eyebrow": "Directory",
       "title": "Organizations",
-      "lead": "Browse organizations on Einsatzbereit to find one you already know.",
+      "lead": "Browse organizations on Afunto to find one you already know.",
       "searchLabel": "Search organizations",
       "searchPlaceholder": "Search organizations by name…",
       "loading": "Loading organizations…",
@@ -466,7 +466,7 @@
       "discardChanges": "Discard changes"
     },
     "orgApp": {
-      "backToSite": "Back to Einsatzbereit",
+      "backToSite": "Back to Afunto",
       "sectionsNavLabel": "Organization sections",
       "backTo": "Back to {{section}}",
       "notAuthorized": "You don't have access to this organization.",
@@ -906,7 +906,7 @@
     },
     "privacyPolicy": {
       "title": "Privacy Policy",
-      "metaDescription": "What personal data Einsatzbereit collects, why, how long it is kept, and the rights you have under the GDPR.",
+      "metaDescription": "What personal data Afunto collects, why, how long it is kept, and the rights you have under the GDPR.",
       "lastUpdated": "Last updated: August 7, 2026",
       "section1Title": "Responsible party",
       "section1Body": "{{name}}\n{{address}}\nEmail: <emailLink>{{email}}</emailLink>\nWebsite: <websiteLink>{{website}}</websiteLink>",
@@ -928,7 +928,7 @@
       "section3cLinkOsm": "OpenStreetMap Foundation Privacy Policy",
       "section3cLinkNominatim": "Nominatim Usage Policy",
       "section4Title": "Uploaded images",
-      "section4Body": "When you upload a profile picture, or your organization adds a logo or an opportunity banner image, the file is stored on our self-hosted, S3-compatible object storage (MinIO). From the moment it is uploaded, the file is accessible via a public URL with no access restriction and no login required. A backup copy is additionally stored off-host, see the \"Hosting and backups\" section.",
+      "section4Body": "When you upload a profile picture, or your organization adds a logo or an opportunity banner image, the file is stored on our self-hosted, S3-compatible object storage (RustFS). From the moment it is uploaded, the file is accessible via a public URL with no access restriction and no login required. A backup copy is additionally stored off-host, see the \"Hosting and backups\" section.",
       "section5Title": "Transactional emails",
       "section5Body": "We send emails that are necessary to operate your account and use the platform: to confirm your email address and to reset your password (via our authentication service, Keycloak), and notifications about sign-ups, confirmations, cancellations, reminders, and invitations. These are sent through an SMTP delivery provider with whom a data processing agreement under Art. 28 GDPR is in place. The legal basis is performance of the usage agreement with you (Art. 6(1)(b) GDPR). Notifications that are not required to operate your account can be unsubscribed from in your profile settings or via the unsubscribe link in the respective email.",
       "section6Title": "Hosting and backups",
@@ -946,7 +946,7 @@
     },
     "imprint": {
       "title": "Imprint",
-      "metaDescription": "Provider identification under section 5 DDG: responsible party, contact details and liability notices for Einsatzbereit.",
+      "metaDescription": "Provider identification under section 5 DDG: responsible party, contact details and liability notices for Afunto.",
       "section1Title": "Information according to § 5 DDG",
       "section2Title": "Contact",
       "section2Body": "Email: <emailLink>{{email}}</emailLink>\nWebsite: <websiteLink>{{website}}</websiteLink>",
@@ -970,7 +970,7 @@
     },
     "help": {
       "title": "Help",
-      "intro": "Answers to common questions for volunteers and organizations using Einsatzbereit. Can't find what you're looking for? See \"Still need help?\" below.",
+      "intro": "Answers to common questions for volunteers and organizations using Afunto. Can't find what you're looking for? See \"Still need help?\" below.",
       "volunteersTitle": "For volunteers",
       "volunteersQ1": "How do I sign up for a volunteer opportunity?",
       "volunteersA1": "Browse opportunities on the home page and open the one you're interested in. Opportunities with fixed time slots have a \"Sign up for a slot\" button - pick your slot and confirm with \"Confirm sign-up\". All others have an \"Express interest\" button where you send a short message.",
@@ -990,8 +990,8 @@
       "organizersQ5": "How do invitations to my organization work?",
       "organizersA5": "Invite people from the \"Members\" tab of your organization's dashboard and pick the role they should get. They receive an email and an in-app notification, and the invitation stays listed as pending until they accept or decline. Unanswered invitations expire after 14 days - the pending row shows the exact date, and you can resend an invitation at any time to start a fresh window or revoke it.",
       "generalTitle": "General",
-      "generalQ1": "Does using Einsatzbereit cost anything?",
-      "generalA1": "No. Einsatzbereit is completely free and open source - for volunteers and organizations.",
+      "generalQ1": "Does using Afunto cost anything?",
+      "generalA1": "No. Afunto is completely free and open source - for volunteers and organizations.",
       "generalQ2": "Do I need an account to take part?",
       "generalA2": "Not to browse - you can search every opportunity without signing up. To join one, you'll need a free account.",
       "generalQ3": "How fast can my organization get started?",
@@ -1004,12 +1004,12 @@
     },
     "termsOfUse": {
       "title": "Terms of Use",
-      "metaDescription": "The rules for using Einsatzbereit: our role as a platform, acceptable use, obligations for organizations, and liability.",
+      "metaDescription": "The rules for using Afunto: our role as a platform, acceptable use, obligations for organizations, and liability.",
       "lastUpdated": "Last updated: August 7, 2026",
       "section1Title": "Scope and acceptance",
-      "section1Body": "These Terms of Use govern your use of Einsatzbereit (the \"Platform\"). By creating an account, registering for a volunteer opportunity, or otherwise using the Platform, you agree to be bound by these Terms. If you do not agree, please do not use the Platform.",
+      "section1Body": "These Terms of Use govern your use of Afunto (the \"Platform\"). By creating an account, registering for a volunteer opportunity, or otherwise using the Platform, you agree to be bound by these Terms. If you do not agree, please do not use the Platform.",
       "section2Title": "Our role as a platform",
-      "section2Body": "Einsatzbereit is an intermediary that connects volunteers with opportunities published by independent organizations. We do not organize, supervise, or take part in the opportunities listed on the Platform, and we are not a party to any arrangement made between a volunteer and an organization. Organizations are solely responsible for the opportunities they publish, including their content, safety, and suitability.",
+      "section2Body": "Afunto is an intermediary that connects volunteers with opportunities published by independent organizations. We do not organize, supervise, or take part in the opportunities listed on the Platform, and we are not a party to any arrangement made between a volunteer and an organization. Organizations are solely responsible for the opportunities they publish, including their content, safety, and suitability.",
       "section3Title": "Acceptable use",
       "section3Body": "When using the Platform, you agree to provide accurate information about yourself and keep it up to date, to treat other users, organizations, and the people you assist with respect, to follow the on-site instructions of the organization hosting an opportunity, and to refrain from posting or sharing content that is illegal, fraudulent, harassing, or otherwise harmful. You may not use the Platform to solicit paid work, collect personal data for unrelated purposes, or misrepresent your identity or affiliation with an organization.",
       "section4Title": "Organizations and volunteer opportunities",
@@ -1409,7 +1409,7 @@
     "routeState": {
       "offline": {
         "title": "You are offline",
-        "message": "We cannot reach Einsatzbereit without a connection. As soon as you are back online we load the page again - you do not have to do anything."
+        "message": "We cannot reach Afunto without a connection. As soon as you are back online we load the page again - you do not have to do anything."
       },
       "adminOnly": {
         "title": "Admin rights required",
@@ -1417,12 +1417,12 @@
       }
     },
     "pwaUpdate": {
-      "message": "A new version of Einsatzbereit is available.",
+      "message": "A new version of Afunto is available.",
       "reloadLabel": "Reload to update the app"
     },
     "config": {
       "unavailableTitle": "Configuration missing",
-      "unavailableMessage": "Einsatzbereit could not load its configuration and cannot start. If you are offline, reconnecting will retry automatically - otherwise, please let the person running this deployment know."
+      "unavailableMessage": "Afunto could not load its configuration and cannot start. If you are offline, reconnecting will retry automatically - otherwise, please let the person running this deployment know."
     },
     "userProfile": {
       "loading": "Loading profile…",

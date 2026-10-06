@@ -31,8 +31,8 @@ Deployment_Node(machine, "Developer Machine", "Windows / macOS / Linux") {
 			Container(mailpit, "Mail capture", "Mailpit", ":1080 / :1025")
 		}
 
-		Deployment_Node(minio_node, "minio (container)") {
-			Container(minio, "Object storage", "MinIO (S3-compatible)", ":9000 / :9001")
+		Deployment_Node(storage_node, "storage (container)") {
+			Container(storage, "Object storage", "RustFS (S3-compatible)", ":9000 / :9001")
 		}
 	}
 }
@@ -42,7 +42,7 @@ Rel(frontend, keycloak, "OIDC", "HTTP :8080")
 Rel(backend, postgres, "SQL / EF Core", "TCP :5432")
 Rel(backend, keycloak, "JWKS + Admin API", "HTTP :8080")
 Rel(backend, mailpit, "SMTP", "TCP :1025")
-Rel(backend, minio, "S3 API", "HTTP :9000")
+Rel(backend, storage, "S3 API", "HTTP :9000")
 Rel(pgadmin, postgres, "DB management", "TCP :5432")
 
 @enduml

@@ -1,7 +1,7 @@
 ---
 name: dead-weight
 description: >
-  Find what can be deleted from einsatzbereit with zero behaviour change -
+  Find what can be deleted from afunto with zero behaviour change -
   unreferenced symbols, unreachable routes and endpoints, features nothing
   triggers any more, unused locale keys and assets, and junk that should
   never have been tracked. Use when the maintainer types /dead-weight, or

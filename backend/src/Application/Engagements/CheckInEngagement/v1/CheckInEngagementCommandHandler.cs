@@ -27,7 +27,7 @@ internal sealed class CheckInEngagementCommandHandler(
 			request.RequestingUserId,
 			cancellationToken);
 
-		// The scanner/UI picks a single opportunity to check people into (einsatzbereit#2202)
+		// The scanner/UI picks a single opportunity to check people into (afunto#2202)
 		// - without this, an organizer running two events the same day could scan a badge
 		// for the other one and get a green success toast for the wrong event.
 		if (engagement.OpportunityId != request.OpportunityId)

@@ -102,7 +102,7 @@ public class DeleteUserAvatarCommandHandlerTests
 			.Returns("user-avatars/some-key/avatar.png");
 		_fileStorage
 			.DeleteAsync("user-avatars/some-key/avatar.png", Arg.Any<CancellationToken>())
-			.ThrowsAsync(new InvalidOperationException("MinIO unavailable"));
+			.ThrowsAsync(new InvalidOperationException("Storage unavailable"));
 
 		var command = new DeleteUserAvatarCommand(userId);
 

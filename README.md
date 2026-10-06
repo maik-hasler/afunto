@@ -1,16 +1,16 @@
 <div align="center">
 
-![Einsatzbereit](frontend/public/og-image.png)
+![Afunto](frontend/public/og-image.png)
 
 **Volunteer coordination platform matching helpers with regional needs.**
 
 *Volunteer spontaneously. Find your local cause.*
 
-[Architecture Docs](https://maik-hasler.github.io/einsatzbereit/Architecture.html) - [Report Bug](https://github.com/maik-hasler/einsatzbereit/issues/new/choose) - [Request Feature](https://github.com/maik-hasler/einsatzbereit/issues/new/choose)
+[Architecture Docs](https://maik-hasler.github.io/afunto/Architecture.html) - [Report Bug](https://github.com/maik-hasler/afunto/issues/new/choose) - [Request Feature](https://github.com/maik-hasler/afunto/issues/new/choose)
 
-[![Backend CI](https://img.shields.io/github/actions/workflow/status/maik-hasler/einsatzbereit/dotnet.yml?label=backend%20CI)](https://github.com/maik-hasler/einsatzbereit/actions/workflows/dotnet.yml)
-[![Frontend CI](https://img.shields.io/github/actions/workflow/status/maik-hasler/einsatzbereit/frontend.yml?label=frontend%20CI)](https://github.com/maik-hasler/einsatzbereit/actions/workflows/frontend.yml)
-[![Docs](https://img.shields.io/github/actions/workflow/status/maik-hasler/einsatzbereit/docs.yml?label=docs)](https://github.com/maik-hasler/einsatzbereit/actions/workflows/docs.yml)
+[![Backend CI](https://img.shields.io/github/actions/workflow/status/maik-hasler/afunto/dotnet.yml?label=backend%20CI)](https://github.com/maik-hasler/afunto/actions/workflows/dotnet.yml)
+[![Frontend CI](https://img.shields.io/github/actions/workflow/status/maik-hasler/afunto/frontend.yml?label=frontend%20CI)](https://github.com/maik-hasler/afunto/actions/workflows/frontend.yml)
+[![Docs](https://img.shields.io/github/actions/workflow/status/maik-hasler/afunto/docs.yml?label=docs)](https://github.com/maik-hasler/afunto/actions/workflows/docs.yml)
 [![License: AGPL v3](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
 
 </div>
@@ -37,9 +37,9 @@
 
 Volunteering doesn't have to mean a long-term commitment - sometimes an afternoon is enough, sometimes a week. The hard part is usually finding out where help is needed right now, whether that's a large NGO or a local sports tournament. Existing platforms tend to be too complex, too generic, or simply unused.
 
-Einsatzbereit makes concrete needs visible: what, where, when. Organizations post opportunities with real time slots, and volunteers who are ready ("einsatzbereit") sign up for exactly the slot that fits their schedule.
+Afunto makes concrete needs visible: what, where, when. Organizations post opportunities with real time slots, and volunteers sign up for exactly the slot that fits their schedule - not every week, just now and then. That is where the name comes from: "af un to" is Low German for "now and then".
 
-The app itself is served in German by default, since Einsatzbereit's primary audience is German-speaking, with English available as a secondary UI language via a language selector. Code, commits, and documentation for contributors stay in English throughout.
+The app itself is served in German by default, since Afunto's primary audience is German-speaking, with English available as a secondary UI language via a language selector. Code, commits, and documentation for contributors stay in English throughout.
 
 ---
 
@@ -57,7 +57,7 @@ The app itself is served in German by default, since Einsatzbereit's primary aud
 - **Achievements and badges** awarded for volunteering milestones, shown on the profile.
 - **Organization invitations** to join and manage an organization's membership.
 - **Reporting and moderation** for opportunities, organizations, and users, backed by a full admin audit log.
-- **Image uploads** for avatars, organization logos, and opportunity banners, stored in MinIO object storage.
+- **Image uploads** for avatars, organization logos, and opportunity banners, stored in S3-compatible object storage (RustFS).
 - **Installable as a PWA** with offline support for previously visited pages.
 
 ---
@@ -70,7 +70,7 @@ The app itself is served in German by default, since Einsatzbereit's primary aud
 | Auth | Keycloak 26.7.4 (OIDC, JWT, Keycloak Organizations) |
 | Frontend | Vite SPA, React 19, React Router v8, Tailwind CSS 4, react-oidc-context, Leaflet/react-leaflet |
 | API client | TypeScript client generated from the backend OpenAPI spec by `@hey-api/openapi-ts`, and a C# one for the integration tests by NSwag - neither is hand-edited |
-| Object storage | MinIO (avatars, organization logos, opportunity banners) |
+| Object storage | RustFS, S3-compatible (avatars, organization logos, opportunity banners) |
 | Tests | TUnit + Aspire.Hosting.Testing + Respawn + NetArchTest (Application.UnitTests, IntegrationTests, ArchitectureTests), Vitest (frontend pure-logic units), Playwright + axe-core (E2E and accessibility, `backend/tests/VisualTests`) |
 | CI | GitHub Actions (build and test on every PR, Docker images to GHCR on tag push) |
 | Dependency updates | Renovate |
@@ -81,7 +81,7 @@ The app itself is served in German by default, since Einsatzbereit's primary aud
 
 The full system architecture is documented in arc42 format and published at:
 
-**[maik-hasler.github.io/einsatzbereit/Architecture.html](https://maik-hasler.github.io/einsatzbereit/Architecture.html)**
+**[maik-hasler.github.io/afunto/Architecture.html](https://maik-hasler.github.io/afunto/Architecture.html)**
 
 It is built from the AsciiDoc sources in `docs/Architecture/` via AsciiDoctor and republished to GitHub Pages on every push to `main` (`docs.yml`). Individual Architecture Decision Records live alongside it in `docs/ADRs/`.
 
@@ -128,22 +128,22 @@ These accounts are **enabled in the released Keycloak image** and these password
 
 ## Running the Released Images
 
-Three images are published to GHCR on every tagged release (see [Versioning & Releases](#versioning--releases)): `einsatzbereit-backend`, `einsatzbereit-frontend`, and `einsatzbereit-keycloak`. Each is configured entirely through environment variables at container start - none of them need a rebuild to point at a different environment. The Keycloak image's own variables are already documented in [`keycloak/README.md`](keycloak/README.md); this section covers the other two.
+Three images are published to GHCR on every tagged release (see [Versioning & Releases](#versioning--releases)): `afunto-backend`, `afunto-frontend`, and `afunto-keycloak`. Each is configured entirely through environment variables at container start - none of them need a rebuild to point at a different environment. The Keycloak image's own variables are already documented in [`keycloak/README.md`](keycloak/README.md); this section covers the other two.
 
 ### Backing services
 
 Bring your own:
 
 - **PostgreSQL** (18, or compatible) - the backend needs its own database, separate from Keycloak's own (see `keycloak/README.md`)
-- **An S3-compatible object store** (e.g. MinIO) - organization logos, user avatars, and opportunity banners
+- **An S3-compatible object store** (e.g. RustFS) - organization logos, user avatars, and opportunity banners
 - **An SMTP relay** - outgoing notification and reminder email
-- **Keycloak** - the `einsatzbereit-keycloak` image, or any Keycloak instance importing the same realm
+- **Keycloak** - the `afunto-keycloak` image, or any Keycloak instance importing the same realm
 
 The backend and frontend both also make outbound HTTPS calls to OpenStreetMap Nominatim for geocoding - no configuration needed, but it must be reachable from wherever you run them.
 
 **Important:** leave `ASPNETCORE_ENVIRONMENT` unset (defaults to `Production`) or set it to `Production` explicitly. `Development` skips the required-configuration check below entirely and unconditionally runs the same seeding that `Database__SeedOnStartup` gates outside Development - a no-op once a database already has data, but not on a fresh one (see the `Database__SeedOnStartup` row further down for exactly what that seeds).
 
-### Backend (`ghcr.io/<owner>/einsatzbereit-backend`)
+### Backend (`ghcr.io/<owner>/afunto-backend`)
 
 Listens on port `8080` (plain HTTP - put a TLS-terminating reverse proxy in front of it; port `8081` is also exposed by the base image but unused unless you configure a certificate yourself).
 
@@ -153,25 +153,25 @@ Required variables crash the container at startup outside Development (`Required
 
 | Variable | Required | Purpose | Example |
 |---|---|---|---|
-| `ConnectionStrings__einsatzbereit` | Yes | PostgreSQL connection string for the application database | `Host=db;Database=einsatzbereit;Username=einsatzbereit;Password=secret` |
+| `ConnectionStrings__afunto` | Yes | PostgreSQL connection string for the application database | `Host=db;Database=afunto;Username=afunto;Password=secret` |
 | `Keycloak__ClientSecret` | Yes | Secret for the confidential `backend` service-account client - must match the Keycloak realm's resolved `KEYCLOAK_BACKEND_SECRET` (`keycloak/README.md`) | - |
-| `Authentication__Authority` | Yes | OIDC authority the backend validates access tokens against | `https://login.example.com/realms/einsatzbereit` |
+| `Authentication__Authority` | Yes | OIDC authority the backend validates access tokens against | `https://login.example.com/realms/afunto` |
 | `Cors__Origins__0` | Yes | Allowed CORS origin - the frontend's own origin; add `__1`, `__2`, ... for more | `https://app.example.com` |
 | `Keycloak__BaseUrl` | No | Base URL the backend calls Keycloak's API at | `https://login.example.com` |
-| `Keycloak__Realm` | No | Keycloak realm name | `einsatzbereit` |
+| `Keycloak__Realm` | No | Keycloak realm name | `afunto` |
 | `Keycloak__ClientId` | No | Keycloak client id for the backend's service account | `backend` |
-| `Authentication__ValidIssuers__0` | No | Acceptable JWT issuer(s) - needed in practice even though not startup-validated | `https://login.example.com/realms/einsatzbereit` |
+| `Authentication__ValidIssuers__0` | No | Acceptable JWT issuer(s) - needed in practice even though not startup-validated | `https://login.example.com/realms/afunto` |
 | `Smtp__Host` | No | SMTP relay hostname | `smtp.example.com` |
 | `Smtp__Port` | No | SMTP port | `587` |
 | `Smtp__FromAddress` | No | From-address for outgoing email | `noreply@example.com` |
-| `Smtp__FromName` | No | From-name for outgoing email | `Einsatzbereit` |
+| `Smtp__FromName` | No | From-name for outgoing email | `Afunto` |
 | `Smtp__Username` | No | SMTP auth username | - |
 | `Smtp__Password` | No | SMTP auth password | - |
 | `Smtp__EnableSsl` | No | Use STARTTLS when connecting to the relay | `true` |
-| `Storage__Endpoint` | No | S3-compatible endpoint the backend writes to | `http://minio:9000` |
+| `Storage__Endpoint` | No | S3-compatible endpoint the backend writes to | `http://storage:9000` |
 | `Storage__AccessKey` | No | Access key for the bucket-scoped service account | - |
 | `Storage__SecretKey` | No | Secret key for the bucket-scoped service account | - |
-| `Storage__BucketName` | No | Bucket for avatars, logos, and opportunity banners | `einsatzbereit` |
+| `Storage__BucketName` | No | Bucket for avatars, logos, and opportunity banners | `afunto` |
 | `Storage__PublicEndpoint` | No | Public origin uploaded files are served from, if different from `Storage__Endpoint` (e.g. an internal vs. a public hostname) - must match the frontend's `STORAGE_PUBLIC_URL` below | `https://storage.example.com` |
 | `Api__PublicBaseUrl` | No | Reserved for the backend's own public base URL - bound at startup but not currently read by any request path | `https://api.example.com` |
 | `TrustedNetworks__Cidrs__0` | No | CIDR(s) trusted to set `X-Forwarded-For` - the reverse proxy in front of this image; defaults cover loopback and RFC1918 private ranges | `10.0.0.0/8` |
@@ -194,14 +194,14 @@ Required variables crash the container at startup outside Development (`Required
 | `OutputCaching__LongPublicReadSeconds` | No | Cache duration for long-lived public reads | `3600` |
 | `OutputCaching__ShortPublicReadSeconds` | No | Cache duration for short-lived public reads | `60` |
 
-### Frontend (`ghcr.io/<owner>/einsatzbereit-frontend`)
+### Frontend (`ghcr.io/<owner>/afunto-frontend`)
 
 Static SPA assets served by nginx on port `80` (plain HTTP - put a TLS-terminating reverse proxy in front of it, same as the backend). Unlike a typical Vite app, the variables below are read at container start, not only baked in at build time: `docker-entrypoint.d/99-runtime-config.sh` substitutes the `VITE_`/`OPERATOR_` ones into `config.js` (read by the app at runtime as `window.__APP_CONFIG__`), derives the Content-Security-Policy's allowed origins from the same origin values, and substitutes `BACKEND_UPSTREAM`/`DNS_RESOLVER` into the nginx config itself - so one built image runs anywhere.
 
 | Variable | Required | Purpose | Example |
 |---|---|---|---|
 | `VITE_API_URL` | Yes | Backend API origin the SPA calls; also the CSP's `connect-src` origin | `https://api.example.com` |
-| `VITE_KEYCLOAK_AUTHORITY_URL` | Yes | Keycloak realm issuer URL for the OIDC login flow; also the CSP's `connect-src`/`frame-src` origin | `https://login.example.com/realms/einsatzbereit` |
+| `VITE_KEYCLOAK_AUTHORITY_URL` | Yes | Keycloak realm issuer URL for the OIDC login flow; also the CSP's `connect-src`/`frame-src` origin | `https://login.example.com/realms/afunto` |
 | `VITE_KEYCLOAK_CLIENT_ID` | No | Public OIDC client id registered in Keycloak for the SPA | `frontend` |
 | `STORAGE_PUBLIC_URL` | No | Public origin uploaded avatars/logos/banners are served from - the CSP's `img-src` origin; must match the backend's `Storage__PublicEndpoint` above (or `Storage__Endpoint` if that isn't set) | `https://storage.example.com` |
 | `OPERATOR_NAME` | No | This deployment's legally responsible party (DDG §5 imprint, GDPR Art. 13 controller) | `Musterverein Rettungsdienst e.V.` |
@@ -220,7 +220,7 @@ CORS must be configured on the backend (`Cors__Origins` above) to allow this ima
 ## Project Structure
 
 ```
-einsatzbereit/
+afunto/
 ├── backend/        .NET 10 Clean Architecture API
 ├── frontend/       Vite SPA + React 19 + Tailwind CSS 4
 ├── keycloak/       Custom Keycloak image + realm config
@@ -244,17 +244,17 @@ Found a vulnerability? See [SECURITY.md](SECURITY.md) for how to report it priva
 
 ## Versioning & Releases
 
-Einsatzbereit uses a single unified SemVer tag across the whole monorepo, published to GHCR - see [VERSIONING.md](VERSIONING.md) for the tag format and release process. Release notes are auto-generated on [GitHub Releases](https://github.com/maik-hasler/einsatzbereit/releases).
+Afunto uses a single unified SemVer tag across the whole monorepo, published to GHCR - see [VERSIONING.md](VERSIONING.md) for the tag format and release process. Release notes are auto-generated on [GitHub Releases](https://github.com/maik-hasler/afunto/releases).
 
 ---
 
 ## License
 
-Einsatzbereit is intentionally licensed under the [GNU Affero General Public License v3.0](LICENSE).
+Afunto is intentionally licensed under the [GNU Affero General Public License v3.0](LICENSE).
 
 It doesn't matter who develops the project further. The benefit to society comes first. No profit, no closed source, no lost knowledge.
 
-Practically, this means: if you self-host a modified version of Einsatzbereit and let others interact with it over a network, you are obligated to make your modified source available to them too.
+Practically, this means: if you self-host a modified version of Afunto and let others interact with it over a network, you are obligated to make your modified source available to them too.
 
 ---
 

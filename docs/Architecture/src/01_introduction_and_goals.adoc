@@ -3,8 +3,10 @@ ifndef::imagesdir[:imagesdir: ../images]
 [[section-introduction-and-goals]]
 == Introduction and Goals
 
-Einsatzbereit is an open-source platform that connects engaged volunteers with regional needs.
+Afunto is an open-source platform that connects engaged volunteers with regional needs.
 Volunteering and concrete societal benefit are always at the forefront.
+
+The name is Low German: _af un to_ means "now and then" - volunteering when it fits, without a standing commitment.
 
 The platform follows three guiding principles:
 
@@ -19,7 +21,7 @@ Sometimes an afternoon is enough, sometimes a week.
 But finding out where help is currently needed is often difficult - whether at large NGOs or a local sports tournament.
 Existing platforms are too complex, too generic, or barely used.
 
-Einsatzbereit solves this by making concrete needs visible: *what* is needed, *where*, and *when*.
+Afunto solves this by making concrete needs visible: *what* is needed, *where*, and *when*.
 
 Key functional requirements:
 
@@ -44,7 +46,7 @@ Key functional requirements:
 
 === Quality Goals
 
-The following quality goals define the essential quality requirements for Einsatzbereit and serve as a guide for architectural decisions.
+The following quality goals define the essential quality requirements for Afunto and serve as a guide for architectural decisions.
 
 .Quality Goals
 [cols="1,3,1" options="header"]

@@ -23,7 +23,7 @@ vi.mock("oidc-client-ts", () => ({
 
 vi.mock("./runtimeConfig", () => ({
 	runtimeConfig: {
-		keycloakAuthorityUrl: "https://keycloak.example/realms/einsatzbereit",
+		keycloakAuthorityUrl: "https://keycloak.example/realms/afunto",
 		keycloakClientId: "frontend",
 		apiUrl: "https://api.example",
 	},
@@ -50,14 +50,12 @@ describe("signinRedirectForRegistration", () => {
 			redirect_uri: string;
 			metadataSeed: { authorization_endpoint: string };
 		};
-		expect(options.authority).toBe(
-			"https://keycloak.example/realms/einsatzbereit",
-		);
+		expect(options.authority).toBe("https://keycloak.example/realms/afunto");
 		expect(options.client_id).toBe("frontend");
 		expect(options.scope).toBe("openid profile email");
 		expect(options.redirect_uri).toBe(`${window.location.origin}/callback`);
 		expect(options.metadataSeed.authorization_endpoint).toBe(
-			"https://keycloak.example/realms/einsatzbereit/protocol/openid-connect/registrations",
+			"https://keycloak.example/realms/afunto/protocol/openid-connect/registrations",
 		);
 	});
 

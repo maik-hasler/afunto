@@ -25,7 +25,7 @@ include::../images/business-context.puml[]
 |Platform Admin
 |Keeps the platform usable for the other two: works through abuse reports, disables or restores accounts, organizations and opportunities, and reads the audit trail of those actions.
 
-|Einsatzbereit
+|Afunto
 |Connects volunteers with organizations by managing regional volunteer opportunities and registrations, and notifies both sides when something concerning them changes.
 |===
 
@@ -74,7 +74,7 @@ include::../images/technical-context.puml[]
 |Outbound
 |The backend sends notification and reminder emails via SMTP (Mailpit locally, a real SMTP relay otherwise).
 
-|Backend → Object storage (MinIO / S3)
+|Backend → Object storage (RustFS / S3)
 |Outbound
 |The backend stores binary assets (organization logos, user avatars, opportunity banners) in S3-compatible object storage.
 

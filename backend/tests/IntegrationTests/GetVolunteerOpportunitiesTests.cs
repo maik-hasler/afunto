@@ -33,7 +33,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 			IsDraft = true,
 		}, cancellationToken);
 
-		var sut = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var sut = new AfuntoApi(fixture.CreateHttpClient());
 
 		var result = await sut.GetVolunteerOpportunitiesAsync(1, 10, cancellationToken: cancellationToken);
 
@@ -53,7 +53,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 		await CreateVolunteerOpportunityAsync(authenticatedClient, orgId, "Opportunity 1", "Description 1", cancellationToken);
 		await CreateVolunteerOpportunityAsync(authenticatedClient, orgId, "Opportunity 2", "Description 2", cancellationToken);
 
-		var sut = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var sut = new AfuntoApi(fixture.CreateHttpClient());
 
 		var result = await sut.GetVolunteerOpportunitiesAsync(1, 10, cancellationToken: cancellationToken);
 
@@ -72,7 +72,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 		await CreateVolunteerOpportunityAsync(authenticatedClient, orgId, "Opportunity 2", "Description 2", cancellationToken);
 		await CreateVolunteerOpportunityAsync(authenticatedClient, orgId, "Opportunity 3", "Description 3", cancellationToken);
 
-		var sut = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var sut = new AfuntoApi(fixture.CreateHttpClient());
 
 		var result = await sut.GetVolunteerOpportunitiesAsync(1, 2, cancellationToken: cancellationToken);
 
@@ -93,7 +93,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 		await CreateVolunteerOpportunityAsync(authenticatedClient, orgId, "Opportunity 2", "Description 2", cancellationToken);
 		await CreateVolunteerOpportunityAsync(authenticatedClient, orgId, "Opportunity 3", "Description 3", cancellationToken);
 
-		var sut = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var sut = new AfuntoApi(fixture.CreateHttpClient());
 
 		var result = await sut.GetVolunteerOpportunitiesAsync(2, 2, cancellationToken: cancellationToken);
 
@@ -113,7 +113,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 		var second = await CreateVolunteerOpportunityAsync(authenticatedClient, orgId, "Second", "Created second", cancellationToken);
 		var third = await CreateVolunteerOpportunityAsync(authenticatedClient, orgId, "Third", "Created last", cancellationToken);
 
-		var sut = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var sut = new AfuntoApi(fixture.CreateHttpClient());
 
 		var result = await sut.GetVolunteerOpportunitiesAsync(1, 10, cancellationToken: cancellationToken);
 
@@ -133,7 +133,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 
 		await CreateVolunteerOpportunityAsync(authenticatedClient, orgId, "Opportunity", "Description", cancellationToken);
 
-		var sut = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var sut = new AfuntoApi(fixture.CreateHttpClient());
 
 		var result = await sut.GetVolunteerOpportunitiesAsync(1, 10, cancellationToken: cancellationToken);
 
@@ -150,7 +150,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 
 		await CreateVolunteerOpportunityAsync(authenticatedClient, orgId, "Opportunity", "Description", cancellationToken);
 
-		var sut = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var sut = new AfuntoApi(fixture.CreateHttpClient());
 
 		var result = await sut.GetVolunteerOpportunitiesAsync(1, 10, cancellationToken: cancellationToken);
 
@@ -201,7 +201,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 
 		await authenticatedClient.PublishVolunteerOpportunityAsync(opportunity.Id, cancellationToken);
 
-		var sut = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var sut = new AfuntoApi(fixture.CreateHttpClient());
 		var result = await sut.GetVolunteerOpportunitiesAsync(1, 10, cancellationToken: cancellationToken);
 
 		var item = result.Items.Single();
@@ -246,7 +246,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 
 		await authenticatedClient.PublishVolunteerOpportunityAsync(opportunity.Id, cancellationToken);
 
-		var sut = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var sut = new AfuntoApi(fixture.CreateHttpClient());
 		var result = await sut.GetVolunteerOpportunitiesAsync(1, 10, cancellationToken: cancellationToken);
 
 		var item = result.Items.Single();
@@ -275,7 +275,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 			ValidUntil = DateTimeOffset.UtcNow.AddDays(30),
 		}, cancellationToken);
 
-		var sut = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var sut = new AfuntoApi(fixture.CreateHttpClient());
 		var result = await sut.GetVolunteerOpportunitiesAsync(1, 10, cancellationToken: cancellationToken);
 
 		var item = result.Items.Single();
@@ -333,7 +333,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 			ValidUntil = DateTimeOffset.UtcNow.AddDays(30),
 		}, cancellationToken);
 
-		var sut = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var sut = new AfuntoApi(fixture.CreateHttpClient());
 		var result = await sut.GetVolunteerOpportunitiesAsync(1, 10, cancellationToken: cancellationToken);
 
 		var ids = result.Items.Select(i => i.Id).ToList();
@@ -381,7 +381,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 
 		await authenticatedClient.PublishVolunteerOpportunityAsync(opportunity.Id, cancellationToken);
 
-		var sut = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var sut = new AfuntoApi(fixture.CreateHttpClient());
 		var result = await sut.GetVolunteerOpportunitiesAsync(1, 10, cancellationToken: cancellationToken);
 
 		var item = result.Items.Single(i => i.Id == opportunity.Id);
@@ -402,7 +402,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 		var tooEarly = await CreateOpportunityWithTimeSlotAsync(
 			authenticatedClient, orgId, "Too early for the filter", nearSlotStart, cancellationToken);
 
-		var sut = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var sut = new AfuntoApi(fixture.CreateHttpClient());
 
 		var result = await sut.GetVolunteerOpportunitiesAsync(
 			1, 10, dateFrom: DateTimeOffset.UtcNow.AddDays(5), cancellationToken: cancellationToken);
@@ -425,7 +425,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 		var tooLate = await CreateOpportunityWithTimeSlotAsync(
 			authenticatedClient, orgId, "Too late for the filter", farSlotStart, cancellationToken);
 
-		var sut = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var sut = new AfuntoApi(fixture.CreateHttpClient());
 
 		var result = await sut.GetVolunteerOpportunitiesAsync(
 			1, 10, dateTo: DateTimeOffset.UtcNow.AddDays(5), cancellationToken: cancellationToken);
@@ -450,7 +450,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 		var outsideRange = await CreateOpportunityWithTimeSlotAsync(
 			authenticatedClient, orgId, "Outside range", DateTimeOffset.UtcNow.AddDays(20), cancellationToken);
 
-		var sut = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var sut = new AfuntoApi(fixture.CreateHttpClient());
 
 		var result = await sut.GetVolunteerOpportunitiesAsync(
 			1, 10,
@@ -482,7 +482,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 			[DateTimeOffset.UtcNow.AddDays(3), DateTimeOffset.UtcNow.AddDays(17)],
 			cancellationToken);
 
-		var sut = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var sut = new AfuntoApi(fixture.CreateHttpClient());
 
 		var result = await sut.GetVolunteerOpportunitiesAsync(
 			1, 10,
@@ -509,7 +509,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 		var slotless = await CreateSlotlessOpportunityAsync(
 			authenticatedClient, orgId, "Express interest opportunity", cancellationToken);
 
-		var sut = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var sut = new AfuntoApi(fixture.CreateHttpClient());
 
 		var result = await sut.GetVolunteerOpportunitiesAsync(
 			1, 10,
@@ -530,7 +530,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 		var slotless = await CreateSlotlessOpportunityAsync(
 			authenticatedClient, orgId, "Express interest opportunity", cancellationToken);
 
-		var sut = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var sut = new AfuntoApi(fixture.CreateHttpClient());
 
 		var result = await sut.GetVolunteerOpportunitiesAsync(
 			1, 10,
@@ -552,7 +552,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 		var slotless = await CreateSlotlessOpportunityAsync(
 			authenticatedClient, orgId, "Express interest opportunity", cancellationToken);
 
-		var sut = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var sut = new AfuntoApi(fixture.CreateHttpClient());
 
 		var result = await sut.GetVolunteerOpportunitiesAsync(
 			1, 10,
@@ -573,7 +573,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 		var httpClient = fixture.CreateHttpClient();
 		httpClient.DefaultRequestHeaders.Authorization =
 			new AuthenticationHeaderValue("Bearer", token);
-		var client = new EinsatzbereitApi(httpClient);
+		var client = new AfuntoApi(httpClient);
 
 		var act = () => client.CreateVolunteerOpportunityAsync(new CreateVolunteerOpportunityRequest
 		{
@@ -632,7 +632,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 
 		await CreateVolunteerOpportunityAsync(authenticatedClient, orgId, "On-site task", "Description", cancellationToken);
 
-		var sut = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var sut = new AfuntoApi(fixture.CreateHttpClient());
 
 		var onSite = await sut.GetVolunteerOpportunitiesAsync(1, 10, isRemote: false, cancellationToken: cancellationToken);
 		var remote = await sut.GetVolunteerOpportunitiesAsync(1, 10, isRemote: true, cancellationToken: cancellationToken);
@@ -645,7 +645,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 	public async Task GetVolunteerOpportunities_ShouldReturnBadRequest_WhenRadiusIsNotPositive(
 		CancellationToken cancellationToken)
 	{
-		var sut = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var sut = new AfuntoApi(fixture.CreateHttpClient());
 
 		var act = () => sut.GetVolunteerOpportunitiesAsync(
 			1, 10, centerLatitude: 52.5, centerLongitude: 13.4, radiusKm: 0, cancellationToken: cancellationToken);
@@ -658,7 +658,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 	public async Task GetVolunteerOpportunities_ShouldReturnBadRequest_WhenOccurrenceIsInvalid(
 		CancellationToken cancellationToken)
 	{
-		var sut = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var sut = new AfuntoApi(fixture.CreateHttpClient());
 
 		var act = () => sut.GetVolunteerOpportunitiesAsync(
 			1, 10, occurrence: "Bogus", cancellationToken: cancellationToken);
@@ -671,7 +671,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 	public async Task GetVolunteerOpportunities_ShouldReturnBadRequest_WhenParticipationTypeIsInvalid(
 		CancellationToken cancellationToken)
 	{
-		var sut = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var sut = new AfuntoApi(fixture.CreateHttpClient());
 
 		var act = () => sut.GetVolunteerOpportunitiesAsync(
 			1, 10, participationType: "Nonsense", cancellationToken: cancellationToken);
@@ -684,7 +684,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 	public async Task GetVolunteerOpportunities_ShouldReturnBadRequest_WhenCategoryIsInvalid(
 		CancellationToken cancellationToken)
 	{
-		var sut = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var sut = new AfuntoApi(fixture.CreateHttpClient());
 
 		var act = () => sut.GetVolunteerOpportunitiesAsync(
 			1, 10, categories: ["NotACategory"], cancellationToken: cancellationToken);
@@ -729,7 +729,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 
 		await authenticatedClient.PublishVolunteerOpportunityAsync(opportunity.Id, cancellationToken);
 
-		var sut = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var sut = new AfuntoApi(fixture.CreateHttpClient());
 
 		var matching = await sut.GetVolunteerOpportunitiesAsync(
 			1, 10, occurrence: "onetime", participationType: "ScheduledSlots", categories: ["environment"], cancellationToken: cancellationToken);
@@ -752,7 +752,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 		await CreateOpportunityWithTagsAsync(
 			authenticatedClient, orgId, "Tutoring", ["education"], cancellationToken);
 
-		var sut = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var sut = new AfuntoApi(fixture.CreateHttpClient());
 
 		var result = await sut.GetVolunteerOpportunitiesAsync(1, 10, tag: "environment", cancellationToken: cancellationToken);
 
@@ -772,7 +772,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 		await CreateVolunteerOpportunityAsync(
 			authenticatedClient, orgId, "Reading Tutor", "Support kids with their reading skills", cancellationToken);
 
-		var sut = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var sut = new AfuntoApi(fixture.CreateHttpClient());
 
 		var byTitle = await sut.GetVolunteerOpportunitiesAsync(1, 10, keyword: "cleanup", cancellationToken: cancellationToken);
 		var byDescription = await sut.GetVolunteerOpportunitiesAsync(1, 10, keyword: "shoreline", cancellationToken: cancellationToken);
@@ -796,7 +796,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 		await CreateVolunteerOpportunityAsync(
 			authenticatedClient, otherOrgId, "Unrelated Task", "Nothing to do with wildlife", cancellationToken);
 
-		var sut = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var sut = new AfuntoApi(fixture.CreateHttpClient());
 
 		var result = await sut.GetVolunteerOpportunitiesAsync(1, 10, keyword: "wildlife rescue", cancellationToken: cancellationToken);
 
@@ -814,7 +814,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 		await CreateVolunteerOpportunityAsync(
 			authenticatedClient, orgId, "Fußball", "A friendly match in München", cancellationToken);
 
-		var sut = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var sut = new AfuntoApi(fixture.CreateHttpClient());
 
 		var asciiTranscriptionOfEszett = await sut.GetVolunteerOpportunitiesAsync(1, 10, keyword: "Fussball", cancellationToken: cancellationToken);
 		var asciiTranscriptionOfUmlaut = await sut.GetVolunteerOpportunitiesAsync(1, 10, keyword: "Muenchen", cancellationToken: cancellationToken);
@@ -846,7 +846,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 		await SeedPublishedOpportunityWithCoordinatesAsync(
 			dbContext, orgId, "Far Opportunity", centerLat + 0.5, centerLon, cancellationToken);
 
-		var sut = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var sut = new AfuntoApi(fixture.CreateHttpClient());
 
 		var result = await sut.GetVolunteerOpportunitiesAsync(
 			1, 10, centerLatitude: centerLat, centerLongitude: centerLon, radiusKm: 20, cancellationToken: cancellationToken);
@@ -866,7 +866,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 		await CreateVolunteerOpportunityAsync(
 			authenticatedClient, orgId, "Translation probe", "Description", cancellationToken);
 
-		var sut = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var sut = new AfuntoApi(fixture.CreateHttpClient());
 
 		var page = await sut.GetVolunteerOpportunitiesAsync(1, 1, cancellationToken: cancellationToken);
 
@@ -875,7 +875,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 	}
 
 	private static async Task<Guid> CreateOrganizationAsync(
-		EinsatzbereitApi client, CancellationToken cancellationToken, string? namePrefix = null)
+		AfuntoApi client, CancellationToken cancellationToken, string? namePrefix = null)
 	{
 		var uniqueName = $"{namePrefix ?? "Testorg"}_{Guid.NewGuid()}";
 		var organization = await client.CreateOrganizationAsync(
@@ -884,7 +884,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 	}
 
 	private static async Task<CreateVolunteerOpportunityResponse> CreateVolunteerOpportunityAsync(
-		EinsatzbereitApi client, Guid orgId, string title, string description,
+		AfuntoApi client, Guid orgId, string title, string description,
 		CancellationToken cancellationToken)
 	{
 		var opportunity = await client.CreateVolunteerOpportunityAsync(new CreateVolunteerOpportunityRequest
@@ -919,7 +919,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 	}
 
 	private static async Task<CreateVolunteerOpportunityResponse> CreateSlotlessOpportunityAsync(
-		EinsatzbereitApi client, Guid orgId, string title, CancellationToken cancellationToken) =>
+		AfuntoApi client, Guid orgId, string title, CancellationToken cancellationToken) =>
 		await client.CreateVolunteerOpportunityAsync(new CreateVolunteerOpportunityRequest
 		{
 			TitleDe = title,
@@ -936,7 +936,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 		}, cancellationToken);
 
 	private static async Task<CreateVolunteerOpportunityResponse> CreateOpportunityWithTimeSlotsAsync(
-		EinsatzbereitApi client, Guid orgId, string title, IReadOnlyList<DateTimeOffset> slotStarts, CancellationToken cancellationToken)
+		AfuntoApi client, Guid orgId, string title, IReadOnlyList<DateTimeOffset> slotStarts, CancellationToken cancellationToken)
 	{
 		var opportunity = await client.CreateVolunteerOpportunityAsync(new CreateVolunteerOpportunityRequest
 		{
@@ -973,7 +973,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 	}
 
 	private static async Task<CreateVolunteerOpportunityResponse> CreateOpportunityWithTimeSlotAsync(
-		EinsatzbereitApi client, Guid orgId, string title, DateTimeOffset slotStart, CancellationToken cancellationToken)
+		AfuntoApi client, Guid orgId, string title, DateTimeOffset slotStart, CancellationToken cancellationToken)
 	{
 		var opportunity = await client.CreateVolunteerOpportunityAsync(new CreateVolunteerOpportunityRequest
 		{
@@ -1007,7 +1007,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 	}
 
 	private async Task<CreateVolunteerOpportunityResponse> CreateOpportunityWithExpiredTimeSlotAsync(
-		EinsatzbereitApi client, Guid orgId, CancellationToken cancellationToken)
+		AfuntoApi client, Guid orgId, CancellationToken cancellationToken)
 	{
 		var opportunity = await client.CreateVolunteerOpportunityAsync(new CreateVolunteerOpportunityRequest
 		{
@@ -1044,7 +1044,7 @@ public class GetVolunteerOpportunitiesTests(IntegrationTestFixture fixture)
 	}
 
 	private static Task<CreateVolunteerOpportunityResponse> CreateOpportunityWithTagsAsync(
-		EinsatzbereitApi client, Guid orgId, string title, string[] tags, CancellationToken cancellationToken) =>
+		AfuntoApi client, Guid orgId, string title, string[] tags, CancellationToken cancellationToken) =>
 		client.CreateVolunteerOpportunityAsync(new CreateVolunteerOpportunityRequest
 		{
 			TitleDe = title,

@@ -30,7 +30,7 @@ Level 3 is deliberately shown for one module only. The remaining eleven are buil
 
 === Level 1: System Overview (Whitebox)
 
-.Container View - Einsatzbereit
+.Container View - Afunto
 [plantuml, "container-view", png]
 ....
 include::../images/container-view.puml[]

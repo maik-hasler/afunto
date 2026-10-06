@@ -7,7 +7,7 @@ namespace VisualTests;
 [ClassDataSource<AspireFixture>(Shared = SharedType.PerTestSession)]
 public class SelfRegistrationDefaultRoleTests(AspireFixture fixture) : VisualTestBase(fixture)
 {
-	private const string Realm = "einsatzbereit";
+	private const string Realm = "afunto";
 
 	[Test]
 	public async Task Register_CompletesForm_GrantsUserRoleForAuthenticatedApiCalls()

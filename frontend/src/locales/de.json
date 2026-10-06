@@ -1,12 +1,12 @@
 {
   "translation": {
     "brand": {
-      "name": "Einsatzbereit",
-      "description": "Einsatzbereit bringt engagierte Helfer:innen mit regionalen Einsätzen zusammen. Spontan, schnell und wirksam."
+      "name": "Afunto",
+      "description": "Afunto bringt engagierte Helfer:innen mit regionalen Einsätzen zusammen. Spontan, schnell und wirksam."
     },
     "meta": {
-      "socialTitle": "Einsatzbereit – Spontan Freiwilligenarbeit leisten. Finde deinen Einsatz.",
-      "description": "Einsatzbereit verbindet engagierte Freiwillige mit regionalen Hilfsangeboten. Finde lokale Einsätze, hilf spontan und mach einen Unterschied in deiner Gemeinde."
+      "socialTitle": "Afunto – Spontan Freiwilligenarbeit leisten. Finde deinen Einsatz.",
+      "description": "Afunto verbindet engagierte Freiwillige mit regionalen Hilfsangeboten. Finde lokale Einsätze, hilf spontan und mach einen Unterschied in deiner Gemeinde."
     },
     "common": {
       "edit": "Bearbeiten",
@@ -62,7 +62,7 @@
       "contact": "Kontakt",
       "help": "Hilfe",
       "license": "AGPL-3.0",
-      "copyright": "© {{year}} Einsatzbereit. Lizenziert unter <licenseLink>AGPL-3.0</licenseLink>."
+      "copyright": "© {{year}} Afunto. Lizenziert unter <licenseLink>AGPL-3.0</licenseLink>."
     },
     "landing": {
       "pageTitle": "Finde Freiwilligenarbeit in deiner Nähe",
@@ -81,8 +81,8 @@
       "latestLink": "Alle Einsätze ansehen",
       "offline": "Sobald deine Verbindung zurück ist, zeigen wir diese Einsätze wieder.",
       "missionLabel": "Vom Gründer",
-      "missionTitle": "Warum ich Einsatzbereit gebaut habe",
-      "missionText": "Für ein klassisches Ehrenamt hatte ich zeitlich nie den Kopf frei – Arbeitszeiten und feste Zusagen passten einfach nicht zusammen. Trotzdem wollte ich etwas zurückgeben. Aus der Idee wurde Einsatzbereit: Ehrenamt ohne langfristige Verbindlichkeit. Kostenlos und öffentlich einsehbar. Gebaut für die Region Oldenburg. Benutzbar von allen.",
+      "missionTitle": "Warum ich Afunto gebaut habe",
+      "missionText": "Für ein klassisches Ehrenamt hatte ich zeitlich nie den Kopf frei – Arbeitszeiten und feste Zusagen passten einfach nicht zusammen. Trotzdem wollte ich etwas zurückgeben. Aus der Idee wurde Afunto (plattdeutsch für „ab und zu“): Ehrenamt ohne langfristige Verbindlichkeit. Kostenlos und öffentlich einsehbar. Gebaut für die Region Oldenburg. Benutzbar von allen.",
       "missionAuthor": "Maik Hasler",
       "missionCta": "Einsätze finden",
       "orgCtaLabel": "Für Organisationen",
@@ -106,7 +106,7 @@
     "organizationsPage": {
       "eyebrow": "Verzeichnis",
       "title": "Organisationen",
-      "lead": "Finde Organisationen auf Einsatzbereit, die du schon kennst.",
+      "lead": "Finde Organisationen auf Afunto, die du schon kennst.",
       "searchLabel": "Organisationen durchsuchen",
       "searchPlaceholder": "Organisationen nach Namen suchen…",
       "loading": "Organisationen werden geladen…",
@@ -466,7 +466,7 @@
       "discardChanges": "Änderungen verwerfen"
     },
     "orgApp": {
-      "backToSite": "Zurück zu Einsatzbereit",
+      "backToSite": "Zurück zu Afunto",
       "sectionsNavLabel": "Bereiche der Organisation",
       "backTo": "Zurück zu {{section}}",
       "notAuthorized": "Du hast keinen Zugriff auf diese Organisation.",
@@ -906,7 +906,7 @@
     },
     "privacyPolicy": {
       "title": "Datenschutzerklärung",
-      "metaDescription": "Welche personenbezogenen Daten Einsatzbereit erhebt, warum, wie lange sie gespeichert werden und welche Rechte du nach der DSGVO hast.",
+      "metaDescription": "Welche personenbezogenen Daten Afunto erhebt, warum, wie lange sie gespeichert werden und welche Rechte du nach der DSGVO hast.",
       "lastUpdated": "Stand: 7. August 2026",
       "section1Title": "Verantwortliche Stelle",
       "section1Body": "{{name}}\n{{address}}\nE-Mail: <emailLink>{{email}}</emailLink>\nWebsite: <websiteLink>{{website}}</websiteLink>",
@@ -928,7 +928,7 @@
       "section3cLinkOsm": "Datenschutzerklärung der OpenStreetMap Foundation",
       "section3cLinkNominatim": "Nutzungsrichtlinie von Nominatim",
       "section4Title": "Hochgeladene Bilder",
-      "section4Body": "Wenn du ein Profilbild hochlädst oder als Organisation ein Logo oder für einen Einsatz ein Banner-Bild hinterlegst, wird die Datei auf unserem selbst betriebenen, S3-kompatiblen Objektspeicher (MinIO) abgelegt. Ab dem Hochladen ist die Datei über eine öffentliche URL ohne Zugriffsbeschränkung und ohne Anmeldung abrufbar. Eine Sicherungskopie wird zusätzlich extern gespeichert, siehe Abschnitt „Hosting und Datensicherungen“.",
+      "section4Body": "Wenn du ein Profilbild hochlädst oder als Organisation ein Logo oder für einen Einsatz ein Banner-Bild hinterlegst, wird die Datei auf unserem selbst betriebenen, S3-kompatiblen Objektspeicher (RustFS) abgelegt. Ab dem Hochladen ist die Datei über eine öffentliche URL ohne Zugriffsbeschränkung und ohne Anmeldung abrufbar. Eine Sicherungskopie wird zusätzlich extern gespeichert, siehe Abschnitt „Hosting und Datensicherungen“.",
       "section5Title": "Transaktionale E-Mails",
       "section5Body": "Wir versenden E-Mails, die für den Betrieb deines Kontos und die Nutzung der Plattform erforderlich sind: zur Bestätigung deiner E-Mail-Adresse und zum Zurücksetzen deines Passworts (über unseren Authentifizierungsdienst Keycloak) sowie Benachrichtigungen zu Eintragungen, Bestätigungen, Absagen, Erinnerungen und Einladungen. Der Versand erfolgt über einen SMTP-Versanddienstleister, mit dem ein Auftragsverarbeitungsvertrag nach Art. 28 DSGVO besteht. Rechtsgrundlage ist die Erfüllung des Nutzungsvertrags mit dir (Art. 6 Abs. 1 lit. b DSGVO). Benachrichtigungen, die nicht für den Betrieb deines Kontos notwendig sind, kannst du in deinen Profileinstellungen oder über den Abmelde-Link in der jeweiligen E-Mail abbestellen.",
       "section6Title": "Hosting und Datensicherungen",
@@ -946,7 +946,7 @@
     },
     "imprint": {
       "title": "Impressum",
-      "metaDescription": "Anbieterkennzeichnung nach § 5 DDG: verantwortliche Stelle, Kontaktdaten und Haftungshinweise für Einsatzbereit.",
+      "metaDescription": "Anbieterkennzeichnung nach § 5 DDG: verantwortliche Stelle, Kontaktdaten und Haftungshinweise für Afunto.",
       "section1Title": "Angaben gemäß § 5 DDG",
       "section2Title": "Kontakt",
       "section2Body": "E-Mail: <emailLink>{{email}}</emailLink>\nWebsite: <websiteLink>{{website}}</websiteLink>",
@@ -970,7 +970,7 @@
     },
     "help": {
       "title": "Hilfe",
-      "intro": "Antworten auf häufige Fragen für Freiwillige und Organisationen auf Einsatzbereit. Nicht gefunden, was du suchst? Siehe „Noch Hilfe nötig?“ unten.",
+      "intro": "Antworten auf häufige Fragen für Freiwillige und Organisationen auf Afunto. Nicht gefunden, was du suchst? Siehe „Noch Hilfe nötig?“ unten.",
       "volunteersTitle": "Für Freiwillige",
       "volunteersQ1": "Wie trage ich mich für einen Einsatz ein?",
       "volunteersA1": "Durchsuche die Einsätze auf der Startseite und öffne den gewünschten Einsatz. Bei Einsätzen mit festen Zeitslots klickst du auf „Für Zeitslot eintragen“, wählst deinen Termin und bestätigst mit „Verbindlich eintragen“. Bei allen anderen klickst du auf „Interesse bekunden“ und sendest eine kurze Nachricht.",
@@ -990,8 +990,8 @@
       "organizersQ5": "Wie funktionieren Einladungen in meine Organisation?",
       "organizersA5": "Lade Personen im Tab „Mitglieder“ im Dashboard deiner Organisation ein und wähle dabei die Rolle, die sie erhalten sollen. Sie bekommen eine E-Mail und eine Benachrichtigung in der App, und die Einladung bleibt als ausstehend gelistet, bis sie angenommen oder abgelehnt wird. Unbeantwortete Einladungen laufen nach 14 Tagen ab – die ausstehende Zeile zeigt das genaue Datum, und du kannst eine Einladung jederzeit erneut senden, um die Frist neu zu starten, oder sie zurückziehen.",
       "generalTitle": "Allgemein",
-      "generalQ1": "Kostet die Nutzung von Einsatzbereit etwas?",
-      "generalA1": "Nein. Einsatzbereit ist komplett kostenlos und open source – für Freiwillige und Organisationen.",
+      "generalQ1": "Kostet die Nutzung von Afunto etwas?",
+      "generalA1": "Nein. Afunto ist komplett kostenlos und open source – für Freiwillige und Organisationen.",
       "generalQ2": "Brauche ich ein Konto, um mitzumachen?",
       "generalA2": "Zum Stöbern nicht – du kannst alle Einsätze ohne Anmeldung durchsuchen. Für die Eintragung zu einem Einsatz brauchst du ein kostenloses Konto.",
       "generalQ3": "Wie schnell kann meine Organisation starten?",
@@ -1004,12 +1004,12 @@
     },
     "termsOfUse": {
       "title": "Nutzungsbedingungen",
-      "metaDescription": "Die Regeln für die Nutzung von Einsatzbereit: unsere Rolle als Plattform, zulässige Nutzung, Pflichten von Organisationen und Haftung.",
+      "metaDescription": "Die Regeln für die Nutzung von Afunto: unsere Rolle als Plattform, zulässige Nutzung, Pflichten von Organisationen und Haftung.",
       "lastUpdated": "Stand: 7. August 2026",
       "section1Title": "Geltungsbereich und Zustimmung",
-      "section1Body": "Diese Nutzungsbedingungen regeln die Nutzung von Einsatzbereit (die „Plattform“). Mit der Erstellung eines Kontos, der Eintragung zu einem Einsatz oder der sonstigen Nutzung der Plattform erklärst du dich mit diesen Bedingungen einverstanden. Wenn du nicht einverstanden bist, nutze die Plattform bitte nicht.",
+      "section1Body": "Diese Nutzungsbedingungen regeln die Nutzung von Afunto (die „Plattform“). Mit der Erstellung eines Kontos, der Eintragung zu einem Einsatz oder der sonstigen Nutzung der Plattform erklärst du dich mit diesen Bedingungen einverstanden. Wenn du nicht einverstanden bist, nutze die Plattform bitte nicht.",
       "section2Title": "Unsere Rolle als Plattform",
-      "section2Body": "Einsatzbereit vermittelt zwischen Freiwilligen und Einsätzen, die von unabhängigen Organisationen veröffentlicht werden. Wir organisieren, beaufsichtigen oder begleiten die auf der Plattform gelisteten Einsätze nicht und sind keine Vertragspartei einer Vereinbarung zwischen Freiwilligen und Organisationen. Organisationen sind allein verantwortlich für die von ihnen veröffentlichten Einsätze, einschließlich deren Inhalt, Sicherheit und Eignung.",
+      "section2Body": "Afunto vermittelt zwischen Freiwilligen und Einsätzen, die von unabhängigen Organisationen veröffentlicht werden. Wir organisieren, beaufsichtigen oder begleiten die auf der Plattform gelisteten Einsätze nicht und sind keine Vertragspartei einer Vereinbarung zwischen Freiwilligen und Organisationen. Organisationen sind allein verantwortlich für die von ihnen veröffentlichten Einsätze, einschließlich deren Inhalt, Sicherheit und Eignung.",
       "section3Title": "Zulässige Nutzung",
       "section3Body": "Bei der Nutzung der Plattform verpflichtest du dich, korrekte Angaben zu deiner Person zu machen und diese aktuell zu halten, andere Nutzerinnen und Nutzer, Organisationen und die Menschen, denen du hilfst, respektvoll zu behandeln, den Anweisungen der veranstaltenden Organisation vor Ort zu folgen und keine Inhalte zu veröffentlichen oder zu teilen, die rechtswidrig, betrügerisch, belästigend oder anderweitig schädlich sind. Du darfst die Plattform nicht nutzen, um bezahlte Arbeit anzubieten, personenbezogene Daten für plattformfremde Zwecke zu sammeln oder deine Identität oder Zugehörigkeit zu einer Organisation falsch darzustellen.",
       "section4Title": "Organisationen und Einsätze",
@@ -1409,7 +1409,7 @@
     "routeState": {
       "offline": {
         "title": "Du bist offline",
-        "message": "Ohne Verbindung erreichen wir Einsatzbereit nicht. Sobald du wieder online bist, laden wir die Seite erneut – du musst nichts tun."
+        "message": "Ohne Verbindung erreichen wir Afunto nicht. Sobald du wieder online bist, laden wir die Seite erneut – du musst nichts tun."
       },
       "adminOnly": {
         "title": "Admin-Rechte erforderlich",
@@ -1417,12 +1417,12 @@
       }
     },
     "pwaUpdate": {
-      "message": "Eine neue Version von Einsatzbereit ist verfügbar.",
+      "message": "Eine neue Version von Afunto ist verfügbar.",
       "reloadLabel": "Neu laden, um die App zu aktualisieren"
     },
     "config": {
       "unavailableTitle": "Konfiguration fehlt",
-      "unavailableMessage": "Einsatzbereit konnte die Konfiguration nicht laden und kann nicht starten. Bist du offline, versuchen wir es automatisch erneut, sobald du wieder online bist – andernfalls wende dich an die Person, die dieses Deployment betreibt."
+      "unavailableMessage": "Afunto konnte die Konfiguration nicht laden und kann nicht starten. Bist du offline, versuchen wir es automatisch erneut, sobald du wieder online bist – andernfalls wende dich an die Person, die dieses Deployment betreibt."
     },
     "userProfile": {
       "loading": "Profil wird geladen…",

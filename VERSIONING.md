@@ -20,11 +20,11 @@ Examples:
 
 Every component receives the same version tag:
 
-| Component | Image                                        |
-|-----------|----------------------------------------------|
-| Backend   | `ghcr.io/<owner>/einsatzbereit-backend`      |
-| Frontend  | `ghcr.io/<owner>/einsatzbereit-frontend`     |
-| Keycloak  | `ghcr.io/<owner>/einsatzbereit-keycloak`     |
+| Component | Image                             |
+|-----------|-----------------------------------|
+| Backend   | `ghcr.io/<owner>/afunto-backend`  |
+| Frontend  | `ghcr.io/<owner>/afunto-frontend` |
+| Keycloak  | `ghcr.io/<owner>/afunto-keycloak` |
 
 ## Platform Support
 
@@ -84,7 +84,7 @@ Publishing the images is where this repository's release process ends. What runs
 
 ## Release Notes
 
-Every tag (stable and `-rc.N`) gets a [GitHub Release](https://github.com/maik-hasler/einsatzbereit/releases)
+Every tag (stable and `-rc.N`) gets a [GitHub Release](https://github.com/maik-hasler/afunto/releases)
 with auto-generated notes grouped by Conventional Commit type (Features, Bug
 Fixes, Performance, Refactoring, Documentation, Reverts, and any `!`-marked
 Breaking Changes) since the previous tag, followed by an Images table listing

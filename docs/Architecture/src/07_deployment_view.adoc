@@ -3,7 +3,7 @@ ifndef::imagesdir[:imagesdir: ../images]
 [[section-deployment-view]]
 == Deployment View
 
-Einsatzbereit runs in two shapes: the local developer stack, orchestrated by .NET Aspire from source, and the deployed runtime, where the same building blocks run as released container images.
+Afunto runs in two shapes: the local developer stack, orchestrated by .NET Aspire from source, and the deployed runtime, where the same building blocks run as released container images.
 
 This chapter describes both and which building blocks run where. How and where the deployed runtime is actually hosted, provisioned and operated is out of scope for this repository - this repository builds and publishes the images, and nothing more (see "Image Publishing" below).
 
@@ -62,8 +62,8 @@ Local development is optimized for fast iteration. All services run on `localhos
 |1080 / 1025
 |Captures outbound email (web UI on 1080, SMTP on 1025)
 
-|MinIO
-|`quay.io/minio/minio`
+|RustFS
+|`rustfs/rustfs`
 |9000 / 9001
 |S3-compatible object storage (API on 9000, console on 9001)
 |===
@@ -88,20 +88,20 @@ Container images are the release artifacts, pulled by tag from GHCR. The backend
 |Building block (Level 1) |Artifact |Notes
 
 |Single Page Application
-|`einsatzbereit-frontend` image
+|`afunto-frontend` image
 |Static SPA assets served by nginx; origins substituted at container start
 
 |Backend API
-|`einsatzbereit-backend` image
+|`afunto-backend` image
 |Migrates on startup when enabled
 
 |Identity Provider
-|`einsatzbereit-keycloak` image
+|`afunto-keycloak` image
 |Custom image with the committed realm and theme; PostgreSQL-backed
 
 |Application Database
 |`postgres:18`
-|Two databases: `einsatzbereit` and `keycloak`
+|Two databases: `afunto` and `keycloak`
 |===
 
 .Consumed Services
@@ -122,7 +122,7 @@ Container images are the release artifacts, pulled by tag from GHCR. The backend
 |Map tiles, proxied through the backend and cached in-process for 24h so the frontend never calls it directly (ADR-5)
 |===
 
-The exact environment variables the backend and frontend images accept - which are required versus optional, their defaults, and how they map to the services above - is documented as the operator-facing contract for this deployment shape, not repeated here: link:https://github.com/maik-hasler/einsatzbereit/blob/main/README.md#running-the-released-images[README.md's "Running the Released Images" section], modelled on the Keycloak image's own contract (`keycloak/README.md`).
+The exact environment variables the backend and frontend images accept - which are required versus optional, their defaults, and how they map to the services above - is documented as the operator-facing contract for this deployment shape, not repeated here: link:https://github.com/maik-hasler/afunto/blob/main/README.md#running-the-released-images[README.md's "Running the Released Images" section], modelled on the Keycloak image's own contract (`keycloak/README.md`).
 
 ==== CI/CD Pipeline
 
@@ -168,4 +168,4 @@ Images are published to GitHub Container Registry (GHCR) on version tag pushes. 
 |`v1.0.0`
 |===
 
-Release candidate tags (`v{semver}-rc.N`) publish images without moving the `latest` tag; stable tags (no `-rc` suffix) publish images and move `latest`. `publish.yml` stops there - what consumes a published tag, and where, is outside this repository. See link:https://github.com/maik-hasler/einsatzbereit/blob/main/VERSIONING.md[VERSIONING.md] for the full versioning and publishing strategy.
+Release candidate tags (`v{semver}-rc.N`) publish images without moving the `latest` tag; stable tags (no `-rc` suffix) publish images and move `latest`. `publish.yml` stops there - what consumes a published tag, and where, is outside this repository. See link:https://github.com/maik-hasler/afunto/blob/main/VERSIONING.md[VERSIONING.md] for the full versioning and publishing strategy.

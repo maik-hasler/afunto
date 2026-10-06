@@ -136,7 +136,7 @@ public class OrganizationCalendarEventsTests(IntegrationTestFixture fixture)
 	public async Task GetOrganizationCalendarEvents_ShouldReturn401_WhenNotAuthenticated(
 		CancellationToken cancellationToken)
 	{
-		var anonClient = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var anonClient = new AfuntoApi(fixture.CreateHttpClient());
 
 		var act = () => anonClient.GetOrganizationCalendarEventsAsync(
 			Guid.NewGuid(),
@@ -158,7 +158,7 @@ public class OrganizationCalendarEventsTests(IntegrationTestFixture fixture)
 		var veraToken = await fixture.GetAccessTokenAsync("vera", "vera123");
 		var veraHttpClient = fixture.CreateHttpClient();
 		veraHttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", veraToken);
-		var veraClient = new EinsatzbereitApi(veraHttpClient);
+		var veraClient = new AfuntoApi(veraHttpClient);
 
 		await CreateOrganizationAsync(veraClient, cancellationToken);
 
@@ -193,7 +193,7 @@ public class OrganizationCalendarEventsTests(IntegrationTestFixture fixture)
 	}
 
 	private static async Task<Guid> CreateOrganizationAsync(
-		EinsatzbereitApi client, CancellationToken cancellationToken)
+		AfuntoApi client, CancellationToken cancellationToken)
 	{
 		var uniqueName = $"CalendarEventsTestOrg_{Guid.NewGuid()}";
 		var org = await client.CreateOrganizationAsync(
@@ -202,7 +202,7 @@ public class OrganizationCalendarEventsTests(IntegrationTestFixture fixture)
 	}
 
 	private static async Task<CreateVolunteerOpportunityResponse> CreateScheduledSlotsDraftOpportunityAsync(
-		EinsatzbereitApi client, Guid orgId, CancellationToken cancellationToken)
+		AfuntoApi client, Guid orgId, CancellationToken cancellationToken)
 	{
 		return await client.CreateVolunteerOpportunityAsync(
 			new CreateVolunteerOpportunityRequest

@@ -43,7 +43,7 @@ public class EngagementTests(IntegrationTestFixture fixture)
 		var orgId = await CreateOrganizationAsync(olafClient, cancellationToken);
 		var opportunity = await CreateOpportunityAsync(olafClient, orgId, cancellationToken);
 
-		var anonClient = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var anonClient = new AfuntoApi(fixture.CreateHttpClient());
 
 		var act = () => anonClient.CreateEngagementAsync(
 			opportunity.Id,
@@ -113,7 +113,7 @@ public class EngagementTests(IntegrationTestFixture fixture)
 	public async Task GetEngagements_ShouldReturn401_WhenNotAuthenticated(
 		CancellationToken cancellationToken)
 	{
-		var anonClient = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var anonClient = new AfuntoApi(fixture.CreateHttpClient());
 
 		var act = () => anonClient.GetEngagementsAsync(Guid.NewGuid(), 1, 10, cancellationToken: cancellationToken);
 
@@ -298,7 +298,7 @@ public class EngagementTests(IntegrationTestFixture fixture)
 	public async Task CreateEngagement_ShouldSucceedForBothSlots_WhenVolunteerSignsUpForTwoSlotsOfTheSameSeries(
 		CancellationToken cancellationToken)
 	{
-		// Regression test for einsatzbereit#2199: the backend must allow one
+		// Regression test for afunto#2199: the backend must allow one
 		// engagement per (volunteer, opportunity, time slot) - signing up for
 		// an earlier occurrence of a recurring series must never block signing
 		// up for a later one.
@@ -1083,7 +1083,7 @@ public class EngagementTests(IntegrationTestFixture fixture)
 		await olafClient.PublishVolunteerOpportunityAsync(opportunity.Id, cancellationToken);
 
 		const int volunteerCount = 8;
-		var volunteerClients = new List<EinsatzbereitApi>(volunteerCount);
+		var volunteerClients = new List<AfuntoApi>(volunteerCount);
 		for (var i = 0; i < volunteerCount; i++)
 		{
 			var (_, username, password) = await fixture.CreateEphemeralUserAsync(cancellationToken);
@@ -2198,7 +2198,7 @@ public class EngagementTests(IntegrationTestFixture fixture)
 	}
 
 	private static async Task<DateTimeOffset> GetCreatedOnAsync(
-		EinsatzbereitApi volunteerClient, Guid engagementId, CancellationToken cancellationToken)
+		AfuntoApi volunteerClient, Guid engagementId, CancellationToken cancellationToken)
 	{
 		var page = await volunteerClient.GetMyEngagementsAsync(
 			1, 50, upcoming: false, cancellationToken);
@@ -2212,7 +2212,7 @@ public class EngagementTests(IntegrationTestFixture fixture)
 	}
 
 	private static async Task<Guid> CreateOrganizationAsync(
-		EinsatzbereitApi client, CancellationToken cancellationToken)
+		AfuntoApi client, CancellationToken cancellationToken)
 	{
 		var uniqueName = $"EngagementTestOrg_{Guid.NewGuid()}";
 		var org = await client.CreateOrganizationAsync(
@@ -2233,11 +2233,11 @@ public class EngagementTests(IntegrationTestFixture fixture)
 	}
 
 	private static Task<CreateVolunteerOpportunityResponse> CreateOpportunityAsync(
-		EinsatzbereitApi client, Guid orgId, CancellationToken cancellationToken) =>
+		AfuntoApi client, Guid orgId, CancellationToken cancellationToken) =>
 		CreateOpportunityAsync(client, orgId, "None", cancellationToken);
 
 	private static async Task<CreateVolunteerOpportunityResponse> CreateOpportunityAsync(
-		EinsatzbereitApi client, Guid orgId, string checkInMethod, CancellationToken cancellationToken)
+		AfuntoApi client, Guid orgId, string checkInMethod, CancellationToken cancellationToken)
 	{
 		return await client.CreateVolunteerOpportunityAsync(
 			new CreateVolunteerOpportunityRequest
@@ -2285,7 +2285,7 @@ public class EngagementTests(IntegrationTestFixture fixture)
 	}
 
 	private static async Task<CreateVolunteerOpportunityResponse> CreateScheduledSlotsOpportunityAsync(
-		EinsatzbereitApi client, Guid orgId, CancellationToken cancellationToken)
+		AfuntoApi client, Guid orgId, CancellationToken cancellationToken)
 	{
 		return await client.CreateVolunteerOpportunityAsync(
 			new CreateVolunteerOpportunityRequest

@@ -94,6 +94,13 @@ The following table lists the relevant architecture decisions. Each decision lin
 |2026-09-21
 |link:ADRs/12_mobile_stays_a_pwa_until_distribution_demands_otherwise.html[Mobile]
 
+|13
+|Object storage
+|Run RustFS instead of MinIO, reach it through AWSSDK.S3, keep the URL scheme, and pin the storage contract in integration tests.
+|Accepted
+|2026-10-02
+|link:ADRs/13_object_storage_on_rustfs.html[Object storage]
+
 |===
 
 See <<section-solution-strategy>> for how the key decisions map to the quality goals.

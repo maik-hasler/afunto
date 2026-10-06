@@ -68,7 +68,7 @@ fi
 if [ -z "$FAILED" ]; then
 	EC_VERSION="v4.0.1"
 	EC_SHA256="90139c6ed52373c0acfc9deb2a07aa812e5184753afd4bc8252bf44eb4909155"
-	EC_BIN="$HOME/.cache/einsatzbereit/editorconfig-checker-${EC_VERSION}"
+	EC_BIN="$HOME/.cache/afunto/editorconfig-checker-${EC_VERSION}"
 	if [ ! -x "$EC_BIN" ]; then
 		mkdir -p "$(dirname "$EC_BIN")"
 		EC_TMP=$(mktemp -d)

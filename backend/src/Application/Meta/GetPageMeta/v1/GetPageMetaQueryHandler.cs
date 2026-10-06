@@ -10,7 +10,7 @@ namespace Application.Meta.GetPageMeta.v1;
 /// preview; every static route instead fell through to index.html, whose og:url
 /// is hardcoded to the site root - so a /help link shared into Slack or
 /// WhatsApp previewed as the homepage and declared the homepage canonical
-/// (einsatzbereit#2331).
+/// (afunto#2331).
 /// </summary>
 internal sealed class GetPageMetaQueryHandler : IQueryHandler<GetPageMetaQuery, string?>
 {

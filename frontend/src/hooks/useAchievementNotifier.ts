@@ -7,7 +7,7 @@ import { dispatchToast } from "../lib/toastBus";
 import { queryKeys } from "../lib/queryKeys";
 import { NOTIFICATION_POLL_INTERVAL_MS } from "../lib/pollIntervals";
 
-const SEEN_KEY_PREFIX = "einsatzbereit:seen-achievements";
+const SEEN_KEY_PREFIX = "afunto:seen-achievements";
 
 const SEEDED_MARKER = "__seeded__";
 

@@ -24,7 +24,7 @@ internal sealed class AdminRestoreOrganizationEndpoint
 			.ProducesProblem(StatusCodes.Status404NotFound)
 			.ProducesProblem(StatusCodes.Status409Conflict)
 			.ProducesProblem(StatusCodes.Status500InternalServerError)
-			.RequireAuthorization(AuthorizationPolicies.EinsatzbereitAdminPolicy)
+			.RequireAuthorization(AuthorizationPolicies.AfuntoAdminPolicy)
 			.RequireRateLimiting(RateLimitingPolicies.Write)
 			.MapToApiVersion(1);
 

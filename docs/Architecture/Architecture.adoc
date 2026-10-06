@@ -1,6 +1,6 @@
 include::src/config.adoc[]
 
-= Einsatzbereit - Architecture Documentation
+= Afunto - Architecture Documentation
 // toc-title definition MUST follow document title without blank line!
 :toc-title: Table of Contents
 

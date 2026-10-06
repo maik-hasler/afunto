@@ -54,7 +54,7 @@ public class LoadingStateTests(AspireFixture fixture) : VisualTestBase(fixture)
 
 		using var tokenHttp = new HttpClient { BaseAddress = keycloak };
 		var tokenResponse = await tokenHttp.PostAsync(
-			"/realms/einsatzbereit/protocol/openid-connect/token",
+			"/realms/afunto/protocol/openid-connect/token",
 			new FormUrlEncodedContent(new Dictionary<string, string>
 			{
 				["grant_type"] = "password",

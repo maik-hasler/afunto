@@ -156,7 +156,7 @@ public class UploadOrganizationLogoCommandHandlerTests
 			.Returns($"organization-logos/{orgId}.jpg");
 		_fileStorage
 			.DeleteAsync($"organization-logos/{orgId}.jpg", Arg.Any<CancellationToken>())
-			.ThrowsAsync(new InvalidOperationException("MinIO unavailable"));
+			.ThrowsAsync(new InvalidOperationException("Storage unavailable"));
 		var command = new UploadOrganizationLogoCommand(orgId, PngBytes, "image/png", DefaultRequestingUserId);
 
 		// Act

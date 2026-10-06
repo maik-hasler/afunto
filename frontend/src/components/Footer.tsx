@@ -49,7 +49,7 @@ export default function Footer({
 				</Link>
 				<span className="mx-2">&middot;</span>
 				<a
-					href="https://github.com/maik-hasler/einsatzbereit/blob/main/LICENSE"
+					href="https://github.com/maik-hasler/afunto/blob/main/LICENSE"
 					target="_blank"
 					rel="noopener noreferrer"
 					className="inline-block py-1 hover:text-gray-600"
@@ -206,7 +206,7 @@ export default function Footer({
 					<div className="mt-10 flex flex-col gap-3 border-t border-brand-100 pt-6 text-xs text-gray-500 sm:flex-row sm:items-center sm:justify-between">
 						<div className="flex items-center gap-3">
 							<a
-								href="https://github.com/maik-hasler/einsatzbereit"
+								href="https://github.com/maik-hasler/afunto"
 								target="_blank"
 								rel="noopener noreferrer"
 								aria-label="GitHub"
@@ -231,7 +231,7 @@ export default function Footer({
 									licenseLink: (
 										// eslint-disable-next-line jsx-a11y/anchor-has-content
 										<a
-											href="https://github.com/maik-hasler/einsatzbereit/blob/main/LICENSE"
+											href="https://github.com/maik-hasler/afunto/blob/main/LICENSE"
 											target="_blank"
 											rel="noopener noreferrer"
 											className="inline-block py-1 underline hover:text-brand-700"

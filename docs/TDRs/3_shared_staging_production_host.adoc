@@ -8,11 +8,13 @@
 [NOTE]
 ====
 *Restored 2026-08-26 (issue #2214).* This record was deleted outright by issue #2165 (2026-08-22) when deployment, staging and observability moved out of this repository's scope, instead of being marked resolved - the arc42 convention this repository otherwise follows for a record that no longer applies. Its original content, through the 2026-08-21 "deploy ownership moved to mgmt-hetzner" update below, is unchanged; the Resolution section at the end is new.
+
+*Since then, the product was renamed from Einsatzbereit to Afunto.* The names in this record changed with it, even where they describe earlier events: `deploy-afunto.yaml` was `deploy-einsatzbereit.yaml`, `afunto-staging`/`afunto-production` were `einsatzbereit-staging`/`einsatzbereit-production`, and `afunto.maik-hasler.de` was `einsatzbereit.maik-hasler.de`.
 ====
 
 === Description
 
-Einsatzbereit has exactly one deployed host (`einsatzbereit.maik-hasler.de` and its `*.maik-hasler.de` siblings), and it is deliberately staging/demo infrastructure rather than a hardened production box - shared `vera`/`olaf`/`admin` test credentials with full admin access are intentionally public on it (see root `AGENTS.md`'s Test Users note). There is no second, separate production host.
+Afunto has exactly one deployed host (`afunto.maik-hasler.de` and its `*.maik-hasler.de` siblings), and it is deliberately staging/demo infrastructure rather than a hardened production box - shared `vera`/`olaf`/`admin` test credentials with full admin access are intentionally public on it (see root `AGENTS.md`'s Test Users note). There is no second, separate production host.
 
 Before issue #1344, `publish.yml` only had a `deploy-staging` job, gated on release-candidate tags. A stable (non-RC) tag published images to GHCR and moved the `latest` tag, but nothing ever deployed them - the architecture docs claimed deployment was "release-driven" for both staging and production, which was not true for stable tags.
 
@@ -46,7 +48,7 @@ Medium, rising to High once the project is generally available and carries real 
 === Proposed Solution
 
 - *Short term (implemented, #1344):* Split `deploy-staging`/`deploy-production` into separate jobs and GitHub Environments now, both currently pointed at the one existing host, so the *workflow* shape doesn't need to change again later - only the `production` Environment's secrets need to change once a real second host exists.
-- *Medium term:* Before or shortly after a real stable v1.0.0 release accumulates real user data, provision a genuinely separate production host (or at minimum, separate its database/object storage from staging's), and repoint mgmt-hetzner's `einsatzbereit-production` GitHub Environment secrets at it (see the "Update" note below for where this now lives).
+- *Medium term:* Before or shortly after a real stable v1.0.0 release accumulates real user data, provision a genuinely separate production host (or at minimum, separate its database/object storage from staging's), and repoint mgmt-hetzner's `afunto-production` GitHub Environment secrets at it (see the "Update" note below for where this now lives).
 - *Longer term:* Reassess whether `reset-staging.yml`'s destructive reset should remain scoped to a shared host once staging and production diverge, and whether staging needs its own smaller, cheaper host once production is real.
 
 === Consequences of Delay
@@ -56,11 +58,11 @@ Acceptable pre-1.0: no stable tag has been cut yet, so no real user data exists 
 === Dependencies
 
 - *Hosting budget/capacity:* A second host requires the repo owner to provision and pay for it - not something achievable from within the repository alone.
-- *GitHub Environment secrets:* the SSH/app secrets for reaching the new host need to be updated when it exists. As of the mgmt-hetzner deploy split (below), these live in that repo's `einsatzbereit-staging`/`einsatzbereit-production` GitHub Environments, not here - see mgmt-hetzner's `README.md` and this repo's `.github/AGENTS.md` "Deployment moved to mgmt-hetzner" section.
+- *GitHub Environment secrets:* the SSH/app secrets for reaching the new host need to be updated when it exists. As of the mgmt-hetzner deploy split (below), these live in that repo's `afunto-staging`/`afunto-production` GitHub Environments, not here - see mgmt-hetzner's `README.md` and this repo's `.github/AGENTS.md` "Deployment moved to mgmt-hetzner" section.
 
 === Update: deploy ownership moved to mgmt-hetzner (2026-08-21)
 
-The `deploy-staging`/`deploy-production` jobs this TDR describes no longer live in this repo's `publish.yml` - they moved, largely unchanged, to `maik-hasler/mgmt-hetzner`'s `deploy-einsatzbereit.yaml` (`einsatzbereit-staging`/`einsatzbereit-production` GitHub Environments there), triggered manually (`workflow_dispatch`, version + environment as inputs) rather than automatically from this repo's `publish.yml` - deliberately, so no credential needs to flow from this repo into mgmt-hetzner just to kick off a deploy. This is an ownership change, not a resolution of this TDR - the environment-separation and blast-radius analysis above is unchanged: staging and production still share the same single host, database, and object storage, just via a workflow in a different repository, triggered by hand.
+The `deploy-staging`/`deploy-production` jobs this TDR describes no longer live in this repo's `publish.yml` - they moved, largely unchanged, to `maik-hasler/mgmt-hetzner`'s `deploy-afunto.yaml` (`afunto-staging`/`afunto-production` GitHub Environments there), triggered manually (`workflow_dispatch`, version + environment as inputs) rather than automatically from this repo's `publish.yml` - deliberately, so no credential needs to flow from this repo into mgmt-hetzner just to kick off a deploy. This is an ownership change, not a resolution of this TDR - the environment-separation and blast-radius analysis above is unchanged: staging and production still share the same single host, database, and object storage, just via a workflow in a different repository, triggered by hand.
 
 === Resolution
 

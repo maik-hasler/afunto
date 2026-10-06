@@ -70,7 +70,7 @@ public class AdminShadowDeleteUserTests(IntegrationTestFixture fixture)
 	}
 
 	private static async Task<Guid> CreateOrganizationAsync(
-		EinsatzbereitApi client, CancellationToken cancellationToken)
+		AfuntoApi client, CancellationToken cancellationToken)
 	{
 		var uniqueName = $"ShadowDeleteTestOrg_{Guid.NewGuid()}";
 		var org = await client.CreateOrganizationAsync(
@@ -79,7 +79,7 @@ public class AdminShadowDeleteUserTests(IntegrationTestFixture fixture)
 	}
 
 	private static async Task<CreateVolunteerOpportunityResponse> CreateOpportunityAsync(
-		EinsatzbereitApi client, Guid orgId, CancellationToken cancellationToken)
+		AfuntoApi client, Guid orgId, CancellationToken cancellationToken)
 	{
 		return await client.CreateVolunteerOpportunityAsync(
 			new CreateVolunteerOpportunityRequest

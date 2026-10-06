@@ -23,7 +23,7 @@ internal sealed class AdminShadowDeleteUserEndpoint
 			.ProducesProblem(StatusCodes.Status403Forbidden)
 			.ProducesProblem(StatusCodes.Status404NotFound)
 			.ProducesProblem(StatusCodes.Status500InternalServerError)
-			.RequireAuthorization(AuthorizationPolicies.EinsatzbereitAdminPolicy)
+			.RequireAuthorization(AuthorizationPolicies.AfuntoAdminPolicy)
 			.RequireRateLimiting(RateLimitingPolicies.Write)
 			.MapToApiVersion(1);
 

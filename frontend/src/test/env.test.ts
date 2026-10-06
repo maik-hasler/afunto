@@ -9,10 +9,10 @@ describe("test environment", () => {
 		});
 
 		it(`${name} round-trips a value`, () => {
-			globalThis[name].setItem("einsatzbereit:probe", "1");
-			expect(globalThis[name].getItem("einsatzbereit:probe")).toBe("1");
+			globalThis[name].setItem("afunto:probe", "1");
+			expect(globalThis[name].getItem("afunto:probe")).toBe("1");
 			globalThis[name].clear();
-			expect(globalThis[name].getItem("einsatzbereit:probe")).toBeNull();
+			expect(globalThis[name].getItem("afunto:probe")).toBeNull();
 		});
 	}
 });

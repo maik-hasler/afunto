@@ -1,0 +1,107 @@
+== 13. Object Storage Runs on RustFS
+
+=== Status
+Accepted
+
+=== Date
+2026-10-02
+
+=== Context
+Uploaded avatars, organization logos and opportunity banners live in S3-compatible object storage. Until now that was MinIO, in Aspire, in CI and on the staging host.
+
+MinIO stopped being something this project can run:
+
+* The community repository is archived and receives no fixes.
+* Docker Hub deleted `minio/minio` and `minio/mc` on 2026-09-11, and `quay.io/minio/minio` has refused anonymous pulls since 2026-09-24. Every Aspire job in CI failed at its image pull, and every staging deploy failed at `docker compose pull`.
+* The successor, AIStor, needs a license key even in its free tier.
+
+A Chainguard rebuild (`cgr.dev/chainguard/minio`) kept CI green for a few days. It is a fork of an abandoned server, published only as `latest`, and not a place to stay.
+
+The app's needs from the storage are small but specific. The backend's storage service writes objects with `Content-Type` and `Cache-Control`, moves them between `public/` and `quarantined/` with copy and delete, and sets a bucket policy that allows anonymous `GetObject` under `public/` only. Browsers then load images straight from path-style URLs (`https://storage.<domain>/<bucket>/public/<key>`), and those URLs are stored in the database.
+
+=== Decision
+Run RustFS (`rustfs/rustfs`, Apache-2.0) as the object storage in Aspire, in CI and on the staging host, and drop every MinIO component with the server:
+
+* The backend talks to the storage through `AWSSDK.S3` (Apache-2.0) in `S3FileStorageService`, in place of the `Minio` NuGet package. The URL scheme and the URLs already stored stay as they are.
+* On the staging host, `storage-init` creates the bucket, the policy and the bucket-scoped account with RustFS's own CLI (`rustfs/rc`). Snapshots, offsite mirrors and restores use `rclone`.
+
+The Aspire resource and the compose service are named `storage`, not after the product, so the next swap touches one block in each place.
+
+The checks this decision rests on are kept as `FileStorageContractTests` in `IntegrationTests`, so any future image swap is measured against the same contract in CI.
+
+=== Rationale
+Each candidate ran the backend's real storage service, then still on the `Minio` SDK, through twelve checks:
+
+* bucket setup with the policy
+* upload, and an anonymous read that returns `Content-Type` and `Cache-Control`
+* quarantine and unquarantine, delete
+* an 8 MiB multipart upload
+* the negative cases: anonymous listing, anonymous writes, and anonymous reads of `quarantined/` must all be refused
+
+[cols="2,2,2,2,2",options="header"]
+|===
+| |RustFS 1.0.0 |SeaweedFS 4.48 |VersityGW 1.8.0 |Garage 2.4.1
+
+|Root credentials
+|12/12
+|12/12
+|12/12
+|5/12 - `PutBucketPolicy` is not implemented
+
+|Bucket-scoped app account
+|12/12, set up through the admin API for users and policies
+|12/12, scoped by a static identities file
+|5/12 - once the policy is set, the bucket owner is locked out of its own bucket
+|-
+
+|Memory after the run
+|112 MiB
+|128 MiB
+|11 MiB
+|-
+|===
+
+* *RustFS is the only drop-in.* Like MinIO it has one port, root credentials from the environment and an admin API for users and policies, so the staging host keeps its bucket-scoped account.
+* *No MinIO code is left.* `S3FileStorageService` on `AWSSDK.S3` passes the same checks against RustFS 1.0.0, with the root credentials and with the bucket-scoped account, plus one more: a quarantine round trip keeps `Content-Type` and `Cache-Control`. `AWSSDK.S3` is the S3 client AWS maintains for .NET; its AWS-only defaults (trailing checksums, virtual-hosted URLs) are switched off in one place. `rclone` is vendor-neutral and the tool Hetzner documents for its Object Storage, so backups depend on no storage vendor's tooling. `rc` is used only where the RustFS admin API leaves no alternative.
+* *The decision is cheap to reverse.* The app speaks plain S3, the contract tests prove what a replacement has to do, and backups are plain-file mirrors of the bucket. Moving to another server means swapping one image and restoring from a mirror.
+
+=== Considered Alternatives
+
+==== SeaweedFS
+* Pros
+** Mature: more than ten years old, weekly releases, broad adoption
+** Passed all twelve checks with a bucket-scoped account
+* Cons
+** Several components (master, volume, filer, S3) with ports of their own. Each needs to stay unreachable from other containers: CVE-2026-73080 (fixed in 4.24) was an unauthenticated SSRF on the volume server's gRPC port
+** Accounts move from an init script against the admin API to an identities file holding secrets, so more of the ops repository changes
+** The documented fallback if RustFS has to go
+
+==== VersityGW
+* Pros
+** Very small (11 MiB), and objects are plain files on disk
+* Cons
+** Works only if the app holds root credentials, or after a change to how the app sets its bucket policy
+
+==== Garage
+* Cons
+** Has no bucket policies. Anonymous reads exist only through its website endpoint, which would change the URL scheme and the data already stored
+
+==== Stay on the Chainguard MinIO rebuild, or license AIStor
+* Cons
+** The first keeps an abandoned server, available only as `latest`. The second puts a license key into CI and onto the host, from the vendor that just changed the terms
+
+==== Keep the MinIO client tools
+* Cons
+** The `Minio` NuGet package's last release was 7.0.0 on 2025-11-05, and `mc` is available only as a Chainguard `latest-dev` rebuild or under the AIStor license, which Hetzner's own documentation warns about
+** It would keep two dependencies on the vendor this decision moves away from
+
+==== Managed object storage (Hetzner)
+* Cons
+** Development and CI would still need a local S3 server, and it adds a running cost. Worth revisiting if self-hosting the storage stops paying off
+
+=== Consequences
+* RustFS is young: 1.0.0 was published on 2026-09-16. Its pre-1.0 releases had serious advisories (for example CVE-2026-40937, an authorization bypass in the admin API, fixed in 1.0.0-alpha.94), all fixed before 1.0. Renovate proposes every stable release.
+* Revisit this decision if RustFS changes its license, stops releasing for three months, or ships a security fix late. The replacement starts with SeaweedFS and must pass `FileStorageContractTests`.
+* `rc` is pre-1.0 (0.1.36 at the time of writing). It runs only in `storage-init`, which stops the deploy if the policy is not attached afterwards; backups do not depend on it.
+* AWS publishes `AWSSDK.S3` almost daily, so Renovate takes it weekly.
+* Staging starts on RustFS with empty storage and a reset database rather than a migration of the old bucket.

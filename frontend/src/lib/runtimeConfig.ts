@@ -61,7 +61,7 @@ export const runtimeConfig = {
 	operatorSiteUrl,
 	// DDG §5/GDPR Art. 13 need a complete legal identity - a half-filled notice
 	// (e.g. a name with no way to reach them) is worse than none, so this is
-	// all-or-nothing rather than per-field (einsatzbereit#2196).
+	// all-or-nothing rather than per-field (afunto#2196).
 	operatorConfigured: Boolean(
 		operatorName && operatorAddress && operatorEmail && operatorSiteUrl,
 	),

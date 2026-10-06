@@ -34,20 +34,20 @@ public class GetSitemapQueryHandlerTests
 	public async Task Handle_ShouldListOnlyTheStaticPages_WhenNoOpportunitiesOrOrganizationsExist(
 		CancellationToken cancellationToken)
 	{
-		var xml = await _sut.Handle(new GetSitemapQuery("https://einsatzbereit.example"), cancellationToken);
+		var xml = await _sut.Handle(new GetSitemapQuery("https://afunto.example"), cancellationToken);
 
 		var document = XDocument.Parse(xml);
 		document.Root!.Name.Should().Be(SitemapNs + "urlset");
 		Locations(document).Should().BeEquivalentTo(
-			StaticPageCatalog.All.Select(page => $"https://einsatzbereit.example{page.Path}"));
+			StaticPageCatalog.All.Select(page => $"https://afunto.example{page.Path}"));
 	}
 
 	[Test]
 	public async Task Handle_ShouldIncludeTheSiteRoot(CancellationToken cancellationToken)
 	{
-		var xml = await _sut.Handle(new GetSitemapQuery("https://einsatzbereit.example"), cancellationToken);
+		var xml = await _sut.Handle(new GetSitemapQuery("https://afunto.example"), cancellationToken);
 
-		Locations(XDocument.Parse(xml)).Should().Contain("https://einsatzbereit.example/");
+		Locations(XDocument.Parse(xml)).Should().Contain("https://afunto.example/");
 	}
 
 	[Test]
@@ -62,20 +62,20 @@ public class GetSitemapQueryHandlerTests
 		string path,
 		CancellationToken cancellationToken)
 	{
-		var xml = await _sut.Handle(new GetSitemapQuery("https://einsatzbereit.example"), cancellationToken);
+		var xml = await _sut.Handle(new GetSitemapQuery("https://afunto.example"), cancellationToken);
 
-		Locations(XDocument.Parse(xml)).Should().Contain($"https://einsatzbereit.example{path}");
+		Locations(XDocument.Parse(xml)).Should().Contain($"https://afunto.example{path}");
 	}
 
 	[Test]
 	public async Task Handle_ShouldOmitLastModified_ForStaticPages(
 		CancellationToken cancellationToken)
 	{
-		var xml = await _sut.Handle(new GetSitemapQuery("https://einsatzbereit.example"), cancellationToken);
+		var xml = await _sut.Handle(new GetSitemapQuery("https://afunto.example"), cancellationToken);
 
 		var root = XDocument.Parse(xml).Root!;
 		var staticEntry = root.Elements(SitemapNs + "url")
-			.Single(u => u.Element(SitemapNs + "loc")!.Value == "https://einsatzbereit.example/help");
+			.Single(u => u.Element(SitemapNs + "loc")!.Value == "https://afunto.example/help");
 
 		staticEntry.Element(SitemapNs + "lastmod").Should().BeNull();
 	}
@@ -93,7 +93,7 @@ public class GetSitemapQueryHandlerTests
 			.GetPublishedForSitemapAsync(Arg.Any<CancellationToken>())
 			.Returns([new SitemapEntry(opportunityId, new DateTimeOffset(2026, 2, 20, 0, 0, 0, TimeSpan.Zero))]);
 
-		var xml = await _sut.Handle(new GetSitemapQuery("https://einsatzbereit.example"), cancellationToken);
+		var xml = await _sut.Handle(new GetSitemapQuery("https://afunto.example"), cancellationToken);
 
 		var document = XDocument.Parse(xml);
 		var locs = document.Root!.Elements(SitemapNs + "url")
@@ -101,8 +101,8 @@ public class GetSitemapQueryHandlerTests
 			.ToList();
 
 		locs.Should().Contain([
-			$"https://einsatzbereit.example/organizations/{orgId}",
-			$"https://einsatzbereit.example/volunteer-opportunities/{opportunityId}",
+			$"https://afunto.example/organizations/{orgId}",
+			$"https://afunto.example/volunteer-opportunities/{opportunityId}",
 		]);
 		locs.Should().HaveCount(StaticPageCatalog.All.Count + 2);
 	}
@@ -116,10 +116,10 @@ public class GetSitemapQueryHandlerTests
 			.GetAllForSitemapAsync(Arg.Any<CancellationToken>())
 			.Returns([new SitemapEntry(orgId, DateTimeOffset.UtcNow)]);
 
-		var xml = await _sut.Handle(new GetSitemapQuery("https://einsatzbereit.example/"), cancellationToken);
+		var xml = await _sut.Handle(new GetSitemapQuery("https://afunto.example/"), cancellationToken);
 
 		Locations(XDocument.Parse(xml)).Should()
-			.Contain($"https://einsatzbereit.example/organizations/{orgId}");
+			.Contain($"https://afunto.example/organizations/{orgId}");
 	}
 
 	[Test]
@@ -131,12 +131,12 @@ public class GetSitemapQueryHandlerTests
 			.GetAllForSitemapAsync(Arg.Any<CancellationToken>())
 			.Returns([new SitemapEntry(orgId, new DateTimeOffset(2026, 3, 7, 13, 45, 0, TimeSpan.Zero))]);
 
-		var xml = await _sut.Handle(new GetSitemapQuery("https://einsatzbereit.example"), cancellationToken);
+		var xml = await _sut.Handle(new GetSitemapQuery("https://afunto.example"), cancellationToken);
 
 		var root = XDocument.Parse(xml).Root!;
 		var entry = root.Elements(SitemapNs + "url")
 			.Single(u => u.Element(SitemapNs + "loc")!.Value
-				== $"https://einsatzbereit.example/organizations/{orgId}");
+				== $"https://afunto.example/organizations/{orgId}");
 
 		entry.Element(SitemapNs + "lastmod")!.Value.Should().Be("2026-03-07");
 	}

@@ -82,13 +82,13 @@ These are the terms the domain model in <<section-concepts>> is built from. They
 |A cluster of domain objects treated as one consistency boundary, with a single root entity as its only entry point. `VolunteerOpportunity` with its `TimeSlot` children is the clearest example; a handler loads and saves the root, never a child directly.
 
 |AGPL
-|GNU Affero General Public License. The open-source license under which Einsatzbereit is released. Derivative works - including those offered as network services - must be released under the same license.
+|GNU Affero General Public License. The open-source license under which Afunto is released. Derivative works - including those offered as network services - must be released under the same license.
 
 |arc42
 |A template for documenting software and system architectures, structured into 12 chapters. Widely used in German-speaking countries. See https://arc42.org.
 
 |Aspire (.NET Aspire)
-|.NET's local orchestration framework. The AppHost project provisions PostgreSQL, pgAdmin, Keycloak, MinIO, Mailpit, the backend API, and the Vite frontend with a single `dotnet run`.
+|.NET's local orchestration framework. The AppHost project provisions PostgreSQL, pgAdmin, Keycloak, RustFS, Mailpit, the backend API, and the Vite frontend with a single `dotnet run`.
 
 |CQRS
 |Command Query Responsibility Segregation. An architectural pattern that separates read operations (queries) from write operations (commands).
@@ -103,7 +103,7 @@ These are the terms the domain model in <<section-concepts>> is built from. They
 |GitHub Container Registry. The Docker image registry used to publish the frontend, backend, and Keycloak images on version releases.
 
 |IAM
-|Identity and Access Management. The discipline of managing who users are (authentication) and what they are allowed to do (authorization). Handled by Keycloak in Einsatzbereit.
+|Identity and Access Management. The discipline of managing who users are (authentication) and what they are allowed to do (authorization). Handled by Keycloak in Afunto.
 
 |JWKS
 |JSON Web Key Set. A published set of public keys from Keycloak used by the backend to verify JWT signatures without contacting Keycloak on every request.
@@ -112,7 +112,7 @@ These are the terms the domain model in <<section-concepts>> is built from. They
 |JSON Web Token. A signed, compact token format used to carry authentication and authorization claims. The backend validates the JWT's signature against Keycloak's public JWKS keys on every request.
 
 |Keycloak
-|An open-source Identity and Access Management server. Used in Einsatzbereit for user authentication (OIDC), user management, and role-based access control.
+|An open-source Identity and Access Management server. Used in Afunto for user authentication (OIDC), user management, and role-based access control.
 
 |Mediator (ISender)
 |The application's small in-house CQRS dispatcher (`ISender`). Routes commands and queries to their handlers, decoupling the API layer from use-case implementation. The project deliberately uses this instead of the external MediatR library.

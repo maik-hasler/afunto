@@ -53,7 +53,7 @@ public class GetUserProfileTests(
 	public async Task GetUserProfile_ShouldReturn401_WhenNotAuthenticated(
 		CancellationToken cancellationToken)
 	{
-		var client = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var client = new AfuntoApi(fixture.CreateHttpClient());
 
 		var act = () => client.GetUserProfileAsync(cancellationToken);
 

@@ -59,11 +59,11 @@ public sealed class MigrationSafetyTests
 	private static string FindMigrationsDirectory()
 	{
 		var dir = new DirectoryInfo(AppContext.BaseDirectory);
-		while (dir is not null && !File.Exists(Path.Combine(dir.FullName, "Einsatzbereit.slnx")))
+		while (dir is not null && !File.Exists(Path.Combine(dir.FullName, "Afunto.slnx")))
 			dir = dir.Parent;
 
 		if (dir is null)
-			throw new InvalidOperationException($"Could not locate Einsatzbereit.slnx above {AppContext.BaseDirectory}.");
+			throw new InvalidOperationException($"Could not locate Afunto.slnx above {AppContext.BaseDirectory}.");
 
 		var migrationsDir = Path.Combine(dir.FullName, "src", "Infrastructure", "Persistence", "Migrations");
 		if (!Directory.Exists(migrationsDir))

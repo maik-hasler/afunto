@@ -27,7 +27,7 @@ internal sealed class GetSitemapQueryHandler(
 
 		// robots.txt points crawlers straight here, so a page missing from this
 		// document is a page they have no reason to look for. The static routes
-		// were absent entirely - the site root included (einsatzbereit#2331).
+		// were absent entirely - the site root included (afunto#2331).
 		// They carry no <lastmod>: it is optional per the sitemap protocol, and
 		// these pages change with a release, not on a date the database knows.
 		foreach (var page in StaticPageCatalog.All)

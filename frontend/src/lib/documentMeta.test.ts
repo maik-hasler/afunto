@@ -9,13 +9,13 @@ import {
 } from "./documentMeta";
 
 const GERMAN_DEFAULTS = {
-	socialTitle: "Einsatzbereit - Finde deinen Einsatz.",
-	description: "Einsatzbereit verbindet Freiwillige mit Hilfsangeboten.",
+	socialTitle: "Afunto - Finde deinen Einsatz.",
+	description: "Afunto verbindet Freiwillige mit Hilfsangeboten.",
 };
 
 const ENGLISH_DEFAULTS = {
-	socialTitle: "Einsatzbereit - Find your opportunity.",
-	description: "Einsatzbereit connects volunteers with regional needs.",
+	socialTitle: "Afunto - Find your opportunity.",
+	description: "Afunto connects volunteers with regional needs.",
 };
 
 function content(selector: string): string | null {

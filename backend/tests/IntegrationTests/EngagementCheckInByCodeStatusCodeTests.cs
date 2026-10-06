@@ -146,7 +146,7 @@ public class EngagementCheckInByCodeStatusCodeTests(IntegrationTestFixture fixtu
 	}
 
 	private async Task<(Guid OpportunityId, Guid EngagementId)> SeedConfirmedQrEngagementAsync(
-		EinsatzbereitApi olaf, EinsatzbereitApi vera, string label, CancellationToken cancellationToken)
+		AfuntoApi olaf, AfuntoApi vera, string label, CancellationToken cancellationToken)
 	{
 		var opportunityId = await CreateQrOpportunityAsync(olaf, label, cancellationToken);
 		var engagement = await vera.CreateEngagementAsync(
@@ -156,7 +156,7 @@ public class EngagementCheckInByCodeStatusCodeTests(IntegrationTestFixture fixtu
 	}
 
 	private static async Task<Guid> CreateQrOpportunityAsync(
-		EinsatzbereitApi olaf, string label, CancellationToken cancellationToken)
+		AfuntoApi olaf, string label, CancellationToken cancellationToken)
 	{
 		var suffix = Guid.NewGuid().ToString("N");
 		var org = await olaf.CreateOrganizationAsync(

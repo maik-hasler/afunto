@@ -154,14 +154,14 @@ jobs:
         run: |
           docker pull quay.io/keycloak/keycloak:26.7.4
           docker pull ghcr.io/axllent/mailpit:v1.31.2
-          docker pull quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z.hotfix.7aa24e772
+          docker pull rustfs/rustfs:1.0.0
 
       - name: Test - IntegrationTests (Aspire + Docker)
         working-directory: backend
         run: dotnet run --project tests/IntegrationTests --no-restore --no-build
 
   # Sharded exactly as dotnet.yml's visual-tests job is - see that job's comment
-  # for why (einsatzbereit#2145). The two must stay in step: this is the same
+  # for why (afunto#2145). The two must stay in step: this is the same
   # suite gating a release that the PR gate runs, so a split that only existed on
   # one side would mean the release path and the PR path disagree about how long
   # the gate takes and which tests ran together.
@@ -223,7 +223,7 @@ jobs:
         run: |
           docker pull quay.io/keycloak/keycloak:26.7.4
           docker pull ghcr.io/axllent/mailpit:v1.31.2
-          docker pull quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z.hotfix.7aa24e772
+          docker pull rustfs/rustfs:1.0.0
 
       - name: Resolve shard filter
         id: shard
@@ -251,7 +251,7 @@ jobs:
           fi
 
   # Builds the real release image (not `dotnet run`) and boots it against a real
-  # Postgres/Keycloak/MinIO stack, the same way the released image will actually be
+  # Postgres/Keycloak/RustFS stack, the same way the released image will actually be
   # run - `integration-tests`/`visual-tests` above only ever exercise the source via
   # `dotnet run`, so an entrypoint bug, a missing runtime file, or a broken env-var
   # substitution has never been caught before an image reached GHCR (#2204). Runs
@@ -281,12 +281,12 @@ jobs:
           cache-from: type=gha,scope=backend-image
           cache-to: type=gha,mode=max,scope=backend-image
 
-      - name: Start backing services (Postgres, Keycloak, MinIO)
+      - name: Start backing services (Postgres, Keycloak, RustFS)
         run: |
           docker network create backend-smoke-test
 
           docker run -d --name smoke-postgres --network backend-smoke-test \
-            -e POSTGRES_USER=einsatzbereit -e POSTGRES_PASSWORD=einsatzbereit -e POSTGRES_DB=einsatzbereit \
+            -e POSTGRES_USER=afunto -e POSTGRES_PASSWORD=afunto -e POSTGRES_DB=afunto \
             postgres:18-alpine
 
           IMPORT_DIR="$RUNNER_TEMP/kc-import"
@@ -302,33 +302,33 @@ jobs:
             -v "$IMPORT_DIR:/opt/keycloak/data/import:ro" \
             quay.io/keycloak/keycloak:26.7.4 start-dev --import-realm
 
-          docker run -d --name smoke-minio --network backend-smoke-test -p 19000:9000 \
-            -e MINIO_ROOT_USER=minio -e MINIO_ROOT_PASSWORD=minio123 \
-            quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z.hotfix.7aa24e772 server /data
+          docker run -d --name smoke-storage --network backend-smoke-test -p 19000:9000 \
+            -e RUSTFS_ACCESS_KEY=storage -e RUSTFS_SECRET_KEY=storage123 \
+            rustfs/rustfs:1.0.0
 
       - name: Wait for backing services to be ready
         run: |
           echo "Waiting for Postgres..."
           for i in $(seq 1 60); do
-            docker exec smoke-postgres pg_isready -U einsatzbereit >/dev/null 2>&1 && break
+            docker exec smoke-postgres pg_isready -U afunto >/dev/null 2>&1 && break
             if [ "$i" = 60 ]; then echo "::error::Postgres never became ready"; exit 1; fi
             sleep 2
           done
 
-          echo "Waiting for Keycloak to serve the einsatzbereit realm..."
+          echo "Waiting for Keycloak to serve the afunto realm..."
           for i in $(seq 1 90); do
             code=$(curl -fsS -o /dev/null -w "%{http_code}" \
-              http://localhost:18080/realms/einsatzbereit/.well-known/openid-configuration || echo 000)
+              http://localhost:18080/realms/afunto/.well-known/openid-configuration || echo 000)
             [ "$code" = "200" ] && break
-            if [ "$i" = 90 ]; then echo "::error::Keycloak never served the einsatzbereit realm"; exit 1; fi
+            if [ "$i" = 90 ]; then echo "::error::Keycloak never served the afunto realm"; exit 1; fi
             sleep 2
           done
 
-          echo "Waiting for MinIO..."
+          echo "Waiting for RustFS..."
           for i in $(seq 1 60); do
-            code=$(curl -fsS -o /dev/null -w "%{http_code}" http://localhost:19000/minio/health/live || echo 000)
+            code=$(curl -fsS -o /dev/null -w "%{http_code}" http://localhost:19000/health || echo 000)
             [ "$code" = "200" ] && break
-            if [ "$i" = 60 ]; then echo "::error::MinIO never became ready"; exit 1; fi
+            if [ "$i" = 60 ]; then echo "::error::RustFS never became ready"; exit 1; fi
             sleep 2
           done
 
@@ -348,20 +348,20 @@ jobs:
           # Program.cs's comment on RequireHttpsMetadata.
           docker run -d --name smoke-backend --network backend-smoke-test -p 18081:8080 \
             -e ASPNETCORE_ENVIRONMENT=Production \
-            -e ConnectionStrings__einsatzbereit="Host=smoke-postgres;Database=einsatzbereit;Username=einsatzbereit;Password=einsatzbereit" \
+            -e ConnectionStrings__afunto="Host=smoke-postgres;Database=afunto;Username=afunto;Password=afunto" \
             -e Keycloak__ClientSecret=smoke-test-secret \
             -e Keycloak__BaseUrl=http://smoke-keycloak:8080 \
-            -e Keycloak__Realm=einsatzbereit \
-            -e Authentication__Authority=http://smoke-keycloak:8080/realms/einsatzbereit \
+            -e Keycloak__Realm=afunto \
+            -e Authentication__Authority=http://smoke-keycloak:8080/realms/afunto \
             -e Authentication__RequireHttpsMetadata=false \
-            -e Authentication__ValidIssuers__0=http://smoke-keycloak:8080/realms/einsatzbereit \
+            -e Authentication__ValidIssuers__0=http://smoke-keycloak:8080/realms/afunto \
             -e Cors__Origins__0=http://localhost \
             -e Smtp__Host=localhost \
             -e Smtp__Port=1025 \
-            -e Storage__Endpoint=http://smoke-minio:9000 \
-            -e Storage__AccessKey=minio \
-            -e Storage__SecretKey=minio123 \
-            -e Storage__BucketName=einsatzbereit \
+            -e Storage__Endpoint=http://smoke-storage:9000 \
+            -e Storage__AccessKey=storage \
+            -e Storage__SecretKey=storage123 \
+            -e Storage__BucketName=afunto \
             -e Database__MigrateOnStartup=true \
             backend-health-check:latest
 
@@ -385,7 +385,7 @@ jobs:
       - name: Container logs (always, for debugging)
         if: always()
         run: |
-          for c in smoke-backend smoke-postgres smoke-keycloak smoke-minio; do
+          for c in smoke-backend smoke-postgres smoke-keycloak smoke-storage; do
             echo "::group::$c"
             docker logs "$c" 2>&1 || true
             echo "::endgroup::"
@@ -394,7 +394,7 @@ jobs:
       - name: Tear down
         if: always()
         run: |
-          docker rm -f smoke-backend smoke-postgres smoke-keycloak smoke-minio >/dev/null 2>&1 || true
+          docker rm -f smoke-backend smoke-postgres smoke-keycloak smoke-storage >/dev/null 2>&1 || true
           docker network rm backend-smoke-test >/dev/null 2>&1 || true
 
   publish-backend:
@@ -497,7 +497,7 @@ jobs:
     needs: [backend-fast-tests, backend-integration-tests, backend-visual-tests]
     uses: ./.github/workflows/frontend-checks.yml
     with:
-      vite_keycloak_authority_url: https://login.example.test/realms/einsatzbereit
+      vite_keycloak_authority_url: https://login.example.test/realms/afunto
       vite_keycloak_client_id: frontend
       keycloak_origin: https://login.example.test
       vite_api_url: https://api.example.test
@@ -727,7 +727,7 @@ jobs:
           # suffix sorts *above* the bare version it precedes - the first stable tag
           # (e.g. v1.0.0) sorts below all its own RCs and lands last in the descending
           # list below, so PREV_TAG comes back empty and RANGE falls back to the entire
-          # repo history (einsatzbereit#1679). This tells git "-rc" is a prerelease
+          # repo history (afunto#1679). This tells git "-rc" is a prerelease
           # marker instead, so v1.0.0 sorts above v1.0.0-rc.N as expected.
           git config versionsort.suffix "-rc"
 

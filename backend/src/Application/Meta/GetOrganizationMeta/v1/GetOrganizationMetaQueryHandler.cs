@@ -22,7 +22,7 @@ internal sealed class GetOrganizationMetaQueryHandler(IApplicationDbContext dbCo
 		var baseUrl = request.BaseUrl.TrimEnd('/');
 
 		return MetaHtmlBuilder.Build(
-			$"{organization.Name} - Einsatzbereit",
+			$"{organization.Name} - Afunto",
 			organization.Description,
 			$"{baseUrl}/organizations/{organization.Id.Value}",
 			organization.LogoUrl ?? $"{baseUrl}/og-image.png");

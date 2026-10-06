@@ -10,7 +10,7 @@
  * different account signing in on the same tab never inherits it.
  */
 
-const STORAGE_KEY = "einsatzbereit.display-name";
+const STORAGE_KEY = "afunto.display-name";
 
 interface StoredName {
 	sub: string;

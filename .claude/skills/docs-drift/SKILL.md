@@ -1,7 +1,7 @@
 ---
 name: docs-drift
 description: >
-  Judge einsatzbereit's documentation by whether it fits the reader who
+  Judge afunto's documentation by whether it fits the reader who
   actually uses it, then whether it is still true - README, CONTRIBUTING,
   the arc42 docs, ADRs and TDRs, and every AGENTS.md in the tree. Use when
   the maintainer types /docs-drift, or asks whether the docs still match

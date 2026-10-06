@@ -544,7 +544,7 @@ button.btn { cursor: pointer; }
 
 /* :not(.btn) is load-bearing. These selectors carry an id, so at 1-0-1 they
  * outrank .btn-primary's 0-1-0 - and info.ftl and error.ftl both put their
- * "back to Einsatzbereit" button inside one of these containers. Without the
+ * "back to Afunto" button inside one of these containers. Without the
  * exclusion that button renders brand-700 text on a brand-700 fill: a solid
  * green bar with an invisible label, on the two pages a stuck visitor is most
  * likely to be looking at. */

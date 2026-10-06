@@ -310,7 +310,7 @@ jobs:
         run: |
           docker pull quay.io/keycloak/keycloak:26.7.4
           docker pull ghcr.io/axllent/mailpit:v1.31.2
-          docker pull quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z.hotfix.7aa24e772
+          docker pull rustfs/rustfs:1.0.0
 
       - name: Test - IntegrationTests (Aspire + Docker)
         working-directory: backend
@@ -374,7 +374,7 @@ jobs:
         run: |
           docker pull quay.io/keycloak/keycloak:26.7.4
           docker pull ghcr.io/axllent/mailpit:v1.31.2
-          docker pull quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z.hotfix.7aa24e772
+          docker pull rustfs/rustfs:1.0.0
 
       - name: Resolve shard filter
         id: shard

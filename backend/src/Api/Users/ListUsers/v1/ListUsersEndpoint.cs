@@ -19,7 +19,7 @@ internal sealed class ListUsersEndpoint : IEndpoint
 			.ProducesProblem(StatusCodes.Status401Unauthorized)
 			.ProducesProblem(StatusCodes.Status403Forbidden)
 			.ProducesProblem(StatusCodes.Status500InternalServerError)
-			.RequireAuthorization(AuthorizationPolicies.EinsatzbereitAdminPolicy)
+			.RequireAuthorization(AuthorizationPolicies.AfuntoAdminPolicy)
 			.RequireRateLimiting(RateLimitingPolicies.Read)
 			.MapToApiVersion(1);
 

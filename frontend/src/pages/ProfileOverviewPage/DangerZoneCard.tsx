@@ -28,7 +28,7 @@ export default function DangerZoneCard() {
 			clearActiveOrgId();
 			clearSeenAchievements(auth.user?.profile?.sub);
 			localStorage.removeItem("i18nextLng");
-			localStorage.removeItem("einsatzbereit:language-explicit");
+			localStorage.removeItem("afunto:language-explicit");
 			await auth.removeUser();
 			navigate("/");
 		} catch (err) {

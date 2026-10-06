@@ -42,7 +42,7 @@ public class GetOrganizationMetaQueryHandlerTests
 			.Returns((Organization?)null);
 
 		var result = await _sut.Handle(
-			new GetOrganizationMetaQuery(organizationId, "https://einsatzbereit.example"),
+			new GetOrganizationMetaQuery(organizationId, "https://afunto.example"),
 			cancellationToken);
 
 		result.Should().BeNull();
@@ -59,13 +59,13 @@ public class GetOrganizationMetaQueryHandlerTests
 			.Returns(CreateOrganization(domainId));
 
 		var html = await _sut.Handle(
-			new GetOrganizationMetaQuery(organizationId, "https://einsatzbereit.example/"),
+			new GetOrganizationMetaQuery(organizationId, "https://afunto.example/"),
 			cancellationToken);
 
 		html.Should().NotBeNull();
-		html.Should().Contain("Küstenschutz e.V. - Einsatzbereit");
+		html.Should().Contain("Küstenschutz e.V. - Afunto");
 		html.Should().Contain("Wir schützen die Küste.");
-		html.Should().Contain($"https://einsatzbereit.example/organizations/{organizationId}");
+		html.Should().Contain($"https://afunto.example/organizations/{organizationId}");
 	}
 
 	[Test]
@@ -79,10 +79,10 @@ public class GetOrganizationMetaQueryHandlerTests
 			.Returns(CreateOrganization(domainId, logoUrl: null));
 
 		var html = await _sut.Handle(
-			new GetOrganizationMetaQuery(organizationId, "https://einsatzbereit.example"),
+			new GetOrganizationMetaQuery(organizationId, "https://afunto.example"),
 			cancellationToken);
 
-		html.Should().Contain("https://einsatzbereit.example/og-image.png");
+		html.Should().Contain("https://afunto.example/og-image.png");
 	}
 
 	[Test]
@@ -95,7 +95,7 @@ public class GetOrganizationMetaQueryHandlerTests
 			.Returns(CreateOrganization(domainId, logoUrl: "https://storage.example/logos/abc.png"));
 
 		var html = await _sut.Handle(
-			new GetOrganizationMetaQuery(organizationId, "https://einsatzbereit.example"),
+			new GetOrganizationMetaQuery(organizationId, "https://afunto.example"),
 			cancellationToken);
 
 		html.Should().Contain("https://storage.example/logos/abc.png");
@@ -113,7 +113,7 @@ public class GetOrganizationMetaQueryHandlerTests
 			.Returns(CreateOrganization(domainId, name: "<script>alert(1)</script> & Friends"));
 
 		var html = await _sut.Handle(
-			new GetOrganizationMetaQuery(organizationId, "https://einsatzbereit.example"),
+			new GetOrganizationMetaQuery(organizationId, "https://afunto.example"),
 			cancellationToken);
 
 		html.Should().NotContain("<script>");

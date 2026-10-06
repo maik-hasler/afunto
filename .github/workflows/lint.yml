@@ -37,7 +37,7 @@ jobs:
 
       - name: Ban unescaped apostrophes in Keycloak English messages
         run: |
-          FILE=keycloak/themes/einsatzbereit/login/messages/messages_en.properties
+          FILE=keycloak/themes/afunto/login/messages/messages_en.properties
           if grep -nE '^[^#[:space:]].*=' "$FILE" | grep -P "(?<!')'(?!')"; then
             echo "::error::Unescaped apostrophe in $FILE - MessageFormat silently drops it. Escape literal apostrophes as '' (see #1854)."
             exit 1

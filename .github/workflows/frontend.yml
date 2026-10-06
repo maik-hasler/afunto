@@ -40,7 +40,7 @@ jobs:
     if: needs.changes.outputs.relevant == 'true'
     uses: ./.github/workflows/frontend-checks.yml
     with:
-      vite_keycloak_authority_url: https://login.example.test/realms/einsatzbereit
+      vite_keycloak_authority_url: https://login.example.test/realms/afunto
       vite_keycloak_client_id: frontend
       keycloak_origin: https://login.example.test
       vite_api_url: https://api.example.test

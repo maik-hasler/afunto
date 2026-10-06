@@ -12,7 +12,7 @@ public static class AuthHelper
 {
 	private const string FrontendClientId = "frontend";
 
-	private const string Realm = "einsatzbereit";
+	private const string Realm = "afunto";
 	private const string FrontendTestClientId = "frontend-test";
 	private const string BackendClientId = "backend";
 	private const string BackendClientSecret = "backend-secret";

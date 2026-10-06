@@ -32,16 +32,14 @@ describe("HelpPage", () => {
 			screen.getByRole("heading", { name: "General" }),
 		).toBeInTheDocument();
 		expect(
-			screen.getByText("Does using Einsatzbereit cost anything?"),
+			screen.getByText("Does using Afunto cost anything?"),
 		).toBeInTheDocument();
 
 		const details = container.querySelectorAll("details");
 		expect(details.length).toBeGreaterThanOrEqual(4);
-		await userEvent.click(
-			screen.getByText("Does using Einsatzbereit cost anything?"),
-		);
+		await userEvent.click(screen.getByText("Does using Afunto cost anything?"));
 		expect(details[0].textContent?.length ?? 0).toBeGreaterThan(
-			"Does using Einsatzbereit cost anything?".length,
+			"Does using Afunto cost anything?".length,
 		);
 	});
 });

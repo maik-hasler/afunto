@@ -74,14 +74,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 	});
 
 builder.Services.AddAuthorizationBuilder()
-	.AddPolicy(AuthorizationPolicies.EinsatzbereitAdminPolicy, policy =>
-		policy.RequireClaim(AuthorizationPolicies.RealmClaim, AuthorizationPolicies.EinsatzbereitRealm)
+	.AddPolicy(AuthorizationPolicies.AfuntoAdminPolicy, policy =>
+		policy.RequireClaim(AuthorizationPolicies.RealmClaim, AuthorizationPolicies.AfuntoRealm)
 			.RequireRole(AuthorizationPolicies.AdminRole))
-	.AddDefaultPolicy(AuthorizationPolicies.EinsatzbereitDefaultUserPolicy, policy =>
-		policy.RequireClaim(AuthorizationPolicies.RealmClaim, AuthorizationPolicies.EinsatzbereitRealm)
+	.AddDefaultPolicy(AuthorizationPolicies.AfuntoDefaultUserPolicy, policy =>
+		policy.RequireClaim(AuthorizationPolicies.RealmClaim, AuthorizationPolicies.AfuntoRealm)
 			.RequireRole(AuthorizationPolicies.DefaultUser))
-	.AddPolicy(AuthorizationPolicies.EinsatzbereitOrganisatorPolicy, policy =>
-		policy.RequireClaim(AuthorizationPolicies.RealmClaim, AuthorizationPolicies.EinsatzbereitRealm)
+	.AddPolicy(AuthorizationPolicies.AfuntoOrganisatorPolicy, policy =>
+		policy.RequireClaim(AuthorizationPolicies.RealmClaim, AuthorizationPolicies.AfuntoRealm)
 			.RequireRole(AuthorizationPolicies.OrganisatorRole));
 
 builder.Services.AddCors(options =>
@@ -142,9 +142,9 @@ apiVersioning.AddOpenApi(versioned =>
 	{
 		document.Info = new OpenApiInfo
 		{
-			Title = "Einsatzbereit API",
+			Title = "Afunto API",
 			Version = "v1",
-			Description = "API for the Einsatzbereit application"
+			Description = "API for the Afunto application"
 		};
 
 		foreach (var pathItem in document.Paths.Values)
@@ -183,7 +183,7 @@ if (!isDesignTimeToolInvocation)
 {
 	var missingConfiguration = RequiredConfigurationValidator.FindMissing(
 		app.Environment.IsDevelopment(),
-		app.Configuration.GetConnectionString("einsatzbereit"),
+		app.Configuration.GetConnectionString("afunto"),
 		app.Configuration["Keycloak:ClientSecret"],
 		app.Configuration["Authentication:Authority"],
 		app.Configuration.GetSection("Cors:Origins").Get<string[]>(),

@@ -21,16 +21,16 @@ public sealed class ResponseDeclarationConventionTests
 {
 	/// <summary>
 	/// Policies that an authenticated realm user can still fail, so the authorization middleware
-	/// really does produce a 403 for them. Per keycloak/realms/einsatzbereit-realm.json,
-	/// "default-roles-einsatzbereit" is composite over "user", so every registered user carries
-	/// the "user" role and EinsatzbereitDefaultUserPolicy can only ever answer 401 (no token) or
+	/// really does produce a 403 for them. Per keycloak/realms/afunto-realm.json,
+	/// "default-roles-afunto" is composite over "user", so every registered user carries
+	/// the "user" role and AfuntoDefaultUserPolicy can only ever answer 401 (no token) or
 	/// pass - which is why it is deliberately absent here. "organisator" is not in the default
 	/// set and "admin" is granted by hand, so both can deny a signed-in caller.
 	/// </summary>
 	private static readonly string[] RoleRestrictedPolicies =
 	[
-		AuthorizationPolicies.EinsatzbereitAdminPolicy,
-		AuthorizationPolicies.EinsatzbereitOrganisatorPolicy
+		AuthorizationPolicies.AfuntoAdminPolicy,
+		AuthorizationPolicies.AfuntoOrganisatorPolicy
 	];
 
 	/// <summary>
@@ -115,8 +115,8 @@ public sealed class ResponseDeclarationConventionTests
 			.ToList();
 
 		endpointsWithoutForbidden.Should().BeEmpty(
-			$"a signed-in user without the required role fails {nameof(AuthorizationPolicies.EinsatzbereitAdminPolicy)} " +
-			$"or {nameof(AuthorizationPolicies.EinsatzbereitOrganisatorPolicy)} and gets a 403 from the " +
+			$"a signed-in user without the required role fails {nameof(AuthorizationPolicies.AfuntoAdminPolicy)} " +
+			$"or {nameof(AuthorizationPolicies.AfuntoOrganisatorPolicy)} and gets a 403 from the " +
 			"authorization middleware; the organization-scoped handlers behind those policies raise a " +
 			"second 403 of their own through OwnershipGuard, so an endpoint that omits it is documenting " +
 			"a denial path it demonstrably has - offenders: {0}",

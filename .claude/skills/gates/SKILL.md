@@ -1,7 +1,7 @@
 ---
 name: gates
 description: >
-  Ask what actually catches a regression in einsatzbereit before it ships -
+  Ask what actually catches a regression in afunto before it ships -
   which CI workflows gate which dimension, where a PR can break something
   silently, where the test net is thin relative to risk, and where CI is
   slow or wasteful. Use when the maintainer types /gates, or asks whether

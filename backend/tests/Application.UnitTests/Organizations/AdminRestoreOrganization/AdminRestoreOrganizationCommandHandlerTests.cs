@@ -147,7 +147,7 @@ public class AdminRestoreOrganizationCommandHandlerTests
 			.Returns($"organization-logos/{orgId}.png");
 		_fileStorage
 			.UnquarantineAsync($"organization-logos/{orgId}.png", Arg.Any<CancellationToken>())
-			.ThrowsAsync(new InvalidOperationException("MinIO unavailable"));
+			.ThrowsAsync(new InvalidOperationException("Storage unavailable"));
 
 		// Act
 		Func<Task> act = async () => await _sut.Handle(new AdminRestoreOrganizationCommand(orgId, DefaultAdminUserId), cancellationToken);

@@ -1,23 +1,23 @@
 {
   "EngagementRequestReceived": {
     "subject": "Deine Anfrage für „{OpportunityTitle}“ ist eingegangen",
-    "body": "Hallo {VolunteerName},\n\ndeine Anfrage zur Teilnahme an „{OpportunityTitle}“ ist eingegangen. Der Organisator wird sich bei dir melden.\n\nEinsatzbereit"
+    "body": "Hallo {VolunteerName},\n\ndeine Anfrage zur Teilnahme an „{OpportunityTitle}“ ist eingegangen. Der Organisator wird sich bei dir melden.\n\nAfunto"
   },
   "EngagementWaitlisted": {
     "subject": "Deine Eintragung für „{OpportunityTitle}“ ist eingegangen",
-    "body": "Hallo {VolunteerName},\n\ndeine Eintragung für „{OpportunityTitle}“ ist eingegangen. Ein Organisator wird deinen Zeitslot prüfen und bald bestätigen.\n\nEinsatzbereit"
+    "body": "Hallo {VolunteerName},\n\ndeine Eintragung für „{OpportunityTitle}“ ist eingegangen. Ein Organisator wird deinen Zeitslot prüfen und bald bestätigen.\n\nAfunto"
   },
   "EngagementSignupNotifyOrganizer": {
     "subject": "Neue Eintragung: {VolunteerName} für „{OpportunityTitle}“",
-    "body": "Hallo {OrganizerName},\n\n{VolunteerName} hat sich für „{OpportunityTitle}“ eingetragen.\n\nEinsatzbereit"
+    "body": "Hallo {OrganizerName},\n\n{VolunteerName} hat sich für „{OpportunityTitle}“ eingetragen.\n\nAfunto"
   },
   "EngagementConfirmed": {
     "subject": "Deine Teilnahme wurde bestätigt",
-    "body": "Hallo {VolunteerName},\n\ndeine Bewerbung für „{OpportunityTitle}“ wurde bestätigt.\n\nWir freuen uns auf dich!\n\nEinsatzbereit"
+    "body": "Hallo {VolunteerName},\n\ndeine Bewerbung für „{OpportunityTitle}“ wurde bestätigt.\n\nWir freuen uns auf dich!\n\nAfunto"
   },
   "EngagementCancelled": {
     "subject": "Deine Teilnahme wurde abgesagt",
-    "body": "Hallo {VolunteerName},\n\nleider wurde deine Eintragung für „{OpportunityTitle}“ abgesagt.{ReasonBlock}\n\nWir hoffen, dich bei einer anderen Gelegenheit zu sehen.\n\nEinsatzbereit"
+    "body": "Hallo {VolunteerName},\n\nleider wurde deine Eintragung für „{OpportunityTitle}“ abgesagt.{ReasonBlock}\n\nWir hoffen, dich bei einer anderen Gelegenheit zu sehen.\n\nAfunto"
   },
   "EngagementCancelledReasonSuffix": {
     "subject": "",
@@ -25,23 +25,23 @@
   },
   "EngagementWithdrawnNotifyOrganizer": {
     "subject": "{VolunteerName} hat sich von „{OpportunityTitle}“ zurückgezogen",
-    "body": "Hallo {OrganizerName},\n\n{VolunteerName} hat sich von „{OpportunityTitle}“ zurückgezogen.\n\nEinsatzbereit"
+    "body": "Hallo {OrganizerName},\n\n{VolunteerName} hat sich von „{OpportunityTitle}“ zurückgezogen.\n\nAfunto"
   },
   "EngagementReminder": {
     "subject": "Erinnerung: {OpportunityTitle} startet morgen",
-    "body": "Hallo {DisplayName},\n\ndies ist eine Erinnerung, dass du für „{OpportunityTitle}“ eingetragen bist, das am {StartFormatted} beginnt.\n\nWir freuen uns auf dich!\n\nDein Einsatzbereit-Team"
+    "body": "Hallo {DisplayName},\n\ndies ist eine Erinnerung, dass du für „{OpportunityTitle}“ eingetragen bist, das am {StartFormatted} beginnt.\n\nWir freuen uns auf dich!\n\nDein Afunto-Team"
   },
   "InvitationReceived": {
     "subject": "Du wurdest eingeladen, einer Organisation beizutreten",
-    "body": "Hallo {InviteeName},\n\ndu wurdest eingeladen, der Organisation „{OrganizationName}“ auf Einsatzbereit beizutreten.\n\nMelde dich in deinem Konto an, um die Einladung anzunehmen oder abzulehnen.\n\nEinsatzbereit"
+    "body": "Hallo {InviteeName},\n\ndu wurdest eingeladen, der Organisation „{OrganizationName}“ auf Afunto beizutreten.\n\nMelde dich in deinem Konto an, um die Einladung anzunehmen oder abzulehnen.\n\nAfunto"
   },
   "OpportunityUpdated": {
     "subject": "Ein Einsatz, für den du dich eingetragen hast, hat sich geändert: „{OpportunityTitle}“",
-    "body": "Hallo {VolunteerName},\n\ndie Details für „{OpportunityTitle}“ haben sich geändert. Bitte sieh in der App nach den aktuellen Informationen.\n\nEinsatzbereit"
+    "body": "Hallo {VolunteerName},\n\ndie Details für „{OpportunityTitle}“ haben sich geändert. Bitte sieh in der App nach den aktuellen Informationen.\n\nAfunto"
   },
   "EngagementOrganizerDigest": {
     "subject": "{Count} Neuigkeit(en) zu deinen Einsätzen",
-    "body": "Hallo {OrganizerName},\n\nhier ist, was sich seit deiner letzten Zusammenfassung getan hat:\n\n{ItemsList}\n\nEinsatzbereit"
+    "body": "Hallo {OrganizerName},\n\nhier ist, was sich seit deiner letzten Zusammenfassung getan hat:\n\n{ItemsList}\n\nAfunto"
   },
   "EngagementOrganizerDigestSignupLine": {
     "subject": "",

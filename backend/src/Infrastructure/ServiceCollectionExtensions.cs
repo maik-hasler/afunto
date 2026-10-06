@@ -64,7 +64,7 @@ public static class ServiceCollectionExtensions
 				sp.GetServices<ISaveChangesInterceptor>());
 
 			options.UseNpgsql(
-				sp.GetRequiredService<IOptions<ConnectionStringOptions>>().Value.Einsatzbereit,
+				sp.GetRequiredService<IOptions<ConnectionStringOptions>>().Value.Afunto,
 				npg =>
 				{
 					npg.MigrationsAssembly("Infrastructure");
@@ -171,7 +171,7 @@ public static class ServiceCollectionExtensions
 			});
 
 		services.ConfigureOptions<StorageSettingsSetup>();
-		services.AddSingleton<IFileStorageService, MinioFileStorageService>();
+		services.AddSingleton<IFileStorageService, S3FileStorageService>();
 
 		services.ConfigureOptions<KeycloakOptionsSetup>();
 

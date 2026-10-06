@@ -150,7 +150,7 @@ describe("the /callback dead ends (#2320)", () => {
 			}),
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole("link", { name: "Back to Einsatzbereit" }),
+			screen.getByRole("link", { name: "Back to Afunto" }),
 		).toHaveAttribute("href", "/");
 		expect(screen.queryByText("Completing sign-in…")).toBeNull();
 	});

@@ -32,7 +32,7 @@ public class GetPublicOrganizationsTests(
 			IsDraft = true,
 		}, cancellationToken);
 
-		var directory = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var directory = new AfuntoApi(fixture.CreateHttpClient());
 
 		var page = await directory.GetPublicOrganizationsAsync(
 			1, 10, search: "OpenCount", cancellationToken: cancellationToken);
@@ -48,7 +48,7 @@ public class GetPublicOrganizationsTests(
 		var client = await fixture.CreateAuthenticatedClientAsync("olaf", "olaf123");
 		await CreateOrganizationAsync(client, "BareOrg", cancellationToken);
 
-		var directory = new EinsatzbereitApi(fixture.CreateHttpClient());
+		var directory = new AfuntoApi(fixture.CreateHttpClient());
 
 		var page = await directory.GetPublicOrganizationsAsync(
 			1, 10, search: "BareOrg", cancellationToken: cancellationToken);
@@ -58,7 +58,7 @@ public class GetPublicOrganizationsTests(
 	}
 
 	private static async Task<Guid> CreateOrganizationAsync(
-		EinsatzbereitApi client, string namePrefix, CancellationToken cancellationToken)
+		AfuntoApi client, string namePrefix, CancellationToken cancellationToken)
 	{
 		var organization = await client.CreateOrganizationAsync(
 			new CreateOrganizationRequest { Name = $"{namePrefix} {Guid.NewGuid():N}" },
@@ -67,7 +67,7 @@ public class GetPublicOrganizationsTests(
 	}
 
 	private static async Task PublishOpportunityAsync(
-		EinsatzbereitApi client, Guid organizationId, string title, CancellationToken cancellationToken)
+		AfuntoApi client, Guid organizationId, string title, CancellationToken cancellationToken)
 	{
 		var opportunity = await client.CreateVolunteerOpportunityAsync(
 			new CreateVolunteerOpportunityRequest
