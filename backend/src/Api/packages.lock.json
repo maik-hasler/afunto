@@ -432,7 +432,7 @@
           "AWSSDK.S3": "[4.0.104.1, 4.0.104.1]",
           "Application": "[1.0.0, )",
           "EFCore.NamingConventions": "[10.0.1, 10.0.1]",
-          "MailKit": "[4.18.0, 4.18.0]",
+          "MailKit": "[4.18.1, 4.18.1]",
           "Microsoft.EntityFrameworkCore.Design": "[10.0.12, 10.0.12]",
           "Microsoft.EntityFrameworkCore.Relational": "[10.0.12, 10.0.12]",
           "Microsoft.Extensions.Configuration.Binder": "[10.0.12, 10.0.12]",
@@ -479,11 +479,11 @@
       },
       "MailKit": {
         "type": "CentralTransitive",
-        "requested": "[4.18.0, 4.18.0]",
-        "resolved": "4.18.0",
-        "contentHash": "Sk+n5f4uVKiQKECOCPcFcYtYpIt9rcli7dDboSkWM2TBbTYE7EpfudL+e5a6TFp9eMHOzNYOydzZh0b+zFGK4A==",
+        "requested": "[4.18.1, 4.18.1]",
+        "resolved": "4.18.1",
+        "contentHash": "EssBsnKHvIcH1QpqqsVUEWAlAHI3dkGXJpKAzSNJ8PGjClNynSo9bRkT68jVZkxhREm0Z51Dwu3127f4WfIiRg==",
         "dependencies": {
-          "MimeKit": "4.18.0"
+          "MimeKit": "4.18.1"
         }
       },
       "Microsoft.EntityFrameworkCore": {
