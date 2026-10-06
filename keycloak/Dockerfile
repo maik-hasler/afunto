@@ -13,11 +13,12 @@ COPY themes /opt/keycloak/themes
 COPY realms /opt/keycloak/data/import
 
 # --import-realm's default behavior skips a realm that already exists in the
-# database, so restarts are idempotent by default. That default is overridden
-# at runtime by setting KC_SPI_REALM_IMPORTER_FILE_IMPORT_BEHAVIOR=OVERWRITE_EXISTING,
-# which makes every restart re-import and overwrite the realm from this
-# image's baked copy instead - see keycloak/AGENTS.md for the resolved
-# semantics and why.
+# database, so restarts are idempotent and the production deployment keeps
+# that default: only the first start imports this image's baked realm. Setting
+# KC_SPI_REALM_IMPORTER_FILE_IMPORT_BEHAVIOR=OVERWRITE_EXISTING would instead
+# rebuild the realm from this copy on every restart and drop every user who
+# signed up since. Realm changes after the first import therefore have to be
+# applied through the Admin API.
 ENTRYPOINT ["/opt/keycloak/bin/kc.sh", "start", "--optimized", "--import-realm"]
 
 # This image has neither curl nor wget (security hardening on the UBI9-micro base),

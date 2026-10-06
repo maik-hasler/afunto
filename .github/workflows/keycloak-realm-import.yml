@@ -54,7 +54,7 @@ jobs:
       # That is exactly what #2308 did not do, leaving both docs wrong for months.
       - name: Assert realm security invariants
         env:
-          DEMO_USERS_ENABLED: "true"
+          DEMO_USERS_ENABLED: "false"
         run: |
           set -euo pipefail
           REALM=keycloak/realms/afunto-realm.json
