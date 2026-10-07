@@ -10,7 +10,9 @@ keycloak/
 ├── README.md               Runtime env vars documentation
 ├── realms/
 │   └── afunto-realm.json   Realm config - source of truth for auth setup
-└── themes/afunto/login/    Custom login theme (see "Login Theme" below)
+└── themes/afunto/
+    ├── login/              Custom login theme (see "Login Theme" below)
+    └── email/              Custom email theme (see "Email Theme" below)
 ```
 
 ## Login Theme
@@ -42,6 +44,25 @@ Two constraints that are easy to trip over:
 Colors, radii, shadows and the control recipes are mirrored from the frontend's `@theme` block and `lib/formClasses.ts` / `lib/surfaceClasses.ts` - change them there first, then here. `resources/img/logo.svg` and `favicon.svg` are byte-identical copies of `frontend/public/`; re-copy rather than hand-editing.
 
 Covered by `backend/tests/VisualTests/KeycloakThemeTests.cs`, which drives Keycloak's origin directly and creates throwaway users to reach the required-action pages (`AspireFixture.CreateThrowawayUserAsync`). Not covered, and deliberately: the TOTP/WebAuthn/identity-provider/consent templates, none of which this realm can reach. They fall back to base markup, over the class-hook mappings in `theme.properties` and the fallback rules at the end of `afunto.css`, so they degrade to plain rather than to unstyled.
+
+## Email Theme
+
+**Directory:** `themes/afunto/email/`, selected by the realm's `emailTheme`. `parent=base`. Keycloak's stock German emails say "Sie", mix "Account" and "Konto" and carry typos - the first email a new user ever gets from Afunto is the address verification, so live testers met exactly that (#2402).
+
+The theme overrides the four emails this realm can send, each as HTML and plain text:
+
+| Template | Sent when |
+|---|---|
+| `email-verification.ftl` | every registration (`verifyEmail: true`), or an admin's "send verify email" |
+| `password-reset.ftl` | "forgot password" (`resetPasswordAllowed: true`) |
+| `executeActions.ftl` | an admin's "send required actions email" |
+| `email-update-confirmation.ftl` | a user changing their address while `verifyEmail` is on |
+
+Each is three lines calling the shared `html/template.ftl` / `text/template.ftl` layout with an intro, a button label, the link and a closing note; the copy lives in `messages/messages_{de,en}.properties`. The layout mirrors the backend's own `HtmlEmailWriter` (card, wordmark, one brand-700 button, muted footer) - change both together, since a user receives both kinds. Values are auto-escaped by FreeMarker's HTML output format, so `newEmail` and names need no `kcSanitize`. The messages are MessageFormat patterns like the login theme's: avoid apostrophes in English or double them.
+
+Not overridden, deliberately: the organization invite (the app sends its own, `IKeycloakOrganizationService` never triggers Keycloak's), the `event-*` emails (they need the `email` event listener, which this realm does not enable), identity-provider linking and the SMTP test email. They fall back to base.
+
+Covered by `backend/tests/IntegrationTests/Email/RealmSmtpDeliveryTests.cs`, which asserts the themed subject of a real verification email delivered to Mailpit.
 
 ## Realm Configuration
 

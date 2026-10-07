@@ -99,4 +99,4 @@ Every email shares one shape - greeting, one or two sentences, a block of facts 
 * Bundling only collapses what is committed before the outbox handles the first event - a bulk confirmation, a cancelled series or opportunity. An organizer confirming dates one click at a time still sends one email per click.
 * Unsubscribe links in cancellation emails sent before this change point at a type that no longer exists; the unsubscribe page reports that instead of unsubscribing.
 * A digest that mixes sign-ups and withdrawals carries the settings link but no one-click unsubscribe link, because the footer has room for one type.
-* Keycloak's own emails (address verification, password reset) are outside this decision; they still use Keycloak's default email theme.
+* Keycloak's own emails (address verification, password reset, admin-requested account actions, address change) follow the same shape through the realm's `afunto` email theme, see `keycloak/AGENTS.md`. They pass the rule through its second half: each carries a link the recipient has to follow to finish what they or an admin started.

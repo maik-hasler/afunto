@@ -25,6 +25,12 @@ Optimized multi-stage image, configured entirely through environment variables a
 
 `KC_BOOTSTRAP_ADMIN_USERNAME`/`KC_BOOTSTRAP_ADMIN_PASSWORD` only bootstrap a login for Keycloak's own **master** realm admin console - not a user in the `afunto` application realm. The demo users for local dev (`vera`/`olaf`/`admin` - see the root `README.md`'s Test users table) are not part of this released image; they live in `keycloak/dev/demo-users.json`, which only the Aspire AppHost imports. To create a real administrator: sign in to the admin console (`/admin/master/console`) with the bootstrap credentials, switch to the `afunto` realm, create a user there (or promote one who self-registered through the app), and assign the `admin` realm role on that user's Role mapping tab.
 
+## Upgrading an existing deployment
+
+The realm is imported on the first start only (see the `Dockerfile` comment), so a realm setting added after that never reaches a running deployment by itself. One such setting needs a manual step once:
+
+- **Email theme** (#2402): Admin console → realm `afunto` → Realm settings → Themes → Email theme → `afunto`, or `PUT /admin/realms/afunto` with `{"emailTheme": "afunto"}`. Until then Keycloak keeps sending its stock verification and password-reset emails.
+
 ## Local development
 
 Local Aspire runs (`dotnet run --project backend/src/Aspire/AppHost`) do not use this image - `AppHost.cs` launches the stock `quay.io/keycloak/keycloak` container directly with `KC_DB=dev-file`, so none of the above applies there.

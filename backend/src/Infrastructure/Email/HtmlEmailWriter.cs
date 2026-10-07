@@ -7,7 +7,8 @@ namespace Infrastructure.Email;
 // The text/html alternative. Deliberately plain: one centred card, inline styles and
 // layout tables only, because many mail clients drop <style> blocks and ignore modern
 // CSS. Every piece of text is HTML-encoded here - opportunity titles, names and reasons
-// are user input and must never reach the markup unescaped.
+// are user input and must never reach the markup unescaped. Keycloak's own emails use the
+// same layout (keycloak/themes/afunto/email/html/template.ftl); change both together.
 internal static class HtmlEmailWriter
 {
 	// Brand tokens from the frontend (brand-50/700/800). White on brand-700 passes WCAG AA.
