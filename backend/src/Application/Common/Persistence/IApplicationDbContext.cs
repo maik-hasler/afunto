@@ -260,8 +260,31 @@ public interface IApplicationDbContext
 	Task<bool> CanConnectAsync(
 		CancellationToken cancellationToken = default);
 
+	// Marks each of the volunteer's engagements on this opportunity that is in `status` and
+	// not yet notified (Engagement.StatusNotifiedAt) as notified - one conditional UPDATE per
+	// row - and returns exactly the engagements this call won. Concurrent handlers for sibling
+	// events therefore never put the same engagement into two emails.
+	Task<List<Engagement>> ClaimStatusNotificationsAsync(
+		UserId volunteerId,
+		VolunteerOpportunityId opportunityId,
+		EngagementStatus status,
+		DateTimeOffset now,
+		CancellationToken cancellationToken = default);
+
+	// Undoes ClaimStatusNotificationsAsync after a failed send, so the outbox retry claims
+	// (and emails) the same engagements again.
+	Task ReleaseStatusNotificationsAsync(
+		IReadOnlyCollection<EngagementId> engagementIds,
+		CancellationToken cancellationToken = default);
+
+	Task MarkRemindersSentAsync(
+		IReadOnlyCollection<EngagementId> engagementIds,
+		DateTimeOffset now,
+		CancellationToken cancellationToken = default);
+
 	Task EnqueueOrganizerDigestItemAsync(
 		UserId organizerId,
+		OrganizationId organizationId,
 		string opportunityTitle,
 		string volunteerName,
 		EmailNotificationType kind,

@@ -1,10 +1,8 @@
-using System.Globalization;
 using Application.Common.Email;
 using Application.Common.Keycloak;
 using Application.Common.Localization;
 using Application.Common.Messaging;
 using Application.Common.Persistence;
-using Application.Common.Time;
 using Domain.Engagements;
 using Domain.Users;
 using Microsoft.Extensions.Logging;
@@ -16,7 +14,7 @@ internal sealed class EngagementReminderDueHandler(
 	IKeycloakUserService keycloakUserService,
 	IEmailService emailService,
 	IEmailTemplateRenderer emailTemplateRenderer,
-	IUnsubscribeLinkBuilder unsubscribeLinkBuilder,
+	IEmailLinkBuilder emailLinkBuilder,
 	ILogger<EngagementReminderDueHandler> logger)
 	: INotificationHandler<EngagementReminderDueDomainEvent>
 {
@@ -42,53 +40,38 @@ internal sealed class EngagementReminderDueHandler(
 		if (!volunteerUser.IsSubscribedTo(EmailNotificationType.EngagementReminder))
 		{
 			logger.LogInformation(
-				"Skipping 24h reminder for engagement {EngagementId}: volunteer opted out of reminder emails",
+				"Skipping reminder for engagement {EngagementId}: volunteer opted out of reminder emails",
 				notification.EngagementId.Value);
 			return;
 		}
 
-		var user = await keycloakUserService.GetUserAsync(notification.VolunteerId.Value, cancellationToken);
-
-		var displayName = $"{user.FirstName} {user.LastName}".Trim();
-		if (string.IsNullOrEmpty(displayName))
-			displayName = user.Username;
-
+		var volunteer = await keycloakUserService.GetUserAsync(notification.VolunteerId.Value, cancellationToken);
 		var language = SupportedLanguages.Resolve(volunteerUser.PreferredLanguage);
 
-		var startFormatted = FormatStart(timeSlot.StartDateTime, language);
-
-		var content = emailTemplateRenderer.Render(
+		var draft = new EmailDraft(
 			EmailTemplateKind.EngagementReminder,
 			language,
-			new Dictionary<string, string>
+			volunteer.FirstName ?? volunteer.Username,
+			emailLinkBuilder.MySignUps())
+		{
+			Placeholders = new Dictionary<string, string>
 			{
-				["DisplayName"] = displayName,
-				["OpportunityTitle"] = opportunity.TitleDe,
-				["StartFormatted"] = startFormatted,
-			});
-
-		var unsubscribeUrl = unsubscribeLinkBuilder.Build(
-			notification.VolunteerId, volunteerUser.UnsubscribeToken, EmailNotificationType.EngagementReminder);
-
-		var subject = content.Subject;
-		var body = EmailFooter.Append(emailTemplateRenderer, language, content.Body, unsubscribeUrl);
+				["OpportunityTitle"] = EmailFacts.OpportunityTitle(opportunity, language),
+			},
+			Facts = [EmailFacts.Schedule(timeSlot), EmailFacts.Location(opportunity)],
+			UnsubscribeUrl = emailLinkBuilder.Unsubscribe(
+				notification.VolunteerId, volunteerUser.UnsubscribeToken, EmailNotificationType.EngagementReminder),
+		};
 
 		var results = await emailService.SendBatchAsync(
-			[new EmailMessage(user.Email, subject, body, notification.EngagementId.Value.ToString())], cancellationToken);
+			[new EmailMessage(volunteer.Email, emailTemplateRenderer.Render(draft), notification.EngagementId.Value.ToString())],
+			cancellationToken);
 		if (!results[0])
 			throw new InvalidOperationException(
-				$"Failed to send 24h reminder email for engagement {notification.EngagementId.Value}");
+				$"Failed to send reminder email for engagement {notification.EngagementId.Value}");
 
 		logger.LogInformation(
-			"Sent 24h reminder for engagement {EngagementId}",
+			"Sent reminder for engagement {EngagementId}",
 			notification.EngagementId.Value);
-	}
-
-	private static string FormatStart(DateTimeOffset startDateTime, string language)
-	{
-		var berlinTime = TimeZoneInfo.ConvertTime(startDateTime, CanonicalTimeZone.Value);
-		var culture = CultureInfo.GetCultureInfo(language == "de" ? "de-DE" : "en-GB");
-		var pattern = language == "de" ? "dddd, d. MMMM yyyy 'um' HH:mm" : "dddd, d. MMMM yyyy 'at' HH:mm";
-		return berlinTime.ToString(pattern, culture);
 	}
 }

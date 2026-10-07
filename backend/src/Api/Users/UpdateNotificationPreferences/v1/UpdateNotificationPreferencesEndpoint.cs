@@ -41,7 +41,6 @@ internal sealed class UpdateNotificationPreferencesEndpoint
 			request.NotifyOnNewSignUp,
 			request.NotifyOnWithdrawal,
 			request.NotifyOnEngagementConfirmed,
-			request.NotifyOnEngagementCancelled,
 			request.NotifyOnEngagementReminder);
 
 		await sender.Send(command, cancellationToken);

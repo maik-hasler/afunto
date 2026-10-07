@@ -97,7 +97,7 @@ internal sealed class EngagementReminderJob(
 		int maxBatchSize,
 		CancellationToken cancellationToken = default)
 	{
-		var windowEnd = now.AddHours(25);
+		var windowEnd = now + Engagement.ReminderLeadTime;
 
 		// A shift's start can pass while its engagement is still unreminded - a long
 		// outage, a backlog bigger than maxBatchSize, or (before this fix) a slot that

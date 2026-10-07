@@ -16,6 +16,8 @@ internal sealed class PendingOrganizerDigestItemConfiguration
 
 		builder.Property(i => i.OrganizerId).IsRequired();
 
+		builder.Property(i => i.OrganizationId);
+
 		builder.Property(i => i.OpportunityTitle).IsRequired();
 
 		builder.Property(i => i.VolunteerName).IsRequired();

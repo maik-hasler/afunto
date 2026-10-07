@@ -15,7 +15,8 @@ internal sealed class ResendInvitationCommandHandler(
 	IUnitOfWork unitOfWork,
 	IKeycloakUserService keycloakUserService,
 	IEmailService emailService,
-	IEmailTemplateRenderer emailTemplateRenderer)
+	IEmailTemplateRenderer emailTemplateRenderer,
+	IEmailLinkBuilder emailLinkBuilder)
 	: ICommandHandler<ResendInvitationCommand, bool>
 {
 	public async ValueTask<bool> Handle(
@@ -52,20 +53,14 @@ internal sealed class ResendInvitationCommandHandler(
 		var inviteeUser = (await dbContext.GetOrCreateUsersAsync([invitation.InviteeId], cancellationToken))[0];
 		var inviteeLanguage = SupportedLanguages.Resolve(inviteeUser.PreferredLanguage);
 
-		var content = emailTemplateRenderer.Render(
-			EmailTemplateKind.InvitationReceived,
+		var draft = InvitationEmail.Draft(
 			inviteeLanguage,
-			new Dictionary<string, string>
-			{
-				["InviteeName"] = invitee.FirstName ?? invitee.Username,
-				["OrganizationName"] = organization.Name,
-			});
+			invitee.FirstName ?? invitee.Username,
+			organization.Name,
+			emailLinkBuilder);
 
 		await emailService.SendAsync(
-			invitee.Email,
-			content.Subject,
-			content.Body,
-			invitation.Id.Value.ToString(),
+			new EmailMessage(invitee.Email, emailTemplateRenderer.Render(draft), invitation.Id.Value.ToString()),
 			cancellationToken);
 
 		return true;

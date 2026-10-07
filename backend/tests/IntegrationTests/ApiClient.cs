@@ -13165,9 +13165,6 @@ namespace IntegrationTests
         [System.Text.Json.Serialization.JsonPropertyName("notifyOnEngagementConfirmed")]
         public bool NotifyOnEngagementConfirmed { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("notifyOnEngagementCancelled")]
-        public bool NotifyOnEngagementCancelled { get; set; } = default!;
-
         [System.Text.Json.Serialization.JsonPropertyName("notifyOnEngagementReminder")]
         public bool NotifyOnEngagementReminder { get; set; } = default!;
 
@@ -14451,9 +14448,6 @@ namespace IntegrationTests
 
         [System.Text.Json.Serialization.JsonPropertyName("notifyOnEngagementConfirmed")]
         public bool NotifyOnEngagementConfirmed { get; set; } = default!;
-
-        [System.Text.Json.Serialization.JsonPropertyName("notifyOnEngagementCancelled")]
-        public bool NotifyOnEngagementCancelled { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("notifyOnEngagementReminder")]
         public bool NotifyOnEngagementReminder { get; set; } = default!;

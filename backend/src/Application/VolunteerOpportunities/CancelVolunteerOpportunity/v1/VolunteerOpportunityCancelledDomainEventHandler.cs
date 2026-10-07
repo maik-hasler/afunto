@@ -30,9 +30,11 @@ internal sealed class VolunteerOpportunityCancelledDomainEventHandler(
 			return;
 		}
 
+		// The organizer's own words only, never a canned English sentence: the reason is
+		// shown verbatim in the volunteer's email and on /my-signups, in either language.
 		var engagementCancellationReason = string.IsNullOrWhiteSpace(notification.Reason)
-			? "Opportunity was cancelled."
-			: $"Opportunity was cancelled: {notification.Reason}";
+			? null
+			: notification.Reason;
 
 		await VolunteerOpportunityEngagementCascadeHelper.NotifyAndCancelActiveEngagementsAsync(
 			dbContext,

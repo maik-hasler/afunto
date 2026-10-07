@@ -1326,14 +1326,13 @@
     },
     "notificationPreferences": {
       "title": "Email notifications",
-      "description": "Choose which transactional emails you want to receive. Every email also includes an unsubscribe link for the type it belongs to.",
+      "description": "Choose which emails you want to receive. Cancellations and changes to the time or place of your sign-ups always reach you by email, so you never turn up for nothing.",
       "inAppNotice": "These settings control email only. You'll always see this and other activity - like opportunity changes or organization invitations - as notifications in the bell menu; that can't be turned off.",
       "organizerGroupLabel": "As an organizer",
       "volunteerGroupLabel": "As a volunteer",
       "newSignUp": "New sign-ups for opportunities you organize",
       "withdrawal": "Volunteer withdrawals from opportunities you organize",
       "engagementConfirmed": "Your sign-up is confirmed",
-      "engagementCancelled": "Your sign-up is cancelled",
       "engagementReminder": "Reminder before your opportunity starts",
       "saveError": "Failed to save notification preferences.",
       "loadError": "Could not load notification preferences."

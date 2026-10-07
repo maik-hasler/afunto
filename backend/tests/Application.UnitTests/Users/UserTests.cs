@@ -16,7 +16,6 @@ public class UserTests
 		user.NotifyOnNewSignUp.Should().BeTrue();
 		user.NotifyOnWithdrawal.Should().BeTrue();
 		user.NotifyOnEngagementConfirmed.Should().BeTrue();
-		user.NotifyOnEngagementCancelled.Should().BeTrue();
 		user.NotifyOnEngagementReminder.Should().BeTrue();
 		foreach (var type in Enum.GetValues<EmailNotificationType>())
 			user.IsSubscribedTo(type).Should().BeTrue();
@@ -44,7 +43,7 @@ public class UserTests
 	}
 
 	[Test]
-	public void UpdateNotificationPreferences_ShouldOverwriteAllFiveFlags()
+	public void UpdateNotificationPreferences_ShouldOverwriteAllFourFlags()
 	{
 		// Arrange
 		var user = User.Create(UserId.New());
@@ -54,14 +53,12 @@ public class UserTests
 			notifyOnNewSignUp: false,
 			notifyOnWithdrawal: false,
 			notifyOnEngagementConfirmed: false,
-			notifyOnEngagementCancelled: false,
 			notifyOnEngagementReminder: false);
 
 		// Assert
 		user.NotifyOnNewSignUp.Should().BeFalse();
 		user.NotifyOnWithdrawal.Should().BeFalse();
 		user.NotifyOnEngagementConfirmed.Should().BeFalse();
-		user.NotifyOnEngagementCancelled.Should().BeFalse();
 		user.NotifyOnEngagementReminder.Should().BeFalse();
 	}
 
@@ -95,7 +92,6 @@ public class UserTests
 		user.NotifyOnNewSignUp.Should().BeTrue();
 		user.NotifyOnWithdrawal.Should().BeTrue();
 		user.NotifyOnEngagementConfirmed.Should().BeTrue();
-		user.NotifyOnEngagementCancelled.Should().BeTrue();
 	}
 
 	[Test]

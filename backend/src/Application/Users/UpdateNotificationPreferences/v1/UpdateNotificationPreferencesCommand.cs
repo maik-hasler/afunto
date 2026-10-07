@@ -8,6 +8,5 @@ public sealed record UpdateNotificationPreferencesCommand(
 	bool NotifyOnNewSignUp,
 	bool NotifyOnWithdrawal,
 	bool NotifyOnEngagementConfirmed,
-	bool NotifyOnEngagementCancelled,
 	bool NotifyOnEngagementReminder)
 	: ICommand<bool>;

@@ -36,7 +36,7 @@ internal sealed class VolunteerOpportunityUnpublishedDomainEventHandler(
 			notification.OpportunityId,
 			opportunity.TitleDe,
 			NotificationKind.OpportunityUnpublished,
-			"Opportunity was unpublished.",
+			engagementCancellationReason: null,
 			notifyPerEngagement: true,
 			logger,
 			cancellationToken);

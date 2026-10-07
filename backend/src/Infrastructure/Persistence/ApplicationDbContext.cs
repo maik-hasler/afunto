@@ -673,15 +673,60 @@ internal sealed class ApplicationDbContext(
 		CancellationToken cancellationToken = default) =>
 		Database.CanConnectAsync(cancellationToken);
 
+	public async Task<List<Engagement>> ClaimStatusNotificationsAsync(
+		UserId volunteerId,
+		VolunteerOpportunityId opportunityId,
+		EngagementStatus status,
+		DateTimeOffset now,
+		CancellationToken cancellationToken = default)
+	{
+		var candidates = await Set<Engagement>()
+			.AsNoTracking()
+			.Where(e => e.VolunteerId == volunteerId
+				&& e.OpportunityId == opportunityId
+				&& e.Status == status
+				&& e.StatusNotifiedAt == null)
+			.ToListAsync(cancellationToken);
+
+		var claimed = new List<Engagement>(candidates.Count);
+		foreach (var candidate in candidates)
+		{
+			var affected = await Set<Engagement>()
+				.Where(e => e.Id == candidate.Id && e.Status == status && e.StatusNotifiedAt == null)
+				.ExecuteUpdateAsync(s => s.SetProperty(e => e.StatusNotifiedAt, now), cancellationToken);
+
+			if (affected == 1)
+				claimed.Add(candidate);
+		}
+
+		return claimed;
+	}
+
+	public async Task ReleaseStatusNotificationsAsync(
+		IReadOnlyCollection<EngagementId> engagementIds,
+		CancellationToken cancellationToken = default) =>
+		await Set<Engagement>()
+			.Where(e => engagementIds.Contains(e.Id))
+			.ExecuteUpdateAsync(s => s.SetProperty(e => e.StatusNotifiedAt, (DateTimeOffset?)null), cancellationToken);
+
+	public async Task MarkRemindersSentAsync(
+		IReadOnlyCollection<EngagementId> engagementIds,
+		DateTimeOffset now,
+		CancellationToken cancellationToken = default) =>
+		await Set<Engagement>()
+			.Where(e => engagementIds.Contains(e.Id) && e.ReminderSentAt == null)
+			.ExecuteUpdateAsync(s => s.SetProperty(e => e.ReminderSentAt, now), cancellationToken);
+
 	public async Task EnqueueOrganizerDigestItemAsync(
 		UserId organizerId,
+		OrganizationId organizationId,
 		string opportunityTitle,
 		string volunteerName,
 		EmailNotificationType kind,
 		CancellationToken cancellationToken = default) =>
 		await Set<PendingOrganizerDigestItem>().AddAsync(
 			PendingOrganizerDigestItem.Create(
-				organizerId.Value, opportunityTitle, volunteerName, kind, DateTime.UtcNow),
+				organizerId.Value, organizationId.Value, opportunityTitle, volunteerName, kind, DateTime.UtcNow),
 			cancellationToken);
 
 	protected override void OnModelCreating(

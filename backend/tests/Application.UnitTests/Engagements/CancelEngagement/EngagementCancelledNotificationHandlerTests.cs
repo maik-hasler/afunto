@@ -3,225 +3,206 @@ using Application.Common.Keycloak;
 using Application.Common.Persistence;
 using Application.Engagements.CancelEngagement.v1;
 using AwesomeAssertions;
-using Domain.Common;
 using Domain.Engagements;
 using Domain.Organizations;
-using Domain.Primitives;
 using Domain.Users;
 using Domain.VolunteerOpportunities;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 
 namespace Application.UnitTests.Engagements.CancelEngagement;
 
 public class EngagementCancelledNotificationHandlerTests
 {
+	private static readonly DateTimeOffset Now = new(2026, 10, 7, 12, 0, 0, TimeSpan.Zero);
+
 	private readonly IApplicationDbContext _dbContext = Substitute.For<IApplicationDbContext>();
 	private readonly IAggregateRepository<VolunteerOpportunity, VolunteerOpportunityId> _opportunityRepo =
 		Substitute.For<IAggregateRepository<VolunteerOpportunity, VolunteerOpportunityId>>();
 	private readonly IKeycloakUserService _keycloakUserService = Substitute.For<IKeycloakUserService>();
 	private readonly IEmailService _emailService = Substitute.For<IEmailService>();
 	private readonly IEmailTemplateRenderer _emailTemplateRenderer = Substitute.For<IEmailTemplateRenderer>();
-	private readonly IUnsubscribeLinkBuilder _unsubscribeLinkBuilder = Substitute.For<IUnsubscribeLinkBuilder>();
+	private readonly IEmailLinkBuilder _emailLinkBuilder = Substitute.For<IEmailLinkBuilder>();
 	private readonly IPinGenerator _pinGenerator = Substitute.For<IPinGenerator>();
 	private readonly EngagementCancelledNotificationHandler _sut;
 
-	private static readonly OrganizationId DefaultOrgId = OrganizationId.New();
-	private static readonly Address DefaultAddress = Address.Create("Teststraße", "1", "12345", "Berlin").Value;
+	private readonly UserId _volunteerId = UserId.New();
+	private readonly VolunteerOpportunity _opportunity;
+	private EmailDraft? _renderedDraft;
 
 	public EngagementCancelledNotificationHandlerTests()
 	{
+		_opportunity = VolunteerOpportunity.Create(
+			OrganizationId.New(), "Tafel-Ausgabe", null, "Beschreibung", null, true, null,
+			Occurrence.Recurring, ParticipationType.ScheduledSlots, CheckInMethod.None, _pinGenerator,
+			status: OpportunityStatus.Draft).Value;
+
 		_dbContext.VolunteerOpportunities.Returns(_opportunityRepo);
 		_opportunityRepo
 			.FindAsync(Arg.Any<VolunteerOpportunityId>(), Arg.Any<CancellationToken>())
-			.Returns(CreateDefaultOpportunity());
+			.Returns(_opportunity);
 		_keycloakUserService
 			.GetUserAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-			.Returns(new KeycloakUserProfile(Guid.NewGuid(), "user", null, null, "user@example.com"));
+			.Returns(new KeycloakUserProfile(Guid.NewGuid(), "vera", "Vera", null, "vera@example.com"));
 		_emailTemplateRenderer
-			.Render(Arg.Any<EmailTemplateKind>(), Arg.Any<string>(), Arg.Any<IReadOnlyDictionary<string, string>>())
-			.Returns(new EmailContent("Test Subject", "Test Body"));
-		_emailTemplateRenderer
-			.Render(EmailTemplateKind.EmailFooter, Arg.Any<string>(), Arg.Any<IReadOnlyDictionary<string, string>>())
-			.Returns(call => new EmailContent(
-				string.Empty,
-				$"\n\n---\n{((IReadOnlyDictionary<string, string>)call[2]!)["UnsubscribeUrl"]}"));
+			.Render(Arg.Do<EmailDraft>(draft => _renderedDraft = draft))
+			.Returns(new RenderedEmail("Subject", "Text", "<p>Html</p>", null));
+		_emailLinkBuilder.Opportunities().Returns("https://afunto.example/opportunities");
 		_dbContext.GetOrCreateUsersAsync(Arg.Any<IReadOnlyCollection<UserId>>(), Arg.Any<CancellationToken>())
 			.Returns(call => ((IReadOnlyCollection<UserId>)call[0]!).Select(User.Create).ToList());
+
 		_sut = new EngagementCancelledNotificationHandler(
-			_dbContext, _keycloakUserService, _emailService, _emailTemplateRenderer, _unsubscribeLinkBuilder, NullLogger<EngagementCancelledNotificationHandler>.Instance);
+			_dbContext, _keycloakUserService, _emailService, _emailTemplateRenderer, _emailLinkBuilder,
+			new FixedTimeProvider(Now), NullLogger<EngagementCancelledNotificationHandler>.Instance);
 	}
 
-	private VolunteerOpportunity CreateDefaultOpportunity() =>
-		VolunteerOpportunity.Create(DefaultOrgId, "Test", null, "Test", null, false, DefaultAddress, Occurrence.OneTime, ParticipationType.ScheduledSlots, CheckInMethod.None, _pinGenerator, status: OpportunityStatus.Draft).Value;
-
 	[Test]
-	public async Task Handle_ShouldEmailVolunteer_WhenEngagementCancelled(
+	public async Task Handle_ShouldSendOneEmailForAWholeCancelledSeries(
 		CancellationToken cancellationToken)
 	{
-		// Arrange
-		var volunteerId = UserId.New();
-		_keycloakUserService
-			.GetUserAsync(volunteerId.Value, Arg.Any<CancellationToken>())
-			.Returns(new KeycloakUserProfile(volunteerId.Value, "vera", "Vera", null, "vera@example.com"));
-		var notification = new EngagementCancelledDomainEvent(
-			EngagementId.New(), volunteerId, VolunteerOpportunityId.New(), "No longer needed.");
+		var claimed = new[] { CancelledSlotEngagement(Now.AddDays(7)), CancelledSlotEngagement(Now.AddDays(14)) };
+		ClaimReturns(claimed);
 
-		// Act
-		await _sut.Handle(notification, cancellationToken);
+		await _sut.Handle(EventFor(claimed[0]), cancellationToken);
 
-		// Assert
 		await _emailService.Received(1).SendAsync(
-			"vera@example.com",
-			"Test Subject",
-			Arg.Is<string>(body => body!.StartsWith("Test Body")),
-			Arg.Any<string>(),
-			cancellationToken);
+			Arg.Is<EmailMessage>(m => m.To == "vera@example.com"), cancellationToken);
+		_renderedDraft!.Kind.Should().Be(EmailTemplateKind.EngagementCancelled);
+		_renderedDraft.Count.Should().Be(2);
+		_renderedDraft.Facts.OfType<EmailFact.Schedule>().Single().Slots.Should().HaveCount(2);
 	}
 
 	[Test]
-	public async Task Handle_ShouldRenderCancellationEmail_InVolunteersPreferredLanguage(
+	public async Task Handle_ShouldEmailEvenAVolunteerWhoOptedOutOfEverythingElse(
 		CancellationToken cancellationToken)
 	{
-		// Arrange
-		var volunteerId = UserId.New();
-		var volunteer = User.Create(volunteerId);
-		volunteer.SetPreferredLanguage("en");
+		var optedOut = User.Create(_volunteerId);
+		optedOut.UpdateNotificationPreferences(
+			notifyOnNewSignUp: false,
+			notifyOnWithdrawal: false,
+			notifyOnEngagementConfirmed: false,
+			notifyOnEngagementReminder: false);
 		_dbContext.GetOrCreateUsersAsync(Arg.Any<IReadOnlyCollection<UserId>>(), Arg.Any<CancellationToken>())
-			.Returns([volunteer]);
-		var notification = new EngagementCancelledDomainEvent(
-			EngagementId.New(), volunteerId, VolunteerOpportunityId.New(), null);
+			.Returns([optedOut]);
+		var engagement = CancelledSlotEngagement(Now.AddDays(7));
+		ClaimReturns([engagement]);
 
-		// Act
-		await _sut.Handle(notification, cancellationToken);
+		await _sut.Handle(EventFor(engagement), cancellationToken);
 
-		// Assert
-		_emailTemplateRenderer.Received(1).Render(
-			EmailTemplateKind.EngagementCancelled,
-			"en",
-			Arg.Any<IReadOnlyDictionary<string, string>>());
+		await _emailService.Received(1).SendAsync(Arg.Any<EmailMessage>(), cancellationToken);
+		_renderedDraft!.UnsubscribeUrl.Should().BeNull("a cancellation cannot be unsubscribed from");
 	}
 
 	[Test]
-	public async Task Handle_ShouldEmailVolunteer_WhenSubscribedToEngagementCancelled(
+	public async Task Handle_ShouldListEachDistinctReasonOnce(
 		CancellationToken cancellationToken)
 	{
-		// Arrange
-		_unsubscribeLinkBuilder.Build(Arg.Any<UserId>(), Arg.Any<Guid>(), Arg.Any<EmailNotificationType>())
-			.Returns("https://example.com/unsubscribe");
-		var notification = new EngagementCancelledDomainEvent(
-			EngagementId.New(), UserId.New(), VolunteerOpportunityId.New(), null);
+		var first = CancelledSlotEngagement(Now.AddDays(7), "Zu wenig Helfende");
+		var second = CancelledSlotEngagement(Now.AddDays(14), "Zu wenig Helfende");
+		var withoutReason = CancelledSlotEngagement(Now.AddDays(21));
+		ClaimReturns([first, second, withoutReason]);
 
-		// Act
-		await _sut.Handle(notification, cancellationToken);
+		await _sut.Handle(EventFor(first), cancellationToken);
 
-		// Assert
-		await _emailService.Received(1).SendAsync(
-			"user@example.com",
-			Arg.Any<string>(),
-			Arg.Is<string>(body => body!.Contains("https://example.com/unsubscribe")),
-			Arg.Any<string>(),
-			cancellationToken);
+		_renderedDraft!.Facts.OfType<EmailFact.Reason>().Should().ContainSingle()
+			.Which.Text.Should().Be("Zu wenig Helfende");
 	}
 
 	[Test]
-	public async Task Handle_ShouldRenderReasonSuffix_WhenReasonIsGiven(
+	public async Task Handle_ShouldUseTheInterestTemplate_ForAnIndividualContactEngagement(
 		CancellationToken cancellationToken)
 	{
-		// Arrange
-		var notification = new EngagementCancelledDomainEvent(
-			EngagementId.New(), UserId.New(), VolunteerOpportunityId.New(), "Not enough sign-ups");
+		var engagement = Engagement.CreateIndividualContact(_opportunity.Id, _volunteerId, "Ich helfe gern").Value;
+		engagement.Cancel();
+		ClaimReturns([engagement]);
 
-		// Act
-		await _sut.Handle(notification, cancellationToken);
+		await _sut.Handle(EventFor(engagement), cancellationToken);
 
-		// Assert
-		_emailTemplateRenderer.Received(1).Render(
-			EmailTemplateKind.EngagementCancelledReasonSuffix,
-			Arg.Any<string>(),
-			Arg.Is<IReadOnlyDictionary<string, string>>(p => p!["Reason"] == "Not enough sign-ups"));
+		_renderedDraft!.Kind.Should().Be(EmailTemplateKind.InterestCancelled);
 	}
 
 	[Test]
-	public async Task Handle_ShouldNotRenderReasonSuffix_WhenNoReasonIsGiven(
+	public async Task Handle_ShouldFallBackToTheEventsTitleAndSnapshotDates_WhenTheOpportunityWasDeleted(
 		CancellationToken cancellationToken)
 	{
-		// Arrange
-		var notification = new EngagementCancelledDomainEvent(
-			EngagementId.New(), UserId.New(), VolunteerOpportunityId.New(), null);
+		var engagement = CancelledSlotEngagement(Now.AddDays(7));
+		ClaimReturns([engagement]);
+		_opportunityRepo
+			.FindAsync(Arg.Any<VolunteerOpportunityId>(), Arg.Any<CancellationToken>())
+			.Returns((VolunteerOpportunity?)null);
 
-		// Act
-		await _sut.Handle(notification, cancellationToken);
+		await _sut.Handle(EventFor(engagement, opportunityTitle: "Gelöschter Einsatz"), cancellationToken);
 
-		// Assert
-		_emailTemplateRenderer.DidNotReceive().Render(
-			EmailTemplateKind.EngagementCancelledReasonSuffix,
-			Arg.Any<string>(),
-			Arg.Any<IReadOnlyDictionary<string, string>>());
+		_renderedDraft!.Placeholders["OpportunityTitle"].Should().Be("Gelöschter Einsatz");
+		_renderedDraft.Facts.OfType<EmailFact.Schedule>().Single().Slots.Single().Start
+			.Should().Be(engagement.TimeSlotStartDateTime!.Value);
 	}
 
 	[Test]
-	public async Task Handle_ShouldNotEmailVolunteer_WhenOptedOutOfEngagementCancelled(
-		CancellationToken cancellationToken)
-	{
-		// Arrange
-		var volunteerId = UserId.New();
-		var optedOutVolunteer = User.Create(volunteerId);
-		optedOutVolunteer.UpdateNotificationPreferences(
-			notifyOnNewSignUp: true,
-			notifyOnWithdrawal: true,
-			notifyOnEngagementConfirmed: true,
-			notifyOnEngagementCancelled: false,
-			notifyOnEngagementReminder: true);
-		_dbContext.GetOrCreateUsersAsync(Arg.Any<IReadOnlyCollection<UserId>>(), Arg.Any<CancellationToken>())
-			.Returns([optedOutVolunteer]);
-		var notification = new EngagementCancelledDomainEvent(
-			EngagementId.New(), volunteerId, VolunteerOpportunityId.New(), null);
-
-		// Act
-		await _sut.Handle(notification, cancellationToken);
-
-		// Assert
-		await _emailService.DidNotReceive().SendAsync(
-			Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
-	}
-
-	[Test]
-	public async Task Handle_ShouldUseOpportunityTitleFromEvent_WhenOpportunityNoLongerExists(
+	public async Task Handle_ShouldNeitherClaimNorEmail_WhenNoTitleIsAvailable(
 		CancellationToken cancellationToken)
 	{
 		_opportunityRepo
 			.FindAsync(Arg.Any<VolunteerOpportunityId>(), Arg.Any<CancellationToken>())
 			.Returns((VolunteerOpportunity?)null);
-		var notification = new EngagementCancelledDomainEvent(
-			EngagementId.New(), UserId.New(), VolunteerOpportunityId.New(), null, OpportunityTitle: "Deleted Opportunity");
 
-		// Act
-		await _sut.Handle(notification, cancellationToken);
+		await _sut.Handle(
+			new EngagementCancelledDomainEvent(EngagementId.New(), _volunteerId, VolunteerOpportunityId.New(), null),
+			cancellationToken);
 
-		// Assert
-		_emailTemplateRenderer.Received(1).Render(
-			EmailTemplateKind.EngagementCancelled,
-			Arg.Any<string>(),
-			Arg.Is<IReadOnlyDictionary<string, string>>(p => p!["OpportunityTitle"] == "Deleted Opportunity"));
+		await _dbContext.DidNotReceive().ClaimStatusNotificationsAsync(
+			Arg.Any<UserId>(), Arg.Any<VolunteerOpportunityId>(), Arg.Any<EngagementStatus>(), Arg.Any<DateTimeOffset>(), Arg.Any<CancellationToken>());
+		await _emailService.DidNotReceive().SendAsync(Arg.Any<EmailMessage>(), Arg.Any<CancellationToken>());
 	}
 
 	[Test]
-	public async Task Handle_ShouldSkipSendingEmail_WhenOpportunityGoneAndEventHasNoTitle(
+	public async Task Handle_ShouldSendNothing_WhenASiblingEventAlreadyClaimedEveryEngagement(
 		CancellationToken cancellationToken)
 	{
-		// Arrange
-		_opportunityRepo
-			.FindAsync(Arg.Any<VolunteerOpportunityId>(), Arg.Any<CancellationToken>())
-			.Returns((VolunteerOpportunity?)null);
-		var notification = new EngagementCancelledDomainEvent(
-			EngagementId.New(), UserId.New(), VolunteerOpportunityId.New(), null);
+		var engagement = CancelledSlotEngagement(Now.AddDays(7));
+		ClaimReturns([]);
 
-		// Act
-		await _sut.Handle(notification, cancellationToken);
+		await _sut.Handle(EventFor(engagement), cancellationToken);
 
-		// Assert
-		await _emailService.DidNotReceive().SendAsync(
-			Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+		await _emailService.DidNotReceive().SendAsync(Arg.Any<EmailMessage>(), Arg.Any<CancellationToken>());
+	}
+
+	[Test]
+	public async Task Handle_ShouldReleaseTheClaimAndRethrow_WhenSendingFails(
+		CancellationToken cancellationToken)
+	{
+		var engagement = CancelledSlotEngagement(Now.AddDays(7));
+		ClaimReturns([engagement]);
+		_emailService
+			.SendAsync(Arg.Any<EmailMessage>(), Arg.Any<CancellationToken>())
+			.ThrowsAsync(new InvalidOperationException("SMTP down"));
+
+		var act = () => _sut.Handle(EventFor(engagement), cancellationToken);
+
+		await act.Should().ThrowAsync<InvalidOperationException>();
+		await _dbContext.Received(1).ReleaseStatusNotificationsAsync(
+			Arg.Is<IReadOnlyCollection<EngagementId>>(ids => ids.Single() == engagement.Id), Arg.Any<CancellationToken>());
+	}
+
+	private Engagement CancelledSlotEngagement(DateTimeOffset start, string? reason = null)
+	{
+		var slot = _opportunity.AddTimeSlot(start, start.AddHours(2), 10, Now).Value;
+		var engagement = Engagement.CreateSlotSignUp(_opportunity.Id, _volunteerId, slot.Id, slot.StartDateTime, slot.EndDateTime);
+		engagement.Cancel(reason);
+		return engagement;
+	}
+
+	private void ClaimReturns(IReadOnlyCollection<Engagement> claimed) =>
+		_dbContext
+			.ClaimStatusNotificationsAsync(_volunteerId, Arg.Any<VolunteerOpportunityId>(), EngagementStatus.Cancelled, Now, Arg.Any<CancellationToken>())
+			.Returns([.. claimed]);
+
+	private static EngagementCancelledDomainEvent EventFor(Engagement engagement, string? opportunityTitle = null) =>
+		new(engagement.Id, engagement.VolunteerId!.Value, engagement.OpportunityId, engagement.CancellationReason, opportunityTitle);
+
+	private sealed class FixedTimeProvider(DateTimeOffset utcNow) : TimeProvider
+	{
+		public override DateTimeOffset GetUtcNow() => utcNow;
 	}
 }

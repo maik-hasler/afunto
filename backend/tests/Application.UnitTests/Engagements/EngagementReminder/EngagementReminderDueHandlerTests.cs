@@ -21,7 +21,7 @@ public class EngagementReminderDueHandlerTests
 	private readonly IEmailService _emailService = Substitute.For<IEmailService>();
 	private readonly IEmailTemplateRenderer _emailTemplateRenderer = Substitute.For<IEmailTemplateRenderer>();
 	private readonly IPinGenerator _pinGenerator = Substitute.For<IPinGenerator>();
-	private readonly IUnsubscribeLinkBuilder _unsubscribeLinkBuilder = Substitute.For<IUnsubscribeLinkBuilder>();
+	private readonly IEmailLinkBuilder _emailLinkBuilder = Substitute.For<IEmailLinkBuilder>();
 	private readonly EngagementReminderDueHandler _sut;
 
 	private static readonly OrganizationId DefaultOrgId = OrganizationId.New();
@@ -30,12 +30,12 @@ public class EngagementReminderDueHandlerTests
 	{
 		_dbContext.VolunteerOpportunities.Returns(_opportunityRepo);
 		_emailTemplateRenderer
-			.Render(Arg.Any<EmailTemplateKind>(), Arg.Any<string>(), Arg.Any<IReadOnlyDictionary<string, string>>())
-			.Returns(new EmailContent("Test Subject", "Test Body"));
+			.Render(Arg.Any<EmailDraft>())
+			.Returns(new RenderedEmail("Test Subject", "Test Body", "<p>Test Body</p>", null));
 		_dbContext.GetOrCreateUsersAsync(Arg.Any<IReadOnlyCollection<UserId>>(), Arg.Any<CancellationToken>())
 			.Returns(call => ((IReadOnlyCollection<UserId>)call[0]!).Select(User.Create).ToList());
 		_sut = new EngagementReminderDueHandler(
-			_dbContext, _keycloakUserService, _emailService, _emailTemplateRenderer, _unsubscribeLinkBuilder, NullLogger<EngagementReminderDueHandler>.Instance);
+			_dbContext, _keycloakUserService, _emailService, _emailTemplateRenderer, _emailLinkBuilder, NullLogger<EngagementReminderDueHandler>.Instance);
 	}
 
 	private VolunteerOpportunity CreateOpportunityWithTimeSlot(out TimeSlotId timeSlotId)
@@ -165,17 +165,14 @@ public class EngagementReminderDueHandlerTests
 
 		// Assert
 		_emailTemplateRenderer.Received(1).Render(
-			EmailTemplateKind.EngagementReminder,
-			"en",
-			Arg.Any<IReadOnlyDictionary<string, string>>());
+			Arg.Is<EmailDraft>(d => d.Kind == EmailTemplateKind.EngagementReminder && d.Language == "en"));
 	}
 
 	[Test]
-	public async Task Handle_ShouldFormatStartTime_InEuropeBerlinTimeZone_NotServerLocalTime(
+	public async Task Handle_ShouldHandTheRendererTheSlotsActualTimeAndThePlace(
 		CancellationToken cancellationToken)
 	{
 		// Arrange
-
 		var opportunity = VolunteerOpportunity.Create(
 			DefaultOrgId, "Beach Cleanup", null, "Help clean the beach", null, true, null,
 			Occurrence.OneTime, ParticipationType.ScheduledSlots, CheckInMethod.None, _pinGenerator,
@@ -197,11 +194,11 @@ public class EngagementReminderDueHandlerTests
 		// Act
 		await _sut.Handle(domainEvent, cancellationToken);
 
-		// Assert
-		_emailTemplateRenderer.Received(1).Render(
-			EmailTemplateKind.EngagementReminder,
-			Arg.Any<string>(),
-			Arg.Is<IReadOnlyDictionary<string, string>>(d => d!["StartFormatted"].Contains("13:00")));
+		// Assert - the renderer, not the handler, converts to Europe/Berlin (EmailTemplateRendererTests)
+		_emailTemplateRenderer.Received(1).Render(Arg.Is<EmailDraft>(d =>
+			d.Facts.OfType<EmailFact.Schedule>().Single().Slots.Single().Start == startUtc
+			&& d.Facts.OfType<EmailFact.Location>().Single().Address == null
+			&& d.UnsubscribeUrl != null));
 	}
 
 	[Test]
@@ -220,7 +217,6 @@ public class EngagementReminderDueHandlerTests
 			notifyOnNewSignUp: true,
 			notifyOnWithdrawal: true,
 			notifyOnEngagementConfirmed: true,
-			notifyOnEngagementCancelled: true,
 			notifyOnEngagementReminder: false);
 		_dbContext.GetOrCreateUsersAsync(Arg.Any<IReadOnlyCollection<UserId>>(), Arg.Any<CancellationToken>())
 			.Returns([optedOutVolunteer]);

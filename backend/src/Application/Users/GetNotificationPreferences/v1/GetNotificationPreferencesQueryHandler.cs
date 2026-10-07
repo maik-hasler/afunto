@@ -26,7 +26,6 @@ internal sealed class GetNotificationPreferencesQueryHandler(
 			user.NotifyOnNewSignUp,
 			user.NotifyOnWithdrawal,
 			user.NotifyOnEngagementConfirmed,
-			user.NotifyOnEngagementCancelled,
 			user.NotifyOnEngagementReminder);
 	}
 }

@@ -1,58 +1,79 @@
 {
-  "EngagementRequestReceived": {
-    "subject": "Your request for \"{OpportunityTitle}\" has been received",
-    "body": "Hi {VolunteerName},\n\nYour request to participate in \"{OpportunityTitle}\" has been received. The organizer will be in touch.\n\nAfunto"
+  "layout": {
+    "culture": "en-GB",
+    "datePattern": "dddd, d MMMM yyyy",
+    "timePattern": "HH:mm",
+    "timeRange": "{Date}, {Start} to {End}",
+    "greeting": "Hi {RecipientName},",
+    "closing": "Best wishes,\nThe Afunto team",
+    "schedule": "Date",
+    "schedulePlural": "Dates",
+    "location": "Place",
+    "online": "Online",
+    "reason": "Reason",
+    "footer": "You are receiving this email because you have an Afunto account.",
+    "settings": "Change email settings",
+    "unsubscribe": "Unsubscribe from this type of email"
   },
-  "EngagementWaitlisted": {
-    "subject": "Your sign-up for \"{OpportunityTitle}\" is pending",
-    "body": "Hi {VolunteerName},\n\nYour sign-up for \"{OpportunityTitle}\" has been received. An organizer will review it and confirm your time slot soon.\n\nAfunto"
-  },
-  "EngagementSignupNotifyOrganizer": {
-    "subject": "New sign-up: {VolunteerName} joined \"{OpportunityTitle}\"",
-    "body": "Hi {OrganizerName},\n\n{VolunteerName} has signed up for \"{OpportunityTitle}\".\n\nAfunto"
-  },
-  "EngagementConfirmed": {
-    "subject": "Your engagement has been confirmed",
-    "body": "Hello {VolunteerName},\n\nYour application for \"{OpportunityTitle}\" has been confirmed.\n\nWe look forward to seeing you!\n\nAfunto"
-  },
-  "EngagementCancelled": {
-    "subject": "Your engagement has been cancelled",
-    "body": "Hello {VolunteerName},\n\nUnfortunately your application for \"{OpportunityTitle}\" has been cancelled.{ReasonBlock}\n\nWe hope to see you at another opportunity.\n\nAfunto"
-  },
-  "EngagementCancelledReasonSuffix": {
-    "subject": "",
-    "body": "\n\nReason: {Reason}"
-  },
-  "EngagementWithdrawnNotifyOrganizer": {
-    "subject": "{VolunteerName} has withdrawn from \"{OpportunityTitle}\"",
-    "body": "Hi {OrganizerName},\n\n{VolunteerName} has withdrawn from \"{OpportunityTitle}\".\n\nAfunto"
-  },
-  "EngagementReminder": {
-    "subject": "Reminder: {OpportunityTitle} starts tomorrow",
-    "body": "Hi {DisplayName},\n\nThis is a reminder that you are signed up for \"{OpportunityTitle}\" which starts on {StartFormatted}.\n\nWe are looking forward to seeing you!\n\nThe Afunto Team"
-  },
-  "InvitationReceived": {
-    "subject": "You've been invited to join an organization",
-    "body": "Hello {InviteeName},\n\nYou've been invited to join \"{OrganizationName}\" on Afunto.\n\nLog in to your account to accept or decline the invitation.\n\nAfunto"
-  },
-  "OpportunityUpdated": {
-    "subject": "An opportunity you signed up for has changed: \"{OpportunityTitle}\"",
-    "body": "Hello {VolunteerName},\n\nThe details for \"{OpportunityTitle}\" have changed. Please check the app for the latest information.\n\nAfunto"
-  },
-  "EngagementOrganizerDigest": {
-    "subject": "{Count} update(s) for your volunteer opportunities",
-    "body": "Hi {OrganizerName},\n\nHere is what happened since your last update:\n\n{ItemsList}\n\nAfunto"
-  },
-  "EngagementOrganizerDigestSignupLine": {
-    "subject": "",
-    "body": "- {VolunteerName} signed up for \"{OpportunityTitle}\""
-  },
-  "EngagementOrganizerDigestWithdrawalLine": {
-    "subject": "",
-    "body": "- {VolunteerName} withdrew from \"{OpportunityTitle}\""
-  },
-  "EmailFooter": {
-    "subject": "",
-    "body": "\n\n---\nDon't want to receive this type of email? Unsubscribe here: {UnsubscribeUrl}"
+  "templates": {
+    "EngagementConfirmed": {
+      "subject": "Sign-up confirmed: {OpportunityTitle}",
+      "subjectPlural": "Sign-ups confirmed: {OpportunityTitle}",
+      "intro": "Your sign-up for \"{OpportunityTitle}\" is confirmed. We look forward to seeing you!",
+      "introPlural": "Your sign-ups for \"{OpportunityTitle}\" are confirmed. We look forward to seeing you!",
+      "action": "View my sign-ups"
+    },
+    "InterestConfirmed": {
+      "subject": "Expression of interest confirmed: {OpportunityTitle}",
+      "intro": "The organization has confirmed your expression of interest in \"{OpportunityTitle}\". They will get in touch to arrange the details.",
+      "action": "View my sign-ups"
+    },
+    "EngagementCancelled": {
+      "subject": "Sign-up cancelled: {OpportunityTitle}",
+      "subjectPlural": "Sign-ups cancelled: {OpportunityTitle}",
+      "intro": "Unfortunately, your sign-up for \"{OpportunityTitle}\" has been cancelled. You don't need to come to this date.",
+      "introPlural": "Unfortunately, your sign-ups for \"{OpportunityTitle}\" have been cancelled. You don't need to come to these dates.",
+      "outro": "Perhaps another opportunity suits you.",
+      "action": "Discover other opportunities"
+    },
+    "InterestCancelled": {
+      "subject": "Expression of interest cancelled: {OpportunityTitle}",
+      "intro": "Unfortunately, your expression of interest in \"{OpportunityTitle}\" has been cancelled.",
+      "outro": "Perhaps another opportunity suits you.",
+      "action": "Discover other opportunities"
+    },
+    "EngagementReminder": {
+      "subject": "Reminder: {OpportunityTitle}",
+      "intro": "It's almost time: you are signed up for \"{OpportunityTitle}\". We look forward to seeing you!",
+      "outro": "If you can no longer make it, please withdraw your sign-up so someone else can step in.",
+      "action": "View my sign-ups"
+    },
+    "TimeSlotRescheduled": {
+      "subject": "New date: {OpportunityTitle}",
+      "intro": "Your date for \"{OpportunityTitle}\" has changed.",
+      "outro": "If the new time doesn't suit you, please withdraw your sign-up.",
+      "action": "View my sign-ups"
+    },
+    "OpportunityLocationChanged": {
+      "subject": "New place: {OpportunityTitle}",
+      "intro": "The place for \"{OpportunityTitle}\" has changed.",
+      "outro": "If the new place doesn't suit you, please withdraw your sign-up.",
+      "action": "View opportunity"
+    },
+    "InvitationReceived": {
+      "subject": "Invitation: {OrganizationName}",
+      "intro": "You have been invited to join the organization \"{OrganizationName}\" on Afunto.",
+      "outro": "The invitation is valid for {ExpiryDays} days.",
+      "action": "View invitation"
+    },
+    "OrganizerDigest": {
+      "subject": "News from your opportunities",
+      "intro": "Here is what happened at your opportunities since the last summary:",
+      "action": "Manage sign-ups",
+      "lines": {
+        "NewSignUp": "{VolunteerName} signed up for \"{OpportunityTitle}\".",
+        "Withdrawal": "{VolunteerName} withdrew their sign-up for \"{OpportunityTitle}\"."
+      }
+    }
   }
 }

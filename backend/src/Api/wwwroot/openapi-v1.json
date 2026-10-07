@@ -8955,7 +8955,6 @@
           "notifyOnNewSignUp",
           "notifyOnWithdrawal",
           "notifyOnEngagementConfirmed",
-          "notifyOnEngagementCancelled",
           "notifyOnEngagementReminder"
         ],
         "type": "object",
@@ -8967,9 +8966,6 @@
             "type": "boolean"
           },
           "notifyOnEngagementConfirmed": {
-            "type": "boolean"
-          },
-          "notifyOnEngagementCancelled": {
             "type": "boolean"
           },
           "notifyOnEngagementReminder": {
@@ -10432,7 +10428,6 @@
           "notifyOnNewSignUp",
           "notifyOnWithdrawal",
           "notifyOnEngagementConfirmed",
-          "notifyOnEngagementCancelled",
           "notifyOnEngagementReminder"
         ],
         "type": "object",
@@ -10444,9 +10439,6 @@
             "type": "boolean"
           },
           "notifyOnEngagementConfirmed": {
-            "type": "boolean"
-          },
-          "notifyOnEngagementCancelled": {
             "type": "boolean"
           },
           "notifyOnEngagementReminder": {

@@ -14,7 +14,6 @@ const TYPE_LABEL_KEYS: Record<string, string> = {
 	NewSignUp: "notificationPreferences.newSignUp",
 	Withdrawal: "notificationPreferences.withdrawal",
 	EngagementConfirmed: "notificationPreferences.engagementConfirmed",
-	EngagementCancelled: "notificationPreferences.engagementCancelled",
 	EngagementReminder: "notificationPreferences.engagementReminder",
 };
 
@@ -36,7 +35,7 @@ export default function UnsubscribeConfirmPage() {
 	const type = searchParams.get("type");
 	const token = searchParams.get("token");
 
-	// `type` is checked against the five real notification types rather than
+	// `type` is checked against the real notification types rather than
 	// echoed into the copy: an unvalidated value both said something the app
 	// could not act on and broke the page's width when it was long (#2320).
 	const isValid = Boolean(

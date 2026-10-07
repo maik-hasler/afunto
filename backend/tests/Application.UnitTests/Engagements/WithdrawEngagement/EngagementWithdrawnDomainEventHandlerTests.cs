@@ -64,6 +64,7 @@ public class EngagementWithdrawnDomainEventHandlerTests
 		// Assert
 		await _dbContext.Received(1).EnqueueOrganizerDigestItemAsync(
 			UserId.Create(organizerId).GetValueOrThrow(),
+			organizationId,
 			opportunity.TitleDe,
 			"Vera",
 			EmailNotificationType.Withdrawal,
@@ -86,7 +87,6 @@ public class EngagementWithdrawnDomainEventHandlerTests
 			notifyOnNewSignUp: true,
 			notifyOnWithdrawal: false,
 			notifyOnEngagementConfirmed: true,
-			notifyOnEngagementCancelled: true,
 			notifyOnEngagementReminder: true);
 		_dbContext.GetOrCreateUsersAsync(Arg.Any<IReadOnlyCollection<UserId>>(), Arg.Any<CancellationToken>())
 			.Returns([optedOutOrganizer]);
@@ -98,7 +98,7 @@ public class EngagementWithdrawnDomainEventHandlerTests
 
 		// Assert
 		await _dbContext.DidNotReceive().EnqueueOrganizerDigestItemAsync(
-			Arg.Any<UserId>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<EmailNotificationType>(), Arg.Any<CancellationToken>());
+			Arg.Any<UserId>(), Arg.Any<OrganizationId>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<EmailNotificationType>(), Arg.Any<CancellationToken>());
 	}
 
 	[Test]
@@ -119,7 +119,7 @@ public class EngagementWithdrawnDomainEventHandlerTests
 		// Assert
 		await act.Should().NotThrowAsync();
 		await _dbContext.DidNotReceive().EnqueueOrganizerDigestItemAsync(
-			Arg.Any<UserId>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<EmailNotificationType>(), Arg.Any<CancellationToken>());
+			Arg.Any<UserId>(), Arg.Any<OrganizationId>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<EmailNotificationType>(), Arg.Any<CancellationToken>());
 	}
 
 	[Test]
@@ -137,7 +137,7 @@ public class EngagementWithdrawnDomainEventHandlerTests
 		// Assert
 		await act.Should().NotThrowAsync();
 		await _dbContext.DidNotReceive().EnqueueOrganizerDigestItemAsync(
-			Arg.Any<UserId>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<EmailNotificationType>(), Arg.Any<CancellationToken>());
+			Arg.Any<UserId>(), Arg.Any<OrganizationId>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<EmailNotificationType>(), Arg.Any<CancellationToken>());
 	}
 
 	[Test]

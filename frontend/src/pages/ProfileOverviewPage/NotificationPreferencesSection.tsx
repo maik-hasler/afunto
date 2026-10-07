@@ -28,10 +28,6 @@ const PREFERENCE_ROWS: {
 		labelKey: "notificationPreferences.engagementConfirmed",
 	},
 	{
-		key: "notifyOnEngagementCancelled",
-		labelKey: "notificationPreferences.engagementCancelled",
-	},
-	{
 		key: "notifyOnEngagementReminder",
 		labelKey: "notificationPreferences.engagementReminder",
 	},
@@ -108,7 +104,12 @@ export default function NotificationPreferencesSection({
 	const isLoading = loading || orgsLoading;
 
 	return (
-		<section className={`mb-6 max-w-3xl ${cardClass} sm:p-6`}>
+		// The id is the anchor every email's "change email settings" footer link
+		// points at (backend EmailLinkBuilder.NotificationSettings).
+		<section
+			id="email-notifications"
+			className={`mb-6 max-w-3xl ${cardClass} sm:p-6`}
+		>
 			<PageSectionHeading>
 				{t("notificationPreferences.title")}
 			</PageSectionHeading>

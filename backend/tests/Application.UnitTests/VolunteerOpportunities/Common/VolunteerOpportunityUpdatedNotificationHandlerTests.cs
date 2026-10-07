@@ -22,6 +22,7 @@ public class VolunteerOpportunityUpdatedNotificationHandlerTests
 	private readonly IKeycloakUserService _keycloakUserService = Substitute.For<IKeycloakUserService>();
 	private readonly IEmailService _emailService = Substitute.For<IEmailService>();
 	private readonly IEmailTemplateRenderer _emailTemplateRenderer = Substitute.For<IEmailTemplateRenderer>();
+	private readonly IEmailLinkBuilder _emailLinkBuilder = Substitute.For<IEmailLinkBuilder>();
 	private readonly IPinGenerator _pinGenerator = Substitute.For<IPinGenerator>();
 	private readonly VolunteerOpportunityUpdatedNotificationHandler _sut;
 
@@ -47,14 +48,11 @@ public class VolunteerOpportunityUpdatedNotificationHandlerTests
 		_dbContext.GetOrCreateUsersAsync(Arg.Any<IReadOnlyCollection<UserId>>(), Arg.Any<CancellationToken>())
 			.Returns(call => ((IReadOnlyCollection<UserId>)call[0]!).Select(User.Create).ToList());
 		_emailTemplateRenderer
-			.Render(Arg.Any<EmailTemplateKind>(), Arg.Any<string>(), Arg.Any<IReadOnlyDictionary<string, string>>())
-			.Returns(callInfo =>
-			{
-				var placeholders = (IReadOnlyDictionary<string, string>)callInfo[2]!;
-				return new EmailContent("Test Subject", $"Test Body {string.Join(" ", placeholders.Values)}");
-			});
+			.Render(Arg.Any<EmailDraft>())
+			.Returns(callInfo => new RenderedEmail(
+				"Test Subject", $"Test Body {callInfo.Arg<EmailDraft>().Placeholders["OpportunityTitle"]}", "<p>Html</p>", null));
 		_sut = new VolunteerOpportunityUpdatedNotificationHandler(
-			_dbContext, _engagementReadRepository, _keycloakUserService, _emailService, _emailTemplateRenderer,
+			_dbContext, _engagementReadRepository, _keycloakUserService, _emailService, _emailTemplateRenderer, _emailLinkBuilder,
 			NullLogger<VolunteerOpportunityUpdatedNotificationHandler>.Instance);
 	}
 
@@ -82,7 +80,7 @@ public class VolunteerOpportunityUpdatedNotificationHandlerTests
 		// Assert
 		await _emailService.Received(1).SendBatchAsync(
 			Arg.Is<IReadOnlyList<EmailMessage>>(messages =>
-				messages!.Count == 1 && messages[0].To == "user@example.com" && messages[0].Body.Contains("Geänderte Aktion")),
+				messages!.Count == 1 && messages[0].To == "user@example.com" && messages[0].Content.TextBody.Contains("Geänderte Aktion")),
 			cancellationToken);
 	}
 
@@ -109,20 +107,63 @@ public class VolunteerOpportunityUpdatedNotificationHandlerTests
 	}
 
 	[Test]
-	public async Task Handle_ShouldFilterVolunteers_ByGivenTimeSlot(
+	public async Task Handle_ShouldEmailOnlyThatSlotsVolunteers_WithTheNewTime_WhenASlotWasRescheduled(
+		CancellationToken cancellationToken)
+	{
+		// Arrange
+		var now = DateTimeOffset.UtcNow;
+		var opportunity = VolunteerOpportunity.Create(
+			DefaultOrgId, "Tafel-Ausgabe", null, "Beschreibung", null, false, DefaultAddress, Occurrence.OneTime,
+			ParticipationType.ScheduledSlots, CheckInMethod.None, _pinGenerator, status: OpportunityStatus.Draft).Value;
+		var slot = opportunity.AddTimeSlot(now.AddDays(3), now.AddDays(3).AddHours(2), 10, now).Value;
+		_opportunityRepo.FindAsync(opportunity.Id, cancellationToken).Returns(opportunity);
+		_engagementReadRepository
+			.GetActiveVolunteerIdsByOpportunityAsync(opportunity.Id, slot.Id, cancellationToken)
+			.Returns([Guid.NewGuid()]);
+
+		// Act
+		await _sut.Handle(new VolunteerOpportunityUpdatedDomainEvent(opportunity.Id, slot.Id), cancellationToken);
+
+		// Assert
+		_emailTemplateRenderer.Received(1).Render(Arg.Is<EmailDraft>(d =>
+			d.Kind == EmailTemplateKind.TimeSlotRescheduled
+			&& d.Facts.OfType<EmailFact.Schedule>().Single().Slots.Single().Start == slot.StartDateTime
+			&& d.UnsubscribeUrl == null));
+	}
+
+	[Test]
+	public async Task Handle_ShouldNameTheNewPlace_WhenTheOpportunityWasRelocated(
 		CancellationToken cancellationToken)
 	{
 		// Arrange
 		var opportunityId = VolunteerOpportunityId.New();
-		var timeSlotId = TimeSlotId.New();
-		var notification = new VolunteerOpportunityUpdatedDomainEvent(opportunityId, timeSlotId);
+		_engagementReadRepository
+			.GetActiveVolunteerIdsByOpportunityAsync(opportunityId, null, cancellationToken)
+			.Returns([Guid.NewGuid()]);
 
 		// Act
-		await _sut.Handle(notification, cancellationToken);
+		await _sut.Handle(new VolunteerOpportunityUpdatedDomainEvent(opportunityId, null), cancellationToken);
 
 		// Assert
-		await _engagementReadRepository.Received(1).GetActiveVolunteerIdsByOpportunityAsync(
-			opportunityId, timeSlotId, cancellationToken);
+		_emailTemplateRenderer.Received(1).Render(Arg.Is<EmailDraft>(d =>
+			d.Kind == EmailTemplateKind.OpportunityLocationChanged
+			&& d.Facts.OfType<EmailFact.Location>().Single().Address == "Hauptstraße 1, 12345 Berlin"));
+	}
+
+	[Test]
+	public async Task Handle_ShouldSkip_WhenTheRescheduledSlotNoLongerExists(
+		CancellationToken cancellationToken)
+	{
+		// Act
+		await _sut.Handle(
+			new VolunteerOpportunityUpdatedDomainEvent(VolunteerOpportunityId.New(), TimeSlotId.New()),
+			cancellationToken);
+
+		// Assert
+		await _engagementReadRepository.DidNotReceive().GetActiveVolunteerIdsByOpportunityAsync(
+			Arg.Any<VolunteerOpportunityId>(), Arg.Any<TimeSlotId?>(), Arg.Any<CancellationToken>());
+		await _emailService.DidNotReceive().SendBatchAsync(
+			Arg.Any<IReadOnlyList<EmailMessage>>(), Arg.Any<CancellationToken>());
 	}
 
 	[Test]
@@ -148,9 +189,7 @@ public class VolunteerOpportunityUpdatedNotificationHandlerTests
 
 		// Assert
 		_emailTemplateRenderer.Received(1).Render(
-			EmailTemplateKind.OpportunityUpdated,
-			"en",
-			Arg.Any<IReadOnlyDictionary<string, string>>());
+			Arg.Is<EmailDraft>(d => d.Kind == EmailTemplateKind.OpportunityLocationChanged && d.Language == "en"));
 	}
 
 	[Test]

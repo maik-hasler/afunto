@@ -104,13 +104,10 @@ const ALLOWED_IDENTICAL_KEYS = new Set(
 );
 
 const EMAIL_TEMPLATE_ALLOWED_IDENTICAL_KEYS = new Set([
-
-	"EngagementCancelledReasonSuffix.subject",
-
-	"EmailFooter.subject",
-
-	"EngagementOrganizerDigestSignupLine.subject",
-	"EngagementOrganizerDigestWithdrawalLine.subject",
+	// A .NET format string, not copy.
+	"layout.timePattern",
+	// The same word in both languages.
+	"layout.online",
 ]);
 
 const PLURAL_EXEMPT_KEYS = new Set(

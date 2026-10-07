@@ -16,7 +16,7 @@ internal static class VolunteerOpportunityEngagementCascadeHelper
 		VolunteerOpportunityId opportunityId,
 		string opportunityTitle,
 		NotificationKind opportunityNotificationKind,
-		string engagementCancellationReason,
+		string? engagementCancellationReason,
 		bool notifyPerEngagement,
 		ILogger logger,
 		CancellationToken cancellationToken)

@@ -76,7 +76,7 @@ public class VolunteerOpportunityUnpublishedDomainEventHandlerTests
 	}
 
 	[Test]
-	public async Task Handle_ShouldCancelActiveEngagements_WithUnpublishedReason(
+	public async Task Handle_ShouldCancelActiveEngagements_WithoutACannedReason(
 		CancellationToken cancellationToken)
 	{
 		// Arrange
@@ -95,7 +95,7 @@ public class VolunteerOpportunityUnpublishedDomainEventHandlerTests
 
 		// Assert
 		pendingEngagement.Status.Should().Be(EngagementStatus.Cancelled);
-		pendingEngagement.CancellationReason.Should().Be("Opportunity was unpublished.");
+		pendingEngagement.CancellationReason.Should().BeNull();
 	}
 
 	[Test]

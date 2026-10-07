@@ -1,14 +1,11 @@
 namespace Application.Common.Email;
 
-public sealed record EmailMessage(string To, string Subject, string Body, string CorrelationId);
+public sealed record EmailMessage(string To, RenderedEmail Content, string CorrelationId);
 
 public interface IEmailService
 {
 	Task SendAsync(
-		string to,
-		string subject,
-		string body,
-		string correlationId,
+		EmailMessage message,
 		CancellationToken cancellationToken = default);
 
 	Task<IReadOnlyList<bool>> SendBatchAsync(

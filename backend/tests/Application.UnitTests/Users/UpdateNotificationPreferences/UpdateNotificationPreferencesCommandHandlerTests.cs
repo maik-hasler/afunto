@@ -34,7 +34,6 @@ public class UpdateNotificationPreferencesCommandHandlerTests
 			NotifyOnNewSignUp: false,
 			NotifyOnWithdrawal: false,
 			NotifyOnEngagementConfirmed: true,
-			NotifyOnEngagementCancelled: true,
 			NotifyOnEngagementReminder: false);
 
 		// Act
@@ -44,7 +43,6 @@ public class UpdateNotificationPreferencesCommandHandlerTests
 		user.NotifyOnNewSignUp.Should().BeFalse();
 		user.NotifyOnWithdrawal.Should().BeFalse();
 		user.NotifyOnEngagementConfirmed.Should().BeTrue();
-		user.NotifyOnEngagementCancelled.Should().BeTrue();
 		user.NotifyOnEngagementReminder.Should().BeFalse();
 		await _unitOfWork.Received(1).SaveChangesAsync(cancellationToken);
 	}
@@ -62,7 +60,6 @@ public class UpdateNotificationPreferencesCommandHandlerTests
 			NotifyOnNewSignUp: false,
 			NotifyOnWithdrawal: true,
 			NotifyOnEngagementConfirmed: true,
-			NotifyOnEngagementCancelled: true,
 			NotifyOnEngagementReminder: true);
 
 		// Act

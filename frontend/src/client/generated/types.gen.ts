@@ -351,7 +351,6 @@ export type NotificationPreferencesResponse = {
     notifyOnNewSignUp: boolean;
     notifyOnWithdrawal: boolean;
     notifyOnEngagementConfirmed: boolean;
-    notifyOnEngagementCancelled: boolean;
     notifyOnEngagementReminder: boolean;
 };
 
@@ -657,7 +656,6 @@ export type UpdateNotificationPreferencesRequest = {
     notifyOnNewSignUp: boolean;
     notifyOnWithdrawal: boolean;
     notifyOnEngagementConfirmed: boolean;
-    notifyOnEngagementCancelled: boolean;
     notifyOnEngagementReminder: boolean;
 };
 

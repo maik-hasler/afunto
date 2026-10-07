@@ -7,6 +7,5 @@ namespace Domain.Engagements;
 public sealed record EngagementReactivatedDomainEvent(
 	EngagementId EngagementId,
 	UserId VolunteerId,
-	VolunteerOpportunityId OpportunityId,
-	bool IsSlotSignUp)
+	VolunteerOpportunityId OpportunityId)
 	: DomainEvent;

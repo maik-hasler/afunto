@@ -124,11 +124,11 @@ public class VolunteerOpportunityCancelledDomainEventHandlerTests
 
 		// Assert
 		pendingEngagement.Status.Should().Be(EngagementStatus.Cancelled);
-		pendingEngagement.CancellationReason.Should().Be("Opportunity was cancelled: Venue flooded");
+		pendingEngagement.CancellationReason.Should().Be("Venue flooded", "the organizer's own words reach the volunteer verbatim, without an English prefix");
 	}
 
 	[Test]
-	public async Task Handle_ShouldCancelActiveEngagements_WithDefaultReason_WhenNoOrganizerReasonGiven(
+	public async Task Handle_ShouldCancelActiveEngagements_WithoutReason_WhenNoOrganizerReasonGiven(
 		CancellationToken cancellationToken)
 	{
 		// Arrange
@@ -146,7 +146,7 @@ public class VolunteerOpportunityCancelledDomainEventHandlerTests
 		await _sut.Handle(domainEvent, cancellationToken);
 
 		// Assert
-		pendingEngagement.CancellationReason.Should().Be("Opportunity was cancelled.");
+		pendingEngagement.CancellationReason.Should().BeNull("a canned English sentence would show up in German emails and on /my-signups");
 	}
 
 	[Test]

@@ -11,8 +11,10 @@ public class EmailDeliveryTests(AspireFixture fixture) : VisualTestBase(fixture)
 {
 	private const string Realm = "afunto";
 
+	// A volunteer's own sign-up sends no email any more (#2402) - the organizer confirming
+	// it does, so that is the round trip this test drives through the real SMTP config.
 	[Test]
-	public async Task CreateEngagement_DeliversConfirmationToMailpit_ThroughBackendSmtpConfig()
+	public async Task ConfirmEngagement_DeliversConfirmationToMailpit_ThroughBackendSmtpConfig()
 	{
 		var frontend = Fixture.GetEndpoint("frontend");
 		var keycloak = Fixture.GetEndpoint("keycloak");
@@ -35,7 +37,23 @@ public class EmailDeliveryTests(AspireFixture fixture) : VisualTestBase(fixture)
 		await Page.Locator("[role='dialog']").GetByRole(AriaRole.Button, new() { Name = "Express interest" }).ClickAsync();
 		await Page.WaitForSelectorAsync("[role='dialog']", new() { State = WaitForSelectorState.Detached });
 
+		await ConfirmOnlyEngagementAsOrganizerAsync(opportunityId);
+
 		await AssertMailpitReceivedMessageToAsync(mailpit, "vera@example.com", subjectContains: suffix);
+	}
+
+	private async Task ConfirmOnlyEngagementAsOrganizerAsync(string opportunityId)
+	{
+		using var http = await CreateOrganizerClientAsync();
+
+		var listResponse = await http.GetAsync(
+			$"/v1/volunteer-opportunities/{opportunityId}/engagements?pageNumber=1&pageSize=10");
+		listResponse.EnsureSuccessStatusCode();
+		var page = await listResponse.Content.ReadFromJsonAsync<JsonElement>();
+		var engagementId = page.GetProperty("items").EnumerateArray().Single().GetProperty("id").GetString();
+
+		(await http.PostAsync($"/v1/engagements/{engagementId}/confirm", content: null))
+			.EnsureSuccessStatusCode();
 	}
 
 	private static async Task AssertMailpitReceivedMessageToAsync(
@@ -75,7 +93,7 @@ public class EmailDeliveryTests(AspireFixture fixture) : VisualTestBase(fixture)
 			+ " within 30s.");
 	}
 
-	private async Task<string> CreateIndividualContactOpportunityAsync(string title)
+	private async Task<HttpClient> CreateOrganizerClientAsync()
 	{
 		var keycloak = Fixture.GetEndpoint("keycloak");
 		using var tokenHttp = new HttpClient { BaseAddress = keycloak };
@@ -93,9 +111,14 @@ public class EmailDeliveryTests(AspireFixture fixture) : VisualTestBase(fixture)
 		var tokenBody = await tokenResponse.Content.ReadFromJsonAsync<JsonElement>();
 		var token = tokenBody.GetProperty("access_token").GetString();
 
-		var backend = Fixture.GetEndpoint("backend");
-		using var http = new HttpClient { BaseAddress = backend };
+		var http = new HttpClient { BaseAddress = Fixture.GetEndpoint("backend") };
 		http.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
+		return http;
+	}
+
+	private async Task<string> CreateIndividualContactOpportunityAsync(string title)
+	{
+		using var http = await CreateOrganizerClientAsync();
 
 		var orgsResponse = await http.GetAsync("/v1/organizations");
 		orgsResponse.EnsureSuccessStatusCode();

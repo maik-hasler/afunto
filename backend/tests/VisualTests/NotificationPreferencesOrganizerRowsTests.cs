@@ -92,6 +92,5 @@ public class NotificationPreferencesOrganizerRowsTests(AspireFixture fixture) : 
 		bool NotifyOnNewSignUp,
 		bool NotifyOnWithdrawal,
 		bool NotifyOnEngagementConfirmed,
-		bool NotifyOnEngagementCancelled,
 		bool NotifyOnEngagementReminder);
 }

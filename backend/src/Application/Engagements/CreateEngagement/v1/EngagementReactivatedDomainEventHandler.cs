@@ -1,4 +1,3 @@
-using Application.Common.Email;
 using Application.Common.Keycloak;
 using Application.Common.Messaging;
 using Application.Common.Persistence;
@@ -14,8 +13,6 @@ internal sealed class EngagementReactivatedDomainEventHandler(
 	IUnitOfWork unitOfWork,
 	IKeycloakOrganizationService keycloakOrganizationService,
 	IKeycloakUserService keycloakUserService,
-	IEmailService emailService,
-	IEmailTemplateRenderer emailTemplateRenderer,
 	ILogger<EngagementReactivatedDomainEventHandler> logger)
 	: INotificationHandler<EngagementReactivatedDomainEvent>
 {
@@ -31,18 +28,6 @@ internal sealed class EngagementReactivatedDomainEventHandler(
 			notification.OpportunityId,
 			notification.VolunteerId,
 			EmailNotificationType.NewSignUp,
-			logger,
-			cancellationToken);
-
-		await EngagementVolunteerConfirmationHelper.NotifyAsync(
-			dbContext,
-			keycloakUserService,
-			emailService,
-			emailTemplateRenderer,
-			notification.EngagementId,
-			notification.OpportunityId,
-			notification.VolunteerId,
-			notification.IsSlotSignUp,
 			logger,
 			cancellationToken);
 

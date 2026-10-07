@@ -72,7 +72,7 @@ internal static class EngagementOrganizerNotificationHelper
 				continue;
 
 			await dbContext.EnqueueOrganizerDigestItemAsync(
-				organizerId, opportunity.TitleDe, volunteerName, subscriptionType, cancellationToken);
+				organizerId, opportunity.OrganizationId, opportunity.TitleDe, volunteerName, subscriptionType, cancellationToken);
 		}
 	}
 }
