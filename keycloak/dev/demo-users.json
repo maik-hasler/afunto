@@ -4,7 +4,6 @@
     "username": "vera",
     "enabled": true,
     "emailVerified": true,
-    "requiredActions": [],
     "email": "vera@example.com",
     "firstName": "Vera",
     "lastName": "Volunteer",
@@ -14,8 +13,8 @@
     "credentials": [
       {
         "type": "password",
-        "secretData": "{\"value\":\"Uc4T3pxk4AlbUdiAOq6Z53FoIUIvUTw/GiLqREHfgvc=\",\"salt\":\"HYtOV0NYMZTP5FpMSjCyBw==\",\"additionalParameters\":{}}",
-        "credentialData": "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+        "value": "vera123",
+        "temporary": false
       }
     ]
   },
@@ -24,7 +23,6 @@
     "username": "olaf",
     "enabled": true,
     "emailVerified": true,
-    "requiredActions": [],
     "email": "olaf@example.com",
     "firstName": "Olaf",
     "lastName": "Organisator",
@@ -35,8 +33,8 @@
     "credentials": [
       {
         "type": "password",
-        "secretData": "{\"value\":\"lNoPUrmLRFeqdZEdkdqWRFWWejhB8iwVd6DfgftqToY=\",\"salt\":\"FNbLnqA0DLZw6/4vfZOC/Q==\",\"additionalParameters\":{}}",
-        "credentialData": "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+        "value": "olaf123",
+        "temporary": false
       }
     ]
   },
@@ -45,7 +43,6 @@
     "username": "admin",
     "enabled": true,
     "emailVerified": true,
-    "requiredActions": [],
     "email": "admin@example.com",
     "firstName": "Admin",
     "lastName": "Admin",
@@ -55,8 +52,8 @@
     "credentials": [
       {
         "type": "password",
-        "secretData": "{\"value\":\"T2Mjy1GA3lLieuNiy+IxRNIlyKAYcGB4aJOH4ky2Uf4=\",\"salt\":\"y3pdmlteVR00GyMcZ4eKwA==\",\"additionalParameters\":{}}",
-        "credentialData": "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+        "value": "admin123",
+        "temporary": false
       }
     ]
   }

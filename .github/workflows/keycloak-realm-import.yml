@@ -55,7 +55,6 @@ jobs:
         run: |
           set -euo pipefail
           REALM=keycloak/realms/afunto-realm.json
-          DEMO_USERS=keycloak/dev/demo-users.json
 
           ft_enabled=$(jq -r '.clients[] | select(.clientId == "frontend-test") | .enabled' "$REALM")
           ft_ropc=$(jq -r '.clients[] | select(.clientId == "frontend-test") | .directAccessGrantsEnabled' "$REALM")
@@ -64,19 +63,19 @@ jobs:
             exit 1
           fi
 
-          plaintext=$(jq -rs '[(.[0].users[]?, .[1][]) | select(.credentials[]? | has("value")) | .username] | join(", ")' "$REALM" "$DEMO_USERS")
+          plaintext=$(jq -r '[.users[]? | select(.credentials[]? | has("value")) | .username] | join(", ")' "$REALM")
           if [ -n "$plaintext" ]; then
-            echo "::error::These users carry a plaintext credential 'value': $plaintext. Credentials must stay pre-hashed under 'secretData' - plaintext is validated against the realm passwordPolicy during --import-realm and crashes the import, besides publishing the password in the image."
+            echo "::error::These users carry a plaintext credential 'value' in the shipped realm: $plaintext. It is baked into the released image, so that publishes the password - dev-only users belong in keycloak/dev/demo-users.json."
             exit 1
           fi
 
           shipped_users=$(jq -r '[.users[]?.username | select(. != "service-account-backend")] | join(", ")' "$REALM")
           if [ -n "$shipped_users" ]; then
-            echo "::error::The shipped realm carries users besides service-account-backend: $shipped_users. It is baked into the released image (#2197) - put dev-only users in $DEMO_USERS, which only AppHost.cs imports."
+            echo "::error::The shipped realm carries users besides service-account-backend: $shipped_users. It is baked into the released image (#2197) - put dev-only users in keycloak/dev/demo-users.json, which only AppHost.cs imports."
             exit 1
           fi
 
-          echo "Realm security invariants hold: frontend-test disabled with ROPC reserved for it, all credentials pre-hashed, no demo users in the shipped realm."
+          echo "Realm security invariants hold: frontend-test disabled with ROPC reserved for it, no plaintext credentials and no demo users in the shipped realm."
 
       - name: Resolve Keycloak version
         id: kc

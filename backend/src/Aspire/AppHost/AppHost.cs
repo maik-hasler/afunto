@@ -81,6 +81,10 @@ var realmUsers = localRealm["users"]!.AsArray();
 foreach (var demoUser in demoUsers)
 	realmUsers.Add(demoUser!.DeepClone());
 
+// Their short plaintext passwords would fail the production password policy,
+// which --import-realm enforces on every imported credential.
+localRealm.AsObject().Remove("passwordPolicy");
+
 localRealm["bruteForceProtected"] = false;
 
 localRealm["accessTokenLifespan"] = 3600;
