@@ -13,7 +13,7 @@ public class KeycloakThemeTests(AspireFixture fixture) : VisualTestBase(fixture)
 	private const string Realm = "afunto";
 	private const string FrontendClientId = "frontend";
 
-	private const string SiteUrl = "https://afunto.maik-hasler.de";
+	private const string SiteUrl = "https://afunto.de";
 
 	private const string ThrowawayPassword = "Throwaway123";
 

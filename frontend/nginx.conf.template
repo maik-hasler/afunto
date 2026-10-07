@@ -1,3 +1,6 @@
+# Keeps the nginx version out of the Server header and error pages.
+server_tokens off;
+
 gzip on;
 gzip_static on;
 gzip_types text/plain text/css text/javascript application/javascript application/json image/svg+xml;

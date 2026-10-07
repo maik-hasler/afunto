@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import PageEaten from "../assets/page-eaten.svg?react";
+import { useNoIndex } from "../hooks/useNoIndex";
 import { usePageTitle } from "../hooks/usePageTitle";
 import Button from "../components/Button";
 import { statusTitleClass } from "../lib/headingClasses";
@@ -7,6 +8,7 @@ import { statusTitleClass } from "../lib/headingClasses";
 export default function NotFoundPage() {
 	const { t } = useTranslation();
 	usePageTitle(t("notFound.title"));
+	useNoIndex();
 
 	return (
 		<div className="mx-auto flex max-w-lg flex-col items-center px-4 py-10 text-center sm:py-16">
