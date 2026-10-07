@@ -72,19 +72,18 @@ if (localRealm["clients"] is JsonArray realmClients)
 	}
 }
 
-if (localRealm["users"] is JsonArray realmUsers)
-{
-	foreach (var user in realmUsers)
-	{
-		if (user is not JsonObject userObject)
-			continue;
+// The demo users (vera/olaf/admin) have public passwords, so they never ship in
+// the realm baked into the released image - they live in keycloak/dev and only
+// ever reach this dev-only copy.
+var demoUsers = JsonNode.Parse(
+	File.ReadAllText(Path.Combine(keycloakRealmPath, "..", "dev", "demo-users.json")))!.AsArray();
+var realmUsers = localRealm["users"]!.AsArray();
+foreach (var demoUser in demoUsers)
+	realmUsers.Add(demoUser!.DeepClone());
 
-		var username = userObject["username"]?.GetValue<string>();
-
-		if (username is "vera" or "olaf" or "admin")
-			userObject["enabled"] = true;
-	}
-}
+// Their short plaintext passwords would fail the production password policy,
+// which --import-realm enforces on every imported credential.
+localRealm.AsObject().Remove("passwordPolicy");
 
 localRealm["bruteForceProtected"] = false;
 

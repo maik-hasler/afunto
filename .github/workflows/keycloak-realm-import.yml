@@ -46,15 +46,12 @@ jobs:
       # Security properties of the realm that ships baked into the published image.
       # Each has already cost a fix once, so they are asserted rather than trusted:
       # #1167 (a public client with ROPC in a released image turns credential
-      # stuffing into one scriptable request), #2197 (an enabled admin account with
-      # a published password is a live takeover). DEMO_USERS_ENABLED is declared
-      # here on purpose: flipping it takes an explicit edit to this file, which is
-      # the forcing function that makes the matching update to keycloak/AGENTS.md's
-      # Test Users section and README.md's Test users table visible in the same PR.
-      # That is exactly what #2308 did not do, leaving both docs wrong for months.
+      # stuffing into one scriptable request), #2197 (an admin account with a
+      # published password is a live takeover). The demo users with those
+      # published passwords live in keycloak/dev/demo-users.json, which only
+      # AppHost.cs merges into its dev-only realm copy - the shipped realm must
+      # not carry any user but the backend's service account.
       - name: Assert realm security invariants
-        env:
-          DEMO_USERS_ENABLED: "true"
         run: |
           set -euo pipefail
           REALM=keycloak/realms/afunto-realm.json
@@ -68,19 +65,17 @@ jobs:
 
           plaintext=$(jq -r '[.users[]? | select(.credentials[]? | has("value")) | .username] | join(", ")' "$REALM")
           if [ -n "$plaintext" ]; then
-            echo "::error::These users carry a plaintext credential 'value': $plaintext. Credentials must stay pre-hashed under 'secretData' - plaintext is validated against the realm passwordPolicy during --import-realm and crashes the import, besides publishing the password in the image."
+            echo "::error::These users carry a plaintext credential 'value' in the shipped realm: $plaintext. It is baked into the released image, so that publishes the password - dev-only users belong in keycloak/dev/demo-users.json."
             exit 1
           fi
 
-          for u in vera olaf admin; do
-            got=$(jq -r --arg u "$u" '.users[] | select(.username == $u) | .enabled' "$REALM")
-            if [ "$got" != "$DEMO_USERS_ENABLED" ]; then
-              echo "::error::Demo user '$u' has enabled=$got but this workflow declares DEMO_USERS_ENABLED=$DEMO_USERS_ENABLED. If the change is intended, edit that literal AND update keycloak/AGENTS.md's Test Users section and README.md's Test users table in the same PR - they state this posture in prose and have been wrong before (#2308)."
-              exit 1
-            fi
-          done
+          shipped_users=$(jq -r '[.users[]?.username | select(. != "service-account-backend")] | join(", ")' "$REALM")
+          if [ -n "$shipped_users" ]; then
+            echo "::error::The shipped realm carries users besides service-account-backend: $shipped_users. It is baked into the released image (#2197) - put dev-only users in keycloak/dev/demo-users.json, which only AppHost.cs imports."
+            exit 1
+          fi
 
-          echo "Realm security invariants hold: frontend-test disabled with ROPC reserved for it, all credentials pre-hashed, demo users enabled=$DEMO_USERS_ENABLED as declared."
+          echo "Realm security invariants hold: frontend-test disabled with ROPC reserved for it, no plaintext credentials and no demo users in the shipped realm."
 
       - name: Resolve Keycloak version
         id: kc
