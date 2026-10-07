@@ -101,6 +101,13 @@ The following table lists the relevant architecture decisions. Each decision lin
 |2026-10-02
 |link:ADRs/13_object_storage_on_rustfs.html[Object storage]
 
+|14
+|Email
+|Send an email only when someone else decided or changed something the recipient needs to know to turn up, or when they have to act; bundle status emails per volunteer and opportunity.
+|Accepted
+|2026-10-07
+|link:ADRs/14_email_only_for_what_the_recipient_must_know.html[Email]
+
 |===
 
 See <<section-solution-strategy>> for how the key decisions map to the quality goals.

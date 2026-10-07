@@ -130,7 +130,15 @@ All API routes include the version in the URL path: `/v{version}/...`.
 
 === Internationalization (i18n)
 
-The user interface is translated with i18next (`react-i18next`), backed by resource bundles under `frontend/src/locales/` (`en.json`, `de.json`). The active language is resolved from the user's Keycloak profile locale on sign-in, then from `localStorage`, then from the browser. Backend and domain content are not localized - i18n is a frontend-only concern. CI enforces `en` / `de` key parity.
+The user interface is translated with i18next (`react-i18next`), backed by resource bundles under `frontend/src/locales/` (`en.json`, `de.json`). The active language is resolved from the user's Keycloak profile locale on sign-in, then from `localStorage`, then from the browser. Domain content is not localized beyond the optional English title and description of an opportunity. The one backend concern is email, rendered in the recipient's stored language (see Email below). CI enforces `en` / `de` key parity for both.
+
+=== Email
+
+Which events send an email at all is decided in ADR-14; most send none and rely on the bell.
+
+*One shape for every email.* A handler builds an `EmailDraft` - template kind, language, recipient name, placeholders, facts (date, place, reason), an optional bullet list and the button's link - and never a string. `EmailTemplateRenderer` (`Infrastructure/Email/`) fills it from `Templates/{de,en}.json`: a shared `layout` (greeting, closing, footer, fact labels, date formats) plus one entry per `EmailTemplateKind`. `PlainTextEmailWriter` and `HtmlEmailWriter` render the same composed email, so the two parts of one multipart message cannot drift apart; the HTML writer encodes every value. Dates are shown in the platform's canonical time zone.
+
+*One email per volunteer and opportunity.* Confirmation and cancellation handlers claim every engagement of the same volunteer on the same opportunity whose current status has not been emailed yet (`Engagement.StatusNotifiedAt`, reset by every status change), one conditional `UPDATE` per row. The first event of a bulk action wins them all and sends one email; its sibling events find nothing to claim. A failed send releases the claim so the outbox retry sends it.
 
 === Geocoding and Geo-Search
 
