@@ -176,7 +176,7 @@ importers:
         specifier: 5.9.1
         version: 5.9.1(@standard-schema/spec@1.1.0)(ajv@8.20.0)(react-hook-form@7.88.0(react@19.3.0))(zod@4.4.3)
       '@tanstack/react-query':
-        specifier: ^5.103.1
+        specifier: 5.103.1
         version: 5.103.1(react@19.3.0)
       date-fns:
         specifier: 4.4.0
@@ -234,10 +234,10 @@ importers:
         specifier: 10.0.1
         version: 10.0.1(eslint@10.11.0(jiti@2.7.0)(supports-color@7.2.0))
       '@hey-api/openapi-ts':
-        specifier: ^0.99.0
+        specifier: 0.99.0
         version: 0.99.0(magicast@0.5.5)(typescript@6.0.3)
       '@size-limit/file':
-        specifier: ^14.0.0
+        specifier: 14.0.0
         version: 14.0.0(size-limit@14.0.0)
       '@stryker-mutator/core':
         specifier: 10.0.0
@@ -309,7 +309,7 @@ importers:
         specifier: 0.8.1
         version: 0.8.1(prettier@3.9.8)
       size-limit:
-        specifier: ^14.0.0
+        specifier: 14.0.0
         version: 14.0.0
       tailwindcss:
         specifier: 4.3.3
