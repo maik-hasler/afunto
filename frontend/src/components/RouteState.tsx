@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import Button from "./Button";
 import ErrorBanner from "./ErrorBanner";
+import { useNoIndex } from "../hooks/useNoIndex";
 import { usePageTitle } from "../hooks/usePageTitle";
 import { statusTitleClass } from "../lib/headingClasses";
 import {
@@ -53,6 +54,9 @@ export default function RouteState({
 	const canRetry = (variant === "error" || variant === "offline") && !!onRetry;
 
 	usePageTitle(inline ? null : title);
+	// A whole route that turned out not to exist (a deleted opportunity, say)
+	// is a 404 to a crawler; an inline empty state inside a real page is not.
+	useNoIndex(variant === "notFound" && !inline);
 
 	return (
 		<div

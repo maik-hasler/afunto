@@ -39,6 +39,7 @@ let defaults: DocumentMetaDefaults = {
 // entering page always lands after the leaving one is gone.
 const titles: Entry[] = [];
 const descriptions: Entry[] = [];
+const noIndexOwners: Entry[] = [];
 
 function topOf(entries: Entry[]): string | undefined {
 	return entries.at(-1)?.value;
@@ -53,6 +54,23 @@ function setContent(selectors: string[], content: string): void {
 // Everything reapplies from the current defaults plus the current owners, so
 // the language changing and a page setting its own title can arrive in either
 // order without one clobbering the other.
+// Unknown paths still get index.html with a 200 - nginx cannot tell an SPA
+// route from a typo - so a crawler would index every 404 as a real page
+// (a "soft 404"). Google's documented fix for SPAs is a robots noindex added
+// while the not-found state is showing, which is what this tag is.
+function applyNoIndex(): void {
+	const existing = document.querySelector('meta[name="robots"]');
+	if (noIndexOwners.length === 0) {
+		existing?.remove();
+		return;
+	}
+	if (existing) return;
+	const meta = document.createElement("meta");
+	meta.name = "robots";
+	meta.content = "noindex";
+	document.head.appendChild(meta);
+}
+
 function apply(): void {
 	const pageTitle = topOf(titles);
 	const documentTitle = pageTitle ? `${pageTitle} | ${APP_NAME}` : APP_NAME;
@@ -65,6 +83,7 @@ function apply(): void {
 		DESCRIPTION_SELECTORS,
 		topOf(descriptions) ?? defaults.description,
 	);
+	applyNoIndex();
 }
 
 function register(entries: Entry[], value: string): () => void {
@@ -91,11 +110,16 @@ export function registerPageDescription(description: string): () => void {
 	return register(descriptions, description);
 }
 
+export function registerNoIndex(): () => void {
+	return register(noIndexOwners, "noindex");
+}
+
 // Test-only: the stacks and defaults are module state, so a suite that mounts
 // several pages needs a way back to a clean document.
 export function resetDocumentMeta(next?: DocumentMetaDefaults): void {
 	titles.length = 0;
 	descriptions.length = 0;
+	noIndexOwners.length = 0;
 	defaults = next ?? {
 		socialTitle: readContent(SOCIAL_TITLE_SELECTORS[0]) ?? APP_NAME,
 		description: readContent(DESCRIPTION_SELECTORS[0]) ?? "",

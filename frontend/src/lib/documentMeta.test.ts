@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import {
 	APP_NAME,
+	registerNoIndex,
 	registerPageDescription,
 	registerPageTitle,
 	resetDocumentMeta,
@@ -27,6 +28,7 @@ const twitterTitle = () => content('meta[name="twitter:title"]');
 const description = () => content('meta[name="description"]');
 const ogDescription = () => content('meta[property="og:description"]');
 const twitterDescription = () => content('meta[name="twitter:description"]');
+const robots = () => content('meta[name="robots"]');
 
 describe("documentMeta", () => {
 	beforeEach(() => {
@@ -109,5 +111,28 @@ describe("documentMeta", () => {
 
 		expect(document.title).toBe(APP_NAME);
 		expect(ogTitle()).toBe(GERMAN_DEFAULTS.socialTitle);
+	});
+
+	it("adds a robots noindex tag while a not-found state is showing", () => {
+		const unregister = registerNoIndex();
+
+		expect(robots()).toBe("noindex");
+
+		unregister();
+		expect(robots()).toBeNull();
+	});
+
+	// A page and the RouteState it renders can both report not-found at once;
+	// the tag must outlive the first of them to leave.
+	it("keeps the noindex tag until its last owner leaves", () => {
+		const unregisterPage = registerNoIndex();
+		const unregisterRouteState = registerNoIndex();
+
+		unregisterRouteState();
+		expect(robots()).toBe("noindex");
+		expect(document.querySelectorAll('meta[name="robots"]')).toHaveLength(1);
+
+		unregisterPage();
+		expect(robots()).toBeNull();
 	});
 });

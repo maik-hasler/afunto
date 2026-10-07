@@ -26,7 +26,7 @@ public static class MetaHtmlBuilder
 					<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 					<meta name="color-scheme" content="light" />
 					<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-					<link rel="apple-touch-icon" href="/icons/icon-192.png" />
+					<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 					<meta name="theme-color" content="#2d8a5e" />
 					<title>{encodedTitle}</title>
 					<meta name="description" content="{encodedDescription}" />
