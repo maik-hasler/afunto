@@ -11,12 +11,17 @@ using Microsoft.Extensions.Logging;
 
 namespace Application.VolunteerOpportunities.Common;
 
+// Raised only for a new time or a new place (see VolunteerOpportunity.NotifyVolunteersOf*),
+// so - like a cancellation - there is no opt-out: it decides whether someone turns up at
+// the right place at the right time. The email names the new value instead of sending the
+// reader to the app to find out what changed (#2402).
 internal sealed class VolunteerOpportunityUpdatedNotificationHandler(
 	IApplicationDbContext dbContext,
 	IEngagementReadRepository engagementReadRepository,
 	IKeycloakUserService keycloakUserService,
 	IEmailService emailService,
 	IEmailTemplateRenderer emailTemplateRenderer,
+	IEmailLinkBuilder emailLinkBuilder,
 	ILogger<VolunteerOpportunityUpdatedNotificationHandler> logger)
 	: INotificationHandler<VolunteerOpportunityUpdatedDomainEvent>
 {
@@ -34,6 +39,20 @@ internal sealed class VolunteerOpportunityUpdatedNotificationHandler(
 			return;
 		}
 
+		TimeSlot? rescheduledSlot = null;
+		if (notification.TimeSlotId is { } timeSlotId)
+		{
+			rescheduledSlot = opportunity.TimeSlots.FirstOrDefault(ts => ts.Id == timeSlotId);
+			if (rescheduledSlot is null)
+			{
+				logger.LogWarning(
+					"Skipping rescheduled email for opportunity {OpportunityId}: time slot {TimeSlotId} no longer exists",
+					notification.OpportunityId.Value,
+					timeSlotId.Value);
+				return;
+			}
+		}
+
 		var volunteerIds = await engagementReadRepository.GetActiveVolunteerIdsByOpportunityAsync(
 			notification.OpportunityId, notification.TimeSlotId, cancellationToken);
 
@@ -46,6 +65,10 @@ internal sealed class VolunteerOpportunityUpdatedNotificationHandler(
 
 		var profileMap = await keycloakUserService.GetUserProfilesAsync(volunteerIds, cancellationToken);
 
+		var (kind, actionUrl, changedFact) = rescheduledSlot is null
+			? (EmailTemplateKind.OpportunityLocationChanged, emailLinkBuilder.VolunteerOpportunity(opportunity.Id), (EmailFact)EmailFacts.Location(opportunity))
+			: (EmailTemplateKind.TimeSlotRescheduled, emailLinkBuilder.MySignUps(), EmailFacts.Schedule(rescheduledSlot));
+
 		var messages = new List<EmailMessage>(volunteerIds.Count);
 		foreach (var volunteerId in volunteerIds)
 		{
@@ -53,18 +76,18 @@ internal sealed class VolunteerOpportunityUpdatedNotificationHandler(
 				continue;
 
 			var volunteerUser = volunteerUsersById[UserId.Create(volunteerId).GetValueOrThrow()];
-			var volunteerLanguage = SupportedLanguages.Resolve(volunteerUser.PreferredLanguage);
+			var language = SupportedLanguages.Resolve(volunteerUser.PreferredLanguage);
 
-			var content = emailTemplateRenderer.Render(
-				EmailTemplateKind.OpportunityUpdated,
-				volunteerLanguage,
-				new Dictionary<string, string>
+			var draft = new EmailDraft(kind, language, volunteer.FirstName ?? volunteer.Username, actionUrl)
+			{
+				Placeholders = new Dictionary<string, string>
 				{
-					["VolunteerName"] = volunteer.FirstName ?? volunteer.Username,
-					["OpportunityTitle"] = opportunity.TitleDe,
-				});
+					["OpportunityTitle"] = EmailFacts.OpportunityTitle(opportunity, language),
+				},
+				Facts = [changedFact],
+			};
 
-			messages.Add(new EmailMessage(volunteer.Email, content.Subject, content.Body, volunteerId.ToString()));
+			messages.Add(new EmailMessage(volunteer.Email, emailTemplateRenderer.Render(draft), volunteerId.ToString()));
 		}
 
 		if (messages.Count > 0)

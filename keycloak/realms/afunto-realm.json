@@ -6,6 +6,7 @@
   "organizationsEnabled": true,
   "sslRequired": "external",
   "loginTheme": "afunto",
+  "emailTheme": "afunto",
   "registrationAllowed": true,
   "registrationEmailAsUsername": false,
   "resetPasswordAllowed": true,

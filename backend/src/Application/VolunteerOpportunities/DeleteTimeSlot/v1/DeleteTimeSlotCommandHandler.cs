@@ -73,7 +73,7 @@ internal sealed class DeleteTimeSlotCommandHandler(
 			await EngagementCancellationHelper.CancelAsync(
 				dbContext,
 				engagement,
-				"The recurring time slot series was cancelled.",
+				reason: null,
 				opportunity.TitleDe,
 
 				notifyVolunteer: true,

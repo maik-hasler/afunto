@@ -15,7 +15,6 @@ const ORGANIZER_ROWS = [
 ];
 const VOLUNTEER_ROWS = [
 	"Your sign-up is confirmed",
-	"Your sign-up is cancelled",
 	"Reminder before your opportunity starts",
 ];
 
@@ -23,7 +22,6 @@ const PREFERENCES = {
 	notifyOnNewSignUp: true,
 	notifyOnWithdrawal: true,
 	notifyOnEngagementConfirmed: true,
-	notifyOnEngagementCancelled: true,
 	notifyOnEngagementReminder: true,
 };
 
@@ -62,7 +60,7 @@ describe("notification preferences for an organization member", () => {
 		});
 	});
 
-	it("still shows all five preferences", () => {
+	it("still shows all four preferences", () => {
 		renderSection();
 
 		for (const label of [...ORGANIZER_ROWS, ...VOLUNTEER_ROWS]) {

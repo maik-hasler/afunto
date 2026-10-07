@@ -17,7 +17,7 @@ namespace Infrastructure.Persistence.Migrations
 		{
 #pragma warning disable 612, 618
 			modelBuilder
-				.HasAnnotation("ProductVersion", "10.0.11")
+				.HasAnnotation("ProductVersion", "10.0.12")
 				.HasAnnotation("Relational:MaxIdentifierLength", 63);
 
 			NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -193,6 +193,10 @@ namespace Infrastructure.Persistence.Migrations
 						.IsRequired()
 						.HasColumnType("text")
 						.HasColumnName("status");
+
+					b.Property<DateTimeOffset?>("StatusNotifiedAt")
+						.HasColumnType("timestamp with time zone")
+						.HasColumnName("status_notified_at");
 
 					b.Property<DateTimeOffset?>("TimeSlotEndDateTime")
 						.HasColumnType("timestamp with time zone")
@@ -649,12 +653,6 @@ namespace Infrastructure.Persistence.Migrations
 						.HasColumnType("timestamp with time zone")
 						.HasColumnName("modified_on");
 
-					b.Property<bool>("NotifyOnEngagementCancelled")
-						.ValueGeneratedOnAdd()
-						.HasColumnType("boolean")
-						.HasDefaultValue(true)
-						.HasColumnName("notify_on_engagement_cancelled");
-
 					b.Property<bool>("NotifyOnEngagementConfirmed")
 						.ValueGeneratedOnAdd()
 						.HasColumnType("boolean")
@@ -1013,6 +1011,10 @@ namespace Infrastructure.Persistence.Migrations
 						.IsRequired()
 						.HasColumnType("text")
 						.HasColumnName("opportunity_title");
+
+					b.Property<Guid?>("OrganizationId")
+						.HasColumnType("uuid")
+						.HasColumnName("organization_id");
 
 					b.Property<Guid>("OrganizerId")
 						.HasColumnType("uuid")

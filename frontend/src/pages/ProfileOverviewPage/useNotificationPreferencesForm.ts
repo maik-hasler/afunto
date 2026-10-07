@@ -6,7 +6,6 @@ export type PreferenceKey =
 	| "notifyOnNewSignUp"
 	| "notifyOnWithdrawal"
 	| "notifyOnEngagementConfirmed"
-	| "notifyOnEngagementCancelled"
 	| "notifyOnEngagementReminder";
 
 export function useNotificationPreferencesForm() {

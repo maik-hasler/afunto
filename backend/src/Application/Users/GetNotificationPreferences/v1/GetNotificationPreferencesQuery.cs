@@ -10,5 +10,4 @@ public sealed record NotificationPreferencesResponse(
 	bool NotifyOnNewSignUp,
 	bool NotifyOnWithdrawal,
 	bool NotifyOnEngagementConfirmed,
-	bool NotifyOnEngagementCancelled,
 	bool NotifyOnEngagementReminder);

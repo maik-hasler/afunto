@@ -2,6 +2,7 @@ using Application.Common.Email;
 using Application.Common.Exceptions;
 using Application.Common.Keycloak;
 using Application.Common.Localization;
+using Domain.Organizations;
 using Domain.Users;
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.Notifications;
@@ -93,10 +94,10 @@ internal sealed class OrganizerNotificationDigestJob(
 		var keycloakUserService = scope.ServiceProvider.GetRequiredService<IKeycloakUserService>();
 		var emailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
 		var emailTemplateRenderer = scope.ServiceProvider.GetRequiredService<IEmailTemplateRenderer>();
-		var unsubscribeLinkBuilder = scope.ServiceProvider.GetRequiredService<IUnsubscribeLinkBuilder>();
+		var emailLinkBuilder = scope.ServiceProvider.GetRequiredService<IEmailLinkBuilder>();
 
 		var digestedCount = await ProcessDigestBatchAsync(
-			dbContext, keycloakUserService, emailService, emailTemplateRenderer, unsubscribeLinkBuilder, logger,
+			dbContext, keycloakUserService, emailService, emailTemplateRenderer, emailLinkBuilder, logger,
 			_options.MaxBatchSize, ct);
 
 		if (digestedCount > 0)
@@ -108,7 +109,7 @@ internal sealed class OrganizerNotificationDigestJob(
 		IKeycloakUserService keycloakUserService,
 		IEmailService emailService,
 		IEmailTemplateRenderer emailTemplateRenderer,
-		IUnsubscribeLinkBuilder unsubscribeLinkBuilder,
+		IEmailLinkBuilder emailLinkBuilder,
 		ILogger logger,
 		int batchSize,
 		CancellationToken cancellationToken)
@@ -143,47 +144,35 @@ internal sealed class OrganizerNotificationDigestJob(
 			var organizerLanguage = SupportedLanguages.Resolve(organizerUsersById[organizerId].PreferredLanguage);
 			var organizerName = profile.FirstName ?? profile.Username;
 
-			var lines = group
-				.OrderBy(i => i.OccurredOnUtc)
-				.Select(item =>
-				{
-					var lineTemplate = item.Kind == EmailNotificationType.Withdrawal
-						? EmailTemplateKind.EngagementOrganizerDigestWithdrawalLine
-						: EmailTemplateKind.EngagementOrganizerDigestSignupLine;
-
-					return emailTemplateRenderer.Render(
-						lineTemplate,
-						organizerLanguage,
-						new Dictionary<string, string>
-						{
-							["VolunteerName"] = item.VolunteerName,
-							["OpportunityTitle"] = item.OpportunityTitle,
-						}).Body;
-				});
-
-			var content = emailTemplateRenderer.Render(
-				EmailTemplateKind.EngagementOrganizerDigest,
-				organizerLanguage,
-				new Dictionary<string, string>
-				{
-					["OrganizerName"] = organizerName,
-					["Count"] = group.Count().ToString(),
-					["ItemsList"] = string.Join('\n', lines),
-				});
-
+			var orderedItems = group.OrderBy(i => i.OccurredOnUtc).ToList();
 			var organizerUser = organizerUsersById[organizerId];
-			var body = content.Body;
-			// One footer per distinct kind in this digest (usually just one) rather than
-			// picking a single subscription type - a mixed digest must let the organizer
-			// unsubscribe from either signup or withdrawal notifications, not just whichever
-			// happened to be listed first.
-			foreach (var kind in group.Select(i => i.Kind).Distinct())
-			{
-				var unsubscribeUrl = unsubscribeLinkBuilder.Build(organizerId, organizerUser.UnsubscribeToken, kind);
-				body = EmailFooter.Append(emailTemplateRenderer, organizerLanguage, body, unsubscribeUrl);
-			}
 
-			messages.Add(new EmailMessage(profile.Email, content.Subject, body, group.Key.ToString()));
+			// A digest can mix signups and withdrawals, and the footer has room for one
+			// unsubscribe link - so only a single-kind digest gets one. The settings link
+			// every email carries covers the mixed case.
+			var kinds = orderedItems.Select(i => i.Kind).Distinct().ToList();
+			var unsubscribeUrl = kinds.Count == 1
+				? emailLinkBuilder.Unsubscribe(organizerId, organizerUser.UnsubscribeToken, kinds[0])
+				: null;
+
+			var draft = new EmailDraft(
+				EmailTemplateKind.OrganizerDigest,
+				organizerLanguage,
+				organizerName,
+				ManageUrl(orderedItems, emailLinkBuilder))
+			{
+				Count = orderedItems.Count,
+				Lines = [.. orderedItems.Select(item => new EmailLine(
+					item.Kind.ToString(),
+					new Dictionary<string, string>
+					{
+						["VolunteerName"] = item.VolunteerName,
+						["OpportunityTitle"] = item.OpportunityTitle,
+					}))],
+				UnsubscribeUrl = unsubscribeUrl,
+			};
+
+			messages.Add(new EmailMessage(profile.Email, emailTemplateRenderer.Render(draft), group.Key.ToString()));
 			groupsByMessageIndex.Add(group);
 		}
 
@@ -202,6 +191,17 @@ internal sealed class OrganizerNotificationDigestJob(
 		await dbContext.SaveChangesAsync(cancellationToken);
 
 		return messages.Count;
+	}
+
+	// The organization of the newest item - an organizer of several organizations lands
+	// where the latest activity happened and can switch from there. Rows queued before the
+	// column existed carry no organization and fall back to the home page.
+	private static string ManageUrl(IReadOnlyList<PendingOrganizerDigestItem> orderedItems, IEmailLinkBuilder emailLinkBuilder)
+	{
+		var organizationId = orderedItems.LastOrDefault(i => i.OrganizationId is not null)?.OrganizationId;
+		return organizationId is { } id
+			? emailLinkBuilder.OrganizationEngagements(OrganizationId.Create(id).GetValueOrThrow())
+			: emailLinkBuilder.Home();
 	}
 
 	private static void MarkDigested(IEnumerable<PendingOrganizerDigestItem> items)
@@ -240,7 +240,7 @@ internal sealed class OrganizerNotificationDigestJob(
 
 			var items = await dbContext.Set<PendingOrganizerDigestItem>()
 				.FromSqlInterpolated($@"
-					SELECT id, organizer_id, opportunity_title, volunteer_name, kind, occurred_on_utc, claimed_on_utc, digest_sent_on_utc
+					SELECT id, organizer_id, organization_id, opportunity_title, volunteer_name, kind, occurred_on_utc, claimed_on_utc, digest_sent_on_utc
 					FROM pending_organizer_digest_item
 					WHERE digest_sent_on_utc IS NULL
 						AND (claimed_on_utc IS NULL OR claimed_on_utc <= {staleCutoff})

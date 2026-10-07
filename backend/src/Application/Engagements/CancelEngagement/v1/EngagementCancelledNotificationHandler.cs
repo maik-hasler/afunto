@@ -4,17 +4,20 @@ using Application.Common.Localization;
 using Application.Common.Messaging;
 using Application.Common.Persistence;
 using Domain.Engagements;
-using Domain.Users;
 using Microsoft.Extensions.Logging;
 
 namespace Application.Engagements.CancelEngagement.v1;
 
+// Always sent - a volunteer cannot opt out of cancellations, or they might turn up to a
+// shift that no longer exists. Bundled like the confirmation email: a cancelled series or
+// opportunity costs each volunteer one email, not one per date (#2402).
 internal sealed class EngagementCancelledNotificationHandler(
 	IApplicationDbContext dbContext,
 	IKeycloakUserService keycloakUserService,
 	IEmailService emailService,
 	IEmailTemplateRenderer emailTemplateRenderer,
-	IUnsubscribeLinkBuilder unsubscribeLinkBuilder,
+	IEmailLinkBuilder emailLinkBuilder,
+	TimeProvider timeProvider,
 	ILogger<EngagementCancelledNotificationHandler> logger)
 	: INotificationHandler<EngagementCancelledDomainEvent>
 {
@@ -22,10 +25,10 @@ internal sealed class EngagementCancelledNotificationHandler(
 		EngagementCancelledDomainEvent notification,
 		CancellationToken cancellationToken)
 	{
-		var opportunityTitle = notification.OpportunityTitle
-			?? (await dbContext.VolunteerOpportunities.FindAsync(notification.OpportunityId, cancellationToken))?.TitleDe;
-
-		if (opportunityTitle is null)
+		// Null once the opportunity was deleted in the same transaction that cancelled the
+		// engagement - the event's title snapshot covers that case.
+		var opportunity = await dbContext.VolunteerOpportunities.FindAsync(notification.OpportunityId, cancellationToken);
+		if (opportunity is null && notification.OpportunityTitle is null)
 		{
 			logger.LogWarning(
 				"Skipping cancellation email for engagement {EngagementId}: opportunity title unavailable for {OpportunityId}",
@@ -34,38 +37,51 @@ internal sealed class EngagementCancelledNotificationHandler(
 			return;
 		}
 
-		var volunteerUser = (await dbContext.GetOrCreateUsersAsync([notification.VolunteerId], cancellationToken))[0];
-		if (!volunteerUser.IsSubscribedTo(EmailNotificationType.EngagementCancelled))
+		var claimed = await dbContext.ClaimStatusNotificationsAsync(
+			notification.VolunteerId, notification.OpportunityId, EngagementStatus.Cancelled, timeProvider.GetUtcNow(), cancellationToken);
+		if (claimed.Count == 0)
 			return;
 
-		var volunteer = await keycloakUserService.GetUserAsync(notification.VolunteerId.Value, cancellationToken);
-		var volunteerLanguage = SupportedLanguages.Resolve(volunteerUser.PreferredLanguage);
+		try
+		{
+			var volunteerUser = (await dbContext.GetOrCreateUsersAsync([notification.VolunteerId], cancellationToken))[0];
+			var volunteer = await keycloakUserService.GetUserAsync(notification.VolunteerId.Value, cancellationToken);
+			var language = SupportedLanguages.Resolve(volunteerUser.PreferredLanguage);
+			var schedule = EmailFacts.Schedule(claimed, opportunity);
+			var facts = new List<EmailFact>();
+			if (schedule is not null)
+				facts.Add(schedule);
+			facts.AddRange(claimed
+				.Select(engagement => engagement.CancellationReason)
+				.OfType<string>()
+				.Where(reason => !string.IsNullOrWhiteSpace(reason))
+				.Distinct()
+				.Select(reason => new EmailFact.Reason(reason)));
 
-		var reasonBlock = string.IsNullOrWhiteSpace(notification.Reason)
-			? string.Empty
-			: emailTemplateRenderer.Render(
-				EmailTemplateKind.EngagementCancelledReasonSuffix,
-				volunteerLanguage,
-				new Dictionary<string, string> { ["Reason"] = notification.Reason }).Body;
-
-		var content = emailTemplateRenderer.Render(
-			EmailTemplateKind.EngagementCancelled,
-			volunteerLanguage,
-			new Dictionary<string, string>
+			var draft = new EmailDraft(
+				schedule is null ? EmailTemplateKind.InterestCancelled : EmailTemplateKind.EngagementCancelled,
+				language,
+				volunteer.FirstName ?? volunteer.Username,
+				emailLinkBuilder.Opportunities())
 			{
-				["VolunteerName"] = volunteer.FirstName ?? volunteer.Username,
-				["OpportunityTitle"] = opportunityTitle,
-				["ReasonBlock"] = reasonBlock,
-			});
+				Placeholders = new Dictionary<string, string>
+				{
+					["OpportunityTitle"] = opportunity is null
+						? notification.OpportunityTitle!
+						: EmailFacts.OpportunityTitle(opportunity, language),
+				},
+				Count = claimed.Count,
+				Facts = facts,
+			};
 
-		var unsubscribeUrl = unsubscribeLinkBuilder.Build(
-			notification.VolunteerId, volunteerUser.UnsubscribeToken, EmailNotificationType.EngagementCancelled);
-
-		await emailService.SendAsync(
-			volunteer.Email,
-			content.Subject,
-			EmailFooter.Append(emailTemplateRenderer, volunteerLanguage, content.Body, unsubscribeUrl),
-			notification.EngagementId.Value.ToString(),
-			cancellationToken);
+			await emailService.SendAsync(
+				new EmailMessage(volunteer.Email, emailTemplateRenderer.Render(draft), notification.EngagementId.Value.ToString()),
+				cancellationToken);
+		}
+		catch
+		{
+			await dbContext.ReleaseStatusNotificationsAsync([.. claimed.Select(e => e.Id)], CancellationToken.None);
+			throw;
+		}
 	}
 }

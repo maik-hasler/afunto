@@ -186,7 +186,7 @@ public class DeleteTimeSlotCommandHandlerTests
 
 		// Assert
 		pendingEngagement.Status.Should().Be(EngagementStatus.Cancelled);
-		pendingEngagement.CancellationReason.Should().Be("The recurring time slot series was cancelled.");
+		pendingEngagement.CancellationReason.Should().BeNull();
 		confirmedEngagement.Status.Should().Be(EngagementStatus.Cancelled);
 
 		await _notifRepo.Received(1).AddAsync(

@@ -6,138 +6,213 @@ using AwesomeAssertions;
 using Domain.Common;
 using Domain.Engagements;
 using Domain.Organizations;
-using Domain.Primitives;
 using Domain.Users;
 using Domain.VolunteerOpportunities;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 
 namespace Application.UnitTests.Engagements.ConfirmEngagement;
 
 public class EngagementConfirmedNotificationHandlerTests
 {
+	private static readonly DateTimeOffset Now = new(2026, 10, 7, 12, 0, 0, TimeSpan.Zero);
+	private static readonly Address DefaultAddress = Address.Create("Teststraße", "1", "12345", "Berlin").Value;
+
 	private readonly IApplicationDbContext _dbContext = Substitute.For<IApplicationDbContext>();
 	private readonly IAggregateRepository<VolunteerOpportunity, VolunteerOpportunityId> _opportunityRepo =
 		Substitute.For<IAggregateRepository<VolunteerOpportunity, VolunteerOpportunityId>>();
 	private readonly IKeycloakUserService _keycloakUserService = Substitute.For<IKeycloakUserService>();
 	private readonly IEmailService _emailService = Substitute.For<IEmailService>();
 	private readonly IEmailTemplateRenderer _emailTemplateRenderer = Substitute.For<IEmailTemplateRenderer>();
-	private readonly IUnsubscribeLinkBuilder _unsubscribeLinkBuilder = Substitute.For<IUnsubscribeLinkBuilder>();
+	private readonly IEmailLinkBuilder _emailLinkBuilder = Substitute.For<IEmailLinkBuilder>();
 	private readonly IPinGenerator _pinGenerator = Substitute.For<IPinGenerator>();
 	private readonly EngagementConfirmedNotificationHandler _sut;
 
-	private static readonly OrganizationId DefaultOrgId = OrganizationId.New();
-	private static readonly Address DefaultAddress = Address.Create("Teststraße", "1", "12345", "Berlin").Value;
+	private readonly UserId _volunteerId = UserId.New();
+	private readonly VolunteerOpportunity _opportunity;
+	private EmailDraft? _renderedDraft;
 
 	public EngagementConfirmedNotificationHandlerTests()
 	{
+		_opportunity = VolunteerOpportunity.Create(
+			OrganizationId.New(), "Tafel-Ausgabe", "Food bank", "Beschreibung", null, false, DefaultAddress,
+			Occurrence.Recurring, ParticipationType.ScheduledSlots, CheckInMethod.None, _pinGenerator,
+			status: OpportunityStatus.Draft).Value;
+
 		_dbContext.VolunteerOpportunities.Returns(_opportunityRepo);
 		_opportunityRepo
 			.FindAsync(Arg.Any<VolunteerOpportunityId>(), Arg.Any<CancellationToken>())
-			.Returns(CreateDefaultOpportunity());
+			.Returns(_opportunity);
 		_keycloakUserService
 			.GetUserAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-			.Returns(new KeycloakUserProfile(Guid.NewGuid(), "user", null, null, "user@example.com"));
+			.Returns(new KeycloakUserProfile(Guid.NewGuid(), "vera", "Vera", null, "vera@example.com"));
 		_emailTemplateRenderer
-			.Render(Arg.Any<EmailTemplateKind>(), Arg.Any<string>(), Arg.Any<IReadOnlyDictionary<string, string>>())
-			.Returns(new EmailContent("Test Subject", "Test Body"));
-		_emailTemplateRenderer
-			.Render(EmailTemplateKind.EmailFooter, Arg.Any<string>(), Arg.Any<IReadOnlyDictionary<string, string>>())
-			.Returns(call => new EmailContent(
-				string.Empty,
-				$"\n\n---\n{((IReadOnlyDictionary<string, string>)call[2]!)["UnsubscribeUrl"]}"));
+			.Render(Arg.Do<EmailDraft>(draft => _renderedDraft = draft))
+			.Returns(new RenderedEmail("Subject", "Text", "<p>Html</p>", null));
+		_emailLinkBuilder.MySignUps().Returns("https://afunto.example/my-signups");
 		_dbContext.GetOrCreateUsersAsync(Arg.Any<IReadOnlyCollection<UserId>>(), Arg.Any<CancellationToken>())
 			.Returns(call => ((IReadOnlyCollection<UserId>)call[0]!).Select(User.Create).ToList());
+
 		_sut = new EngagementConfirmedNotificationHandler(
-			_dbContext, _keycloakUserService, _emailService, _emailTemplateRenderer, _unsubscribeLinkBuilder, NullLogger<EngagementConfirmedNotificationHandler>.Instance);
+			_dbContext, _keycloakUserService, _emailService, _emailTemplateRenderer, _emailLinkBuilder,
+			new FixedTimeProvider(Now), NullLogger<EngagementConfirmedNotificationHandler>.Instance);
 	}
 
-	private VolunteerOpportunity CreateDefaultOpportunity() =>
-		VolunteerOpportunity.Create(DefaultOrgId, "Test", null, "Test", null, false, DefaultAddress, Occurrence.OneTime, ParticipationType.ScheduledSlots, CheckInMethod.None, _pinGenerator, status: OpportunityStatus.Draft).Value;
-
 	[Test]
-	public async Task Handle_ShouldRenderConfirmationEmail_InVolunteersPreferredLanguage(
+	public async Task Handle_ShouldSendOneEmailListingEveryDate_WhenSeveralEngagementsWereConfirmedTogether(
 		CancellationToken cancellationToken)
 	{
-		// Arrange
-		var volunteerId = UserId.New();
-		var volunteer = User.Create(volunteerId);
+		var claimed = new[] { ConfirmedSlotEngagement(Now.AddDays(7)), ConfirmedSlotEngagement(Now.AddDays(14)), ConfirmedSlotEngagement(Now.AddDays(21)) };
+		ClaimReturns(claimed);
+
+		await _sut.Handle(EventFor(claimed[0]), cancellationToken);
+
+		await _emailService.Received(1).SendAsync(
+			Arg.Is<EmailMessage>(m => m.To == "vera@example.com"), cancellationToken);
+		_renderedDraft!.Kind.Should().Be(EmailTemplateKind.EngagementConfirmed);
+		_renderedDraft.Count.Should().Be(3);
+		_renderedDraft.Facts.OfType<EmailFact.Schedule>().Single().Slots.Should().HaveCount(3);
+		_renderedDraft.Facts.OfType<EmailFact.Location>().Single().Address.Should().Be("Teststraße 1, 12345 Berlin");
+	}
+
+	[Test]
+	public async Task Handle_ShouldSendNothing_WhenASiblingEventAlreadyClaimedEveryEngagement(
+		CancellationToken cancellationToken)
+	{
+		var engagement = ConfirmedSlotEngagement(Now.AddDays(7));
+		ClaimReturns([]);
+
+		await _sut.Handle(EventFor(engagement), cancellationToken);
+
+		_emailTemplateRenderer.DidNotReceive().Render(Arg.Any<EmailDraft>());
+		await _emailService.DidNotReceive().SendAsync(Arg.Any<EmailMessage>(), Arg.Any<CancellationToken>());
+	}
+
+	[Test]
+	public async Task Handle_ShouldUseTheInterestTemplateWithoutDates_ForAnIndividualContactEngagement(
+		CancellationToken cancellationToken)
+	{
+		var engagement = Engagement.CreateIndividualContact(_opportunity.Id, _volunteerId, "Ich helfe gern").Value;
+		engagement.Confirm();
+		ClaimReturns([engagement]);
+
+		await _sut.Handle(EventFor(engagement), cancellationToken);
+
+		_renderedDraft!.Kind.Should().Be(EmailTemplateKind.InterestConfirmed);
+		_renderedDraft.Facts.Should().BeEmpty();
+	}
+
+	[Test]
+	public async Task Handle_ShouldRenderInTheVolunteersLanguage_WithTheMatchingTitle(
+		CancellationToken cancellationToken)
+	{
+		var volunteer = User.Create(_volunteerId);
 		volunteer.SetPreferredLanguage("en");
 		_dbContext.GetOrCreateUsersAsync(Arg.Any<IReadOnlyCollection<UserId>>(), Arg.Any<CancellationToken>())
 			.Returns([volunteer]);
-		var notification = new EngagementConfirmedDomainEvent(EngagementId.New(), volunteerId, VolunteerOpportunityId.New());
+		var engagement = ConfirmedSlotEngagement(Now.AddDays(7));
+		ClaimReturns([engagement]);
 
-		// Act
-		await _sut.Handle(notification, cancellationToken);
+		await _sut.Handle(EventFor(engagement), cancellationToken);
 
-		// Assert
-		_emailTemplateRenderer.Received(1).Render(
-			EmailTemplateKind.EngagementConfirmed,
-			"en",
-			Arg.Any<IReadOnlyDictionary<string, string>>());
+		_renderedDraft!.Language.Should().Be("en");
+		_renderedDraft.Placeholders["OpportunityTitle"].Should().Be("Food bank");
+		_renderedDraft.RecipientName.Should().Be("Vera");
 	}
 
 	[Test]
-	public async Task Handle_ShouldEmailVolunteer_WhenSubscribedToEngagementConfirmed(
+	public async Task Handle_ShouldClaimButNotEmail_WhenTheVolunteerOptedOut(
 		CancellationToken cancellationToken)
 	{
-		// Arrange
-		_unsubscribeLinkBuilder.Build(Arg.Any<UserId>(), Arg.Any<Guid>(), Arg.Any<EmailNotificationType>())
-			.Returns("https://example.com/unsubscribe");
-		var notification = new EngagementConfirmedDomainEvent(EngagementId.New(), UserId.New(), VolunteerOpportunityId.New());
+		var optedOut = User.Create(_volunteerId);
+		optedOut.UpdateNotificationPreferences(
+			notifyOnNewSignUp: true,
+			notifyOnWithdrawal: true,
+			notifyOnEngagementConfirmed: false,
+			notifyOnEngagementReminder: true);
+		_dbContext.GetOrCreateUsersAsync(Arg.Any<IReadOnlyCollection<UserId>>(), Arg.Any<CancellationToken>())
+			.Returns([optedOut]);
+		var engagement = ConfirmedSlotEngagement(Now.AddHours(10));
+		ClaimReturns([engagement]);
 
-		// Act
-		await _sut.Handle(notification, cancellationToken);
+		await _sut.Handle(EventFor(engagement), cancellationToken);
 
-		// Assert
-		await _emailService.Received(1).SendAsync(
-			"user@example.com",
-			Arg.Any<string>(),
-			Arg.Is<string>(body => body!.Contains("https://example.com/unsubscribe")),
-			Arg.Any<string>(),
+		await _emailService.DidNotReceive().SendAsync(Arg.Any<EmailMessage>(), Arg.Any<CancellationToken>());
+		await _dbContext.DidNotReceive().ReleaseStatusNotificationsAsync(
+			Arg.Any<IReadOnlyCollection<EngagementId>>(), Arg.Any<CancellationToken>());
+		await _dbContext.DidNotReceive().MarkRemindersSentAsync(
+			Arg.Any<IReadOnlyCollection<EngagementId>>(), Arg.Any<DateTimeOffset>(), Arg.Any<CancellationToken>());
+	}
+
+	[Test]
+	public async Task Handle_ShouldReleaseTheClaimAndRethrow_WhenSendingFails(
+		CancellationToken cancellationToken)
+	{
+		var engagement = ConfirmedSlotEngagement(Now.AddDays(7));
+		ClaimReturns([engagement]);
+		_emailService
+			.SendAsync(Arg.Any<EmailMessage>(), Arg.Any<CancellationToken>())
+			.ThrowsAsync(new InvalidOperationException("SMTP down"));
+
+		var act = () => _sut.Handle(EventFor(engagement), cancellationToken);
+
+		await act.Should().ThrowAsync<InvalidOperationException>();
+		await _dbContext.Received(1).ReleaseStatusNotificationsAsync(
+			Arg.Is<IReadOnlyCollection<EngagementId>>(ids => ids.Single() == engagement.Id), Arg.Any<CancellationToken>());
+	}
+
+	[Test]
+	public async Task Handle_ShouldMarkTheReminderSent_OnlyForDatesInsideTheReminderWindow(
+		CancellationToken cancellationToken)
+	{
+		var tomorrow = ConfirmedSlotEngagement(Now.AddHours(20));
+		var nextWeek = ConfirmedSlotEngagement(Now.AddDays(7));
+		ClaimReturns([tomorrow, nextWeek]);
+
+		await _sut.Handle(EventFor(tomorrow), cancellationToken);
+
+		await _dbContext.Received(1).MarkRemindersSentAsync(
+			Arg.Is<IReadOnlyCollection<EngagementId>>(ids => ids.SequenceEqual(new[] { tomorrow.Id })),
+			Now,
 			cancellationToken);
 	}
 
 	[Test]
-	public async Task Handle_ShouldNotEmailVolunteer_WhenOptedOutOfEngagementConfirmed(
+	public async Task Handle_ShouldNeitherClaimNorEmail_WhenOpportunityNoLongerExists(
 		CancellationToken cancellationToken)
 	{
-		// Arrange
-		var volunteerId = UserId.New();
-		var optedOutVolunteer = User.Create(volunteerId);
-		optedOutVolunteer.UpdateNotificationPreferences(
-			notifyOnNewSignUp: true,
-			notifyOnWithdrawal: true,
-			notifyOnEngagementConfirmed: false,
-			notifyOnEngagementCancelled: true,
-			notifyOnEngagementReminder: true);
-		_dbContext.GetOrCreateUsersAsync(Arg.Any<IReadOnlyCollection<UserId>>(), Arg.Any<CancellationToken>())
-			.Returns([optedOutVolunteer]);
-		var notification = new EngagementConfirmedDomainEvent(EngagementId.New(), volunteerId, VolunteerOpportunityId.New());
-
-		// Act
-		await _sut.Handle(notification, cancellationToken);
-
-		// Assert
-		await _emailService.DidNotReceive().SendAsync(
-			Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
-	}
-
-	[Test]
-	public async Task Handle_ShouldSkip_WhenOpportunityNoLongerExists(
-		CancellationToken cancellationToken)
-	{
-		// Arrange
 		_opportunityRepo
 			.FindAsync(Arg.Any<VolunteerOpportunityId>(), Arg.Any<CancellationToken>())
 			.Returns((VolunteerOpportunity?)null);
-		var notification = new EngagementConfirmedDomainEvent(EngagementId.New(), UserId.New(), VolunteerOpportunityId.New());
 
-		// Act
-		await _sut.Handle(notification, cancellationToken);
+		await _sut.Handle(
+			new EngagementConfirmedDomainEvent(EngagementId.New(), _volunteerId, VolunteerOpportunityId.New()),
+			cancellationToken);
 
-		// Assert
-		await _emailService.DidNotReceive().SendAsync(
-			Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+		await _dbContext.DidNotReceive().ClaimStatusNotificationsAsync(
+			Arg.Any<UserId>(), Arg.Any<VolunteerOpportunityId>(), Arg.Any<EngagementStatus>(), Arg.Any<DateTimeOffset>(), Arg.Any<CancellationToken>());
+		await _emailService.DidNotReceive().SendAsync(Arg.Any<EmailMessage>(), Arg.Any<CancellationToken>());
+	}
+
+	private Engagement ConfirmedSlotEngagement(DateTimeOffset start)
+	{
+		var slot = _opportunity.AddTimeSlot(start, start.AddHours(2), 10, Now).Value;
+		var engagement = Engagement.CreateSlotSignUp(_opportunity.Id, _volunteerId, slot.Id, slot.StartDateTime, slot.EndDateTime);
+		engagement.Confirm();
+		return engagement;
+	}
+
+	private void ClaimReturns(IReadOnlyCollection<Engagement> claimed) =>
+		_dbContext
+			.ClaimStatusNotificationsAsync(_volunteerId, _opportunity.Id, EngagementStatus.Confirmed, Now, Arg.Any<CancellationToken>())
+			.Returns([.. claimed]);
+
+	private static EngagementConfirmedDomainEvent EventFor(Engagement engagement) =>
+		new(engagement.Id, engagement.VolunteerId!.Value, engagement.OpportunityId);
+
+	private sealed class FixedTimeProvider(DateTimeOffset utcNow) : TimeProvider
+	{
+		public override DateTimeOffset GetUtcNow() => utcNow;
 	}
 }

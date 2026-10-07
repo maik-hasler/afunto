@@ -585,10 +585,15 @@ public sealed class VolunteerOpportunity
 		return Result.Success();
 	}
 
-	// Callers decide "material change" from a before/after snapshot the aggregate
-	// itself doesn't retain (see UpdateVolunteerOpportunityCommandHandler), so this is
-	// an explicit trigger rather than something raised from within a single mutator.
-	public void NotifyVolunteersOfUpdate(TimeSlotId? timeSlotId = null) =>
+	// Both triggers email every volunteer signed up for the opportunity (or the slot), so
+	// they are reserved for the two changes that decide whether someone turns up at the
+	// right place at the right time (#2402). Callers detect them from a before/after
+	// snapshot the aggregate itself doesn't retain, hence explicit triggers rather than
+	// events raised from within Relocate()/UpdateTimeSlot().
+	public void NotifyVolunteersOfRelocation() =>
+		AddEvent(new VolunteerOpportunityUpdatedDomainEvent(Id, TimeSlotId: null));
+
+	public void NotifyVolunteersOfReschedule(TimeSlotId timeSlotId) =>
 		AddEvent(new VolunteerOpportunityUpdatedDomainEvent(Id, timeSlotId));
 
 	public Result<TimeSlot> AddTimeSlot(

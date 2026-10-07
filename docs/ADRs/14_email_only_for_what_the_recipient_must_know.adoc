@@ -1,0 +1,102 @@
+== 14. Email Only for What the Recipient Must Know
+
+=== Status
+Accepted
+
+=== Date
+2026-10-07
+
+=== Context
+Live user testing on 2026-09-11 (#2402) produced one consistent complaint about email: far too many of them. Testers also called them clumsy and unfriendly, inconsistent in length, and found spelling mistakes.
+
+Counting what one volunteer received confirms it. A sign-up for one time slot produced three emails: a receipt for the sign-up the volunteer had just made, a confirmation, and a reminder. Six dates of a weekly series produced eighteen. On top came:
+
+* an "opportunity changed" email for every slot edit, including an organizer merely raising a slot's capacity - with no opt-out and no detail beyond "check the app";
+* one cancellation email per date when a series or a whole opportunity was cancelled, with a canned English reason ("Opportunity was deleted.") inside the German email;
+* a reminder saying "starts tomorrow" an hour after a confirmation for a shift that started the same day.
+
+None of the emails linked back into the app. The templates mixed "Bewerbung", "Teilnahme", "Anfrage" and "Eintragung" for the same thing and signed off with a bare "Afunto".
+
+=== Decision
+**An email goes out only when someone other than the recipient decided or changed something the recipient needs to know to turn up at the right place at the right time, or when the recipient has to act.** The recipient's own actions get no email. The in-app bell keeps notifying about everything, as before.
+
+That rule leaves these emails:
+
+[cols="3,2,2,5" options="header"]
+|===
+|Email |Recipient |Opt-out |Note
+
+|Sign-up confirmed
+|Volunteer
+|Yes
+|One email per volunteer and opportunity, listing every confirmed date.
+
+|Sign-up cancelled
+|Volunteer
+|No
+|Bundled the same way. Not optional: an opted-out volunteer could turn up to a shift that no longer exists.
+
+|New time / new place
+|Volunteer
+|No
+|Only for a rescheduled slot or a changed address/remote flag, and it names the new value. Capacity and occurrence edits notify by bell only, or not at all.
+
+|Reminder
+|Volunteer
+|Yes
+|Skipped when the confirmation itself arrived inside the reminder window - it already named date and place.
+
+|Invitation
+|Invitee
+|No
+|Unchanged: the invitee may not open the app otherwise.
+
+|Digest
+|Organizer
+|Yes
+|Unchanged: sign-ups and withdrawals, collapsed per organizer every four hours.
+|===
+
+Removed: the sign-up and expression-of-interest receipts.
+
+Every email shares one shape - greeting, one or two sentences, a block of facts (date, place, reason), one button into the app, closing, and a footer saying why it was sent with a link to the email settings. Each is sent as HTML with a plain-text alternative, marked `Auto-Submitted: auto-generated`, never with a priority header, and with `List-Unsubscribe` when it can be unsubscribed from.
+
+=== Rationale
+* Volume is what testers objected to first, and the receipts alone were a third of a volunteer's emails while carrying nothing the app had not just shown.
+* The rule is checkable. "Would this be useful?" admits almost any email; "did someone else change where or when you have to be?" admits very few.
+* Bundling the status emails per volunteer and opportunity addresses the multiplier, not just the count: a bulk confirmation or a cancelled series is one decision and reads as one email. It is done with a claim on the engagement (`Engagement.StatusNotifiedAt`, see the Email concept in chapter 8) rather than a queue, so a cancellation still goes out within one outbox poll instead of waiting for a digest tick.
+* Removing an email is cheap to undo; an inbox full of noise teaches people to ignore the one email that matters.
+
+=== Considered Alternatives
+
+==== Keep every email and only rewrite the copy
+* Pros
+** Smallest change; no behaviour differs
+* Cons
+** Addresses the second complaint and ignores the first
+
+==== A per-volunteer digest, like the organizer one
+* Pros
+** Collapses everything, including confirmations clicked one at a time
+* Cons
+** Delays the one email that is time-critical - a cancellation - by up to the digest interval
+** Another queue table and another background job for a problem the claim already solves for the cases that produce bursts
+
+==== Bell only, no email for volunteers
+* Pros
+** Quietest possible inbox
+* Cons
+** A cancellation must reach someone who has not opened the app since signing up, and web push is not reliable enough on iOS to replace email (ADR-12)
+
+==== Plain text only
+* Pros
+** Robust in every client, nothing to escape
+* Cons
+** Testers read the plain emails as clumsy; a minimal HTML layout with a text alternative costs one writer class
+
+=== Consequences
+* A new email has to pass the rule above. Prefer a bell notification; an email that does not pass is a product decision to record here, not an implementation detail.
+* Bundling only collapses what is committed before the outbox handles the first event - a bulk confirmation, a cancelled series or opportunity. An organizer confirming dates one click at a time still sends one email per click.
+* Unsubscribe links in cancellation emails sent before this change point at a type that no longer exists; the unsubscribe page reports that instead of unsubscribing.
+* A digest that mixes sign-ups and withdrawals carries the settings link but no one-click unsubscribe link, because the footer has room for one type.
+* Keycloak's own emails (address verification, password reset, admin-requested account actions, address change) follow the same shape through the realm's `afunto` email theme, see `keycloak/AGENTS.md`. They pass the rule through its second half: each carries a link the recipient has to follow to finish what they or an admin started.

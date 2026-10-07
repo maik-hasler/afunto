@@ -33,7 +33,7 @@ These are the terms the domain model in <<section-concepts>> is built from. They
 |The link between a user and an organization, carrying the member's role (`Member` or `Organizer`). This local record - not the JWT role - decides at request time whether a user may modify a given organization.
 
 |Notification
-|An in-app message in a user's inbox, generated from a domain event (a sign-up arrived, an invitation was accepted, an opportunity you signed up for changed). Distinct from the emails sent for the same events.
+|An in-app message in a user's inbox, generated from a domain event (a sign-up arrived, an invitation was accepted, an opportunity you signed up for changed). Distinct from email, which only a few of those events send (ADR-14).
 
 |Occurrence
 |Whether an opportunity happens once (`OneTime`) or repeatedly (`Recurring`). Recurring opportunities generate a series of time slots that can be edited or cancelled together.

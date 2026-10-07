@@ -275,6 +275,59 @@ public class UpdateTimeSlotCommandHandlerTests
 	}
 
 	[Test]
+	public async Task Handle_ShouldNotifyNobody_WhenOnlyTheCapacityOfASlotChanges(
+		CancellationToken cancellationToken)
+	{
+		// Arrange
+		var opportunity = CreateScheduledSlotsOpportunity();
+		var editedSlot = opportunity.AddTimeSlot(BaseStart, BaseEnd, 10, DateTimeOffset.UtcNow).Value;
+		_opportunityRepo
+			.FindAsync(opportunity.Id, cancellationToken)
+			.Returns(opportunity);
+		_engagementReadRepository
+			.GetActiveVolunteerIdsByOpportunityAsync(opportunity.Id, editedSlot.Id, cancellationToken)
+			.Returns([Guid.NewGuid()]);
+
+		var command = new UpdateTimeSlotCommand(
+			opportunity.Id.Value, editedSlot.Id.Value, BaseStart, BaseEnd, 20, DefaultRequestingUserId);
+
+		// Act
+		await _sut.Handle(command, cancellationToken);
+
+		// Assert - more room on the slot changes nothing for anyone already on it (#2402)
+		editedSlot.MaxParticipants.Should().Be(20);
+		await _notifRepo.DidNotReceive().AddAsync(Arg.Any<Notification>(), Arg.Any<CancellationToken>());
+		opportunity.Events.Should().NotContain(e => e is VolunteerOpportunityUpdatedDomainEvent);
+	}
+
+	[Test]
+	public async Task Handle_ShouldNotifyNobody_WhenTheCapacityOfASeriesChanges(
+		CancellationToken cancellationToken)
+	{
+		// Arrange
+		var opportunity = CreateScheduledSlotsOpportunity();
+		var seriesId = Guid.CreateVersion7();
+		var slot = opportunity.AddTimeSlot(BaseStart, BaseEnd, 10, DateTimeOffset.UtcNow, seriesId, "Weekly", 2).Value;
+		opportunity.AddTimeSlot(BaseStart.AddDays(7), BaseEnd.AddDays(7), 10, DateTimeOffset.UtcNow, seriesId, "Weekly", 2);
+		_opportunityRepo
+			.FindAsync(opportunity.Id, cancellationToken)
+			.Returns(opportunity);
+		_engagementReadRepository
+			.GetActiveVolunteerIdsByOpportunityAsync(Arg.Any<VolunteerOpportunityId>(), Arg.Any<TimeSlotId?>(), cancellationToken)
+			.Returns([Guid.NewGuid()]);
+
+		var command = new UpdateTimeSlotCommand(
+			opportunity.Id.Value, slot.Id.Value, null, null, 20, DefaultRequestingUserId, SeriesEditScope.EntireSeries);
+
+		// Act
+		await _sut.Handle(command, cancellationToken);
+
+		// Assert
+		await _notifRepo.DidNotReceive().AddAsync(Arg.Any<Notification>(), Arg.Any<CancellationToken>());
+		opportunity.Events.Should().NotContain(e => e is VolunteerOpportunityUpdatedDomainEvent);
+	}
+
+	[Test]
 	public async Task Handle_ShouldThrow_WhenRequestingUserIsNotOrganizer(
 		CancellationToken cancellationToken)
 	{

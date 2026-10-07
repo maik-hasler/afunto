@@ -25,7 +25,6 @@ internal sealed class UpdateNotificationPreferencesCommandHandler(
 			request.NotifyOnNewSignUp,
 			request.NotifyOnWithdrawal,
 			request.NotifyOnEngagementConfirmed,
-			request.NotifyOnEngagementCancelled,
 			request.NotifyOnEngagementReminder);
 
 		await unitOfWork.SaveChangesAsync(cancellationToken);

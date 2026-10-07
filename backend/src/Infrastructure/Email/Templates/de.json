@@ -1,58 +1,79 @@
 {
-  "EngagementRequestReceived": {
-    "subject": "Deine Anfrage für „{OpportunityTitle}“ ist eingegangen",
-    "body": "Hallo {VolunteerName},\n\ndeine Anfrage zur Teilnahme an „{OpportunityTitle}“ ist eingegangen. Der Organisator wird sich bei dir melden.\n\nAfunto"
+  "layout": {
+    "culture": "de-DE",
+    "datePattern": "dddd, d. MMMM yyyy",
+    "timePattern": "HH:mm",
+    "timeRange": "{Date}, {Start} – {End} Uhr",
+    "greeting": "Hallo {RecipientName},",
+    "closing": "Viele Grüße\nDein Afunto-Team",
+    "schedule": "Termin",
+    "schedulePlural": "Termine",
+    "location": "Ort",
+    "online": "Online",
+    "reason": "Grund",
+    "footer": "Du bekommst diese E-Mail, weil du ein Konto bei Afunto hast.",
+    "settings": "E-Mail-Einstellungen ändern",
+    "unsubscribe": "Diese Art von E-Mail abbestellen"
   },
-  "EngagementWaitlisted": {
-    "subject": "Deine Eintragung für „{OpportunityTitle}“ ist eingegangen",
-    "body": "Hallo {VolunteerName},\n\ndeine Eintragung für „{OpportunityTitle}“ ist eingegangen. Ein Organisator wird deinen Zeitslot prüfen und bald bestätigen.\n\nAfunto"
-  },
-  "EngagementSignupNotifyOrganizer": {
-    "subject": "Neue Eintragung: {VolunteerName} für „{OpportunityTitle}“",
-    "body": "Hallo {OrganizerName},\n\n{VolunteerName} hat sich für „{OpportunityTitle}“ eingetragen.\n\nAfunto"
-  },
-  "EngagementConfirmed": {
-    "subject": "Deine Teilnahme wurde bestätigt",
-    "body": "Hallo {VolunteerName},\n\ndeine Bewerbung für „{OpportunityTitle}“ wurde bestätigt.\n\nWir freuen uns auf dich!\n\nAfunto"
-  },
-  "EngagementCancelled": {
-    "subject": "Deine Teilnahme wurde abgesagt",
-    "body": "Hallo {VolunteerName},\n\nleider wurde deine Eintragung für „{OpportunityTitle}“ abgesagt.{ReasonBlock}\n\nWir hoffen, dich bei einer anderen Gelegenheit zu sehen.\n\nAfunto"
-  },
-  "EngagementCancelledReasonSuffix": {
-    "subject": "",
-    "body": "\n\nGrund: {Reason}"
-  },
-  "EngagementWithdrawnNotifyOrganizer": {
-    "subject": "{VolunteerName} hat sich von „{OpportunityTitle}“ zurückgezogen",
-    "body": "Hallo {OrganizerName},\n\n{VolunteerName} hat sich von „{OpportunityTitle}“ zurückgezogen.\n\nAfunto"
-  },
-  "EngagementReminder": {
-    "subject": "Erinnerung: {OpportunityTitle} startet morgen",
-    "body": "Hallo {DisplayName},\n\ndies ist eine Erinnerung, dass du für „{OpportunityTitle}“ eingetragen bist, das am {StartFormatted} beginnt.\n\nWir freuen uns auf dich!\n\nDein Afunto-Team"
-  },
-  "InvitationReceived": {
-    "subject": "Du wurdest eingeladen, einer Organisation beizutreten",
-    "body": "Hallo {InviteeName},\n\ndu wurdest eingeladen, der Organisation „{OrganizationName}“ auf Afunto beizutreten.\n\nMelde dich in deinem Konto an, um die Einladung anzunehmen oder abzulehnen.\n\nAfunto"
-  },
-  "OpportunityUpdated": {
-    "subject": "Ein Einsatz, für den du dich eingetragen hast, hat sich geändert: „{OpportunityTitle}“",
-    "body": "Hallo {VolunteerName},\n\ndie Details für „{OpportunityTitle}“ haben sich geändert. Bitte sieh in der App nach den aktuellen Informationen.\n\nAfunto"
-  },
-  "EngagementOrganizerDigest": {
-    "subject": "{Count} Neuigkeit(en) zu deinen Einsätzen",
-    "body": "Hallo {OrganizerName},\n\nhier ist, was sich seit deiner letzten Zusammenfassung getan hat:\n\n{ItemsList}\n\nAfunto"
-  },
-  "EngagementOrganizerDigestSignupLine": {
-    "subject": "",
-    "body": "- {VolunteerName} hat sich für „{OpportunityTitle}“ eingetragen"
-  },
-  "EngagementOrganizerDigestWithdrawalLine": {
-    "subject": "",
-    "body": "- {VolunteerName} hat sich von „{OpportunityTitle}“ zurückgezogen"
-  },
-  "EmailFooter": {
-    "subject": "",
-    "body": "\n\n---\nMöchtest du diese Art von E-Mail nicht mehr erhalten? Hier abmelden: {UnsubscribeUrl}"
+  "templates": {
+    "EngagementConfirmed": {
+      "subject": "Eintragung bestätigt: {OpportunityTitle}",
+      "subjectPlural": "Eintragungen bestätigt: {OpportunityTitle}",
+      "intro": "deine Eintragung für „{OpportunityTitle}“ ist bestätigt. Wir freuen uns auf dich!",
+      "introPlural": "deine Eintragungen für „{OpportunityTitle}“ sind bestätigt. Wir freuen uns auf dich!",
+      "action": "Meine Eintragungen ansehen"
+    },
+    "InterestConfirmed": {
+      "subject": "Interessenbekundung bestätigt: {OpportunityTitle}",
+      "intro": "die Organisation hat deine Interessenbekundung für „{OpportunityTitle}“ bestätigt und meldet sich bei dir, um alles Weitere abzusprechen.",
+      "action": "Meine Eintragungen ansehen"
+    },
+    "EngagementCancelled": {
+      "subject": "Eintragung abgesagt: {OpportunityTitle}",
+      "subjectPlural": "Eintragungen abgesagt: {OpportunityTitle}",
+      "intro": "leider wurde deine Eintragung für „{OpportunityTitle}“ abgesagt. Du brauchst zu diesem Termin nicht zu kommen.",
+      "introPlural": "leider wurden deine Eintragungen für „{OpportunityTitle}“ abgesagt. Du brauchst zu diesen Terminen nicht zu kommen.",
+      "outro": "Vielleicht passt ja ein anderer Einsatz zu dir.",
+      "action": "Andere Einsätze entdecken"
+    },
+    "InterestCancelled": {
+      "subject": "Interessenbekundung abgesagt: {OpportunityTitle}",
+      "intro": "leider wurde deine Interessenbekundung für „{OpportunityTitle}“ abgesagt.",
+      "outro": "Vielleicht passt ja ein anderer Einsatz zu dir.",
+      "action": "Andere Einsätze entdecken"
+    },
+    "EngagementReminder": {
+      "subject": "Erinnerung: {OpportunityTitle}",
+      "intro": "bald ist es so weit: Du bist für „{OpportunityTitle}“ eingetragen. Wir freuen uns auf dich!",
+      "outro": "Falls du doch nicht kannst, ziehe deine Eintragung bitte zurück. Dann kann jemand anderes einspringen.",
+      "action": "Meine Eintragungen ansehen"
+    },
+    "TimeSlotRescheduled": {
+      "subject": "Neuer Termin: {OpportunityTitle}",
+      "intro": "dein Termin für „{OpportunityTitle}“ hat sich geändert.",
+      "outro": "Falls dir die neue Zeit nicht passt, ziehe deine Eintragung bitte zurück.",
+      "action": "Meine Eintragungen ansehen"
+    },
+    "OpportunityLocationChanged": {
+      "subject": "Neuer Ort: {OpportunityTitle}",
+      "intro": "der Ort für „{OpportunityTitle}“ hat sich geändert.",
+      "outro": "Falls dir der neue Ort nicht passt, ziehe deine Eintragung bitte zurück.",
+      "action": "Einsatz ansehen"
+    },
+    "InvitationReceived": {
+      "subject": "Einladung: {OrganizationName}",
+      "intro": "du bist eingeladen, der Organisation „{OrganizationName}“ auf Afunto beizutreten.",
+      "outro": "Die Einladung gilt {ExpiryDays} Tage.",
+      "action": "Einladung ansehen"
+    },
+    "OrganizerDigest": {
+      "subject": "Neues bei deinen Einsätzen",
+      "intro": "das hat sich seit der letzten Zusammenfassung bei deinen Einsätzen getan:",
+      "action": "Eintragungen verwalten",
+      "lines": {
+        "NewSignUp": "{VolunteerName} hat sich für „{OpportunityTitle}“ eingetragen.",
+        "Withdrawal": "{VolunteerName} hat die Eintragung für „{OpportunityTitle}“ zurückgezogen."
+      }
+    }
   }
 }

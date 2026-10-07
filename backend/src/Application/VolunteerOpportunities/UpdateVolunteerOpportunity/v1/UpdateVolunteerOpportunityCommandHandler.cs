@@ -58,10 +58,10 @@ internal sealed class UpdateVolunteerOpportunityCommandHandler(
 		opportunity.SwitchParticipationType(request.ParticipationType);
 		opportunity.SetValidUntil(request.ValidUntil, DateTimeOffset.UtcNow).ThrowIfFailure();
 
-		var materialChanged =
+		var relocated =
 			prevIsRemote != request.IsRemote ||
-			prevOccurrence != request.Occurrence ||
 			AddressTextChanged(prevAddress, request.Address);
+		var materialChanged = relocated || prevOccurrence != request.Occurrence;
 
 		if (materialChanged)
 		{
@@ -72,9 +72,12 @@ internal sealed class UpdateVolunteerOpportunityCommandHandler(
 				NotificationKind.OpportunityUpdated,
 				cancellationToken,
 				opportunityTitle: opportunity.TitleDe);
-
-			opportunity.NotifyVolunteersOfUpdate();
 		}
+
+		// Email only for a new place: an occurrence switch leaves every booked slot exactly
+		// where and when it was, so the bell notification above is enough (#2402).
+		if (relocated)
+			opportunity.NotifyVolunteersOfRelocation();
 
 		return true;
 	}

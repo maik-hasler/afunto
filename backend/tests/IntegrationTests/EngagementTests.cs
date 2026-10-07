@@ -2194,7 +2194,7 @@ public class EngagementTests(IntegrationTestFixture fixture)
 		var engagements = await olafClient.GetEngagementsAsync(opportunity.Id, 1, 10, cancellationToken: cancellationToken);
 		var cascaded = engagements.Items.Should().ContainSingle().Which;
 		cascaded.Status.Should().Be("Cancelled");
-		cascaded.CancellationReason.Should().Be("Opportunity was cancelled: Venue is no longer available");
+		cascaded.CancellationReason.Should().Be("Venue is no longer available");
 	}
 
 	private static async Task<DateTimeOffset> GetCreatedOnAsync(

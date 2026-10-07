@@ -106,7 +106,7 @@ public class OrganizerNotificationDigestJobTests(IntegrationTestFixture fixture)
 		CancellationToken cancellationToken)
 	{
 		var item = PendingOrganizerDigestItem.Create(
-			Guid.NewGuid(), "Beach Cleanup", "Vera Volunteer", EmailNotificationType.NewSignUp, DateTime.UtcNow);
+			Guid.NewGuid(), Guid.NewGuid(), "Beach Cleanup", "Vera Volunteer", EmailNotificationType.NewSignUp, DateTime.UtcNow);
 		dbContext.Set<PendingOrganizerDigestItem>().Add(item);
 		await dbContext.SaveChangesAsync(cancellationToken);
 		return item.Id;

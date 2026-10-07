@@ -153,9 +153,9 @@ public class DeleteVolunteerOpportunityCommandHandlerTests
 
 		// Assert
 		pendingEngagement.Status.Should().Be(EngagementStatus.Cancelled);
-		pendingEngagement.CancellationReason.Should().Be("Opportunity was deleted.");
+		pendingEngagement.CancellationReason.Should().BeNull();
 		confirmedEngagement.Status.Should().Be(EngagementStatus.Cancelled);
-		confirmedEngagement.CancellationReason.Should().Be("Opportunity was deleted.");
+		confirmedEngagement.CancellationReason.Should().BeNull();
 	}
 
 	[Test]

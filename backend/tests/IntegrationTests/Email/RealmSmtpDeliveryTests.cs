@@ -39,7 +39,9 @@ public class RealmSmtpDeliveryTests(IntegrationTestFixture fixture)
 				cancellationToken);
 			sendResponse.EnsureSuccessStatusCode();
 
-			await AssertMailpitReceivedMessageToAsync(email, cancellationToken);
+			// The subject is the email theme's (keycloak/themes/afunto/email), not Keycloak's
+			// stock "E-Mail verifizieren" - proving the realm selects the theme at all (#2402).
+			await AssertMailpitReceivedMessageToAsync(email, "E-Mail-Adresse bestätigen", cancellationToken);
 		}
 		finally
 		{
@@ -48,7 +50,7 @@ public class RealmSmtpDeliveryTests(IntegrationTestFixture fixture)
 	}
 
 	private async Task AssertMailpitReceivedMessageToAsync(
-		string recipientEmail, CancellationToken cancellationToken)
+		string recipientEmail, string expectedSubject, CancellationToken cancellationToken)
 	{
 		using var mailpit = fixture.CreateMailpitClient();
 		var deadline = DateTime.UtcNow.AddSeconds(30);
@@ -65,7 +67,9 @@ public class RealmSmtpDeliveryTests(IntegrationTestFixture fixture)
 						&& to.EnumerateArray().Any(recipient =>
 							recipient.TryGetProperty("Address", out var address)
 							&& string.Equals(
-								address.GetString(), recipientEmail, StringComparison.OrdinalIgnoreCase))))
+								address.GetString(), recipientEmail, StringComparison.OrdinalIgnoreCase))
+						&& message.TryGetProperty("Subject", out var subject)
+						&& subject.GetString() == expectedSubject))
 				{
 					return;
 				}
@@ -75,7 +79,7 @@ public class RealmSmtpDeliveryTests(IntegrationTestFixture fixture)
 		}
 
 		throw new Exception(
-			$"Mailpit never received a message addressed to {recipientEmail} within 30s - "
-			+ "the realm's SMTP config is not delivering.");
+			$"Mailpit never received a message addressed to {recipientEmail} with subject \"{expectedSubject}\" within 30s - "
+			+ "either the realm's SMTP config is not delivering, or the realm no longer uses the afunto email theme.");
 	}
 }

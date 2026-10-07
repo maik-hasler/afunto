@@ -37,8 +37,6 @@ public sealed class User
 
 	public bool NotifyOnEngagementConfirmed { get; private set; } = true;
 
-	public bool NotifyOnEngagementCancelled { get; private set; } = true;
-
 	public bool NotifyOnEngagementReminder { get; private set; } = true;
 
 	public DateTimeOffset CreatedOn { get; private set; }
@@ -95,13 +93,11 @@ public sealed class User
 		bool notifyOnNewSignUp,
 		bool notifyOnWithdrawal,
 		bool notifyOnEngagementConfirmed,
-		bool notifyOnEngagementCancelled,
 		bool notifyOnEngagementReminder)
 	{
 		NotifyOnNewSignUp = notifyOnNewSignUp;
 		NotifyOnWithdrawal = notifyOnWithdrawal;
 		NotifyOnEngagementConfirmed = notifyOnEngagementConfirmed;
-		NotifyOnEngagementCancelled = notifyOnEngagementCancelled;
 		NotifyOnEngagementReminder = notifyOnEngagementReminder;
 	}
 
@@ -110,7 +106,6 @@ public sealed class User
 		EmailNotificationType.NewSignUp => NotifyOnNewSignUp,
 		EmailNotificationType.Withdrawal => NotifyOnWithdrawal,
 		EmailNotificationType.EngagementConfirmed => NotifyOnEngagementConfirmed,
-		EmailNotificationType.EngagementCancelled => NotifyOnEngagementCancelled,
 		EmailNotificationType.EngagementReminder => NotifyOnEngagementReminder,
 		_ => true,
 	};
@@ -130,9 +125,6 @@ public sealed class User
 				break;
 			case EmailNotificationType.EngagementConfirmed:
 				NotifyOnEngagementConfirmed = false;
-				break;
-			case EmailNotificationType.EngagementCancelled:
-				NotifyOnEngagementCancelled = false;
 				break;
 			case EmailNotificationType.EngagementReminder:
 				NotifyOnEngagementReminder = false;

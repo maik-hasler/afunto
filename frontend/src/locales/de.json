@@ -1092,9 +1092,9 @@
       "description": "Bestätige, dass du keine E-Mails vom Typ „{{type}}“ mehr erhalten möchtest. Dieser Link wirkt erst, wenn du unten auf Bestätigen klickst – das bloße Öffnen dieser Seite bestellt nichts ab.",
       "confirm": "Abbestellung bestätigen",
       "invalidLink": "Der Link ist unvollständig oder nicht mehr gültig. In deinen Benachrichtigungseinstellungen kannst du weiterhin jede E-Mail-Art verwalten.",
-      "invalidTitle": "Dieser Abmeldelink funktioniert nicht",
+      "invalidTitle": "Dieser Abbestell-Link funktioniert nicht",
       "confirming": "Wird abgemeldet …",
-      "failed": "Wir konnten dich nicht abmelden. Versuche den Link erneut oder verwalte deine E-Mails in den Benachrichtigungseinstellungen."
+      "failed": "Wir konnten die E-Mails nicht abbestellen. Versuche den Link erneut oder verwalte deine E-Mails in den Benachrichtigungseinstellungen."
     },
     "report": {
       "title": "Inhalt melden",
@@ -1326,14 +1326,13 @@
     },
     "notificationPreferences": {
       "title": "E-Mail-Benachrichtigungen",
-      "description": "Wähle aus, welche transaktionalen E-Mails du erhalten möchtest. Jede E-Mail enthält außerdem einen Abmeldelink für den jeweiligen Typ.",
+      "description": "Wähle aus, welche E-Mails du bekommen möchtest. Absagen und Änderungen an Termin oder Ort deiner Eintragungen bekommst du immer per E-Mail, damit du nie vor verschlossener Tür stehst.",
       "inAppNotice": "Diese Einstellungen betreffen nur E-Mails. Du siehst diese und weitere Aktivitäten – etwa Änderungen an Einsätzen oder Organisationseinladungen – immer als Benachrichtigungen im Glockenmenü; das lässt sich nicht abschalten.",
       "organizerGroupLabel": "Als Organisator:in",
       "volunteerGroupLabel": "Als Freiwillige:r",
       "newSignUp": "Neue Eintragungen für Einsätze, die du organisierst",
       "withdrawal": "Rückzüge von Freiwilligen bei Einsätzen, die du organisierst",
       "engagementConfirmed": "Deine Eintragung wird bestätigt",
-      "engagementCancelled": "Deine Eintragung wird abgesagt",
       "engagementReminder": "Erinnerung vor Beginn deines Einsatzes",
       "saveError": "Benachrichtigungseinstellungen konnten nicht gespeichert werden.",
       "loadError": "Benachrichtigungseinstellungen konnten nicht geladen werden."
@@ -1676,7 +1675,7 @@
         "NotDeleted": "Nutzer:in ist nicht ausgeblendet.",
         "InvalidUnsubscribeToken": "Der Abmelde-Link ist ungültig oder wurde bereits mit einem anderen Token verwendet.",
         "SoleOrganizerOfOrganizations": "Du bist die:der einzige Organisator:in mindestens einer Organisation. Übertrage die Leitung an eine andere Person oder lösche diese Organisationen, bevor du dein Konto löschst.",
-        "UnknownNotificationType": "Dieser Abmeldelink verweist auf eine E-Mail-Art, die es nicht mehr gibt."
+        "UnknownNotificationType": "Dieser Abbestell-Link verweist auf eine E-Mail-Art, die es nicht mehr gibt."
       },
       "Users": {
         "CannotModifyServiceAccount": "Das interne Service-Konto des Systems kann nicht geändert werden.",

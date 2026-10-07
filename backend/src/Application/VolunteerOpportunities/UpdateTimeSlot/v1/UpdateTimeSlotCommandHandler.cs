@@ -38,7 +38,7 @@ internal sealed class UpdateTimeSlotCommandHandler(
 		if (request.Scope == SeriesEditScope.Only)
 			return await UpdateOnlyAsync(opportunity, opportunityId, timeSlotId, request, cancellationToken);
 
-		return await UpdateSeriesCapacityAsync(opportunity, opportunityId, targetSlot, request, cancellationToken);
+		return await UpdateSeriesCapacityAsync(opportunity, targetSlot, request, cancellationToken);
 	}
 
 	private async ValueTask<UpdateTimeSlotResult> UpdateOnlyAsync(
@@ -59,6 +59,11 @@ internal sealed class UpdateTimeSlotCommandHandler(
 				"VolunteerOpportunity.TimeSlotCapacityBelowActive",
 				$"Cannot reduce capacity below the current number of active sign-ups ({activeCount})."));
 
+		var timeSlot = opportunity.TimeSlots.First(ts => ts.Id == timeSlotId);
+		var rescheduled =
+			timeSlot.StartDateTime != request.StartDateTime.Value ||
+			timeSlot.EndDateTime != request.EndDateTime.Value;
+
 		opportunity.UpdateTimeSlot(
 			timeSlotId,
 			request.StartDateTime.Value,
@@ -66,23 +71,27 @@ internal sealed class UpdateTimeSlotCommandHandler(
 			request.MaxParticipants,
 			DateTimeOffset.UtcNow).ThrowIfFailure();
 
-		await OpportunityNotificationHelper.NotifyActiveVolunteersAsync(
-			dbContext,
-			engagementReadRepository,
-			opportunityId,
-			NotificationKind.OpportunityUpdated,
-			cancellationToken,
-			timeSlotId,
-			opportunity.TitleDe);
+		// A capacity-only edit changes nothing for anyone already signed up, so it notifies
+		// nobody - neither by bell nor by email (#2402).
+		if (rescheduled)
+		{
+			await OpportunityNotificationHelper.NotifyActiveVolunteersAsync(
+				dbContext,
+				engagementReadRepository,
+				opportunityId,
+				NotificationKind.OpportunityUpdated,
+				cancellationToken,
+				timeSlotId,
+				opportunity.TitleDe);
 
-		opportunity.NotifyVolunteersOfUpdate(timeSlotId);
+			opportunity.NotifyVolunteersOfReschedule(timeSlotId);
+		}
 
 		return new UpdateTimeSlotResult(1, []);
 	}
 
 	private async ValueTask<UpdateTimeSlotResult> UpdateSeriesCapacityAsync(
 		VolunteerOpportunity opportunity,
-		VolunteerOpportunityId opportunityId,
 		TimeSlot targetSlot,
 		UpdateTimeSlotCommand request,
 		CancellationToken cancellationToken)
@@ -114,16 +123,10 @@ internal sealed class UpdateTimeSlotCommandHandler(
 				continue;
 			}
 
+			// Capacity only - nothing changes for volunteers already signed up, so no
+			// notification (#2402).
 			opportunity.UpdateTimeSlotCapacity(slot.Id, request.MaxParticipants).ThrowIfFailure();
 			updatedCount++;
-
-			await OpportunityNotificationHelper.NotifyActiveVolunteersAsync(
-				dbContext,
-				engagementReadRepository,
-				opportunityId,
-				NotificationKind.OpportunityUpdated,
-				cancellationToken,
-				slot.Id);
 		}
 
 		return new UpdateTimeSlotResult(updatedCount, skipped);

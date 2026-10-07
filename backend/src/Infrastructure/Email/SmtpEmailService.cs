@@ -17,39 +17,25 @@ internal sealed class SmtpEmailService(
 	private readonly SmtpOptions _options = options.Value;
 
 	public async Task SendAsync(
-		string to,
-		string subject,
-		string body,
-		string correlationId,
+		EmailMessage message,
 		CancellationToken cancellationToken = default)
 	{
 		try
 		{
 			using var client = new SmtpClient();
+			await ConnectAsync(client, cancellationToken);
 
-			var secureSocketOptions = _options.EnableSsl
-				? SecureSocketOptions.StartTls
-				: SecureSocketOptions.None;
-			await client.ConnectAsync(_options.Host, _options.Port, secureSocketOptions, cancellationToken);
-
-			if (!string.IsNullOrEmpty(_options.Username))
-				await client.AuthenticateAsync(_options.Username, _options.Password ?? string.Empty, cancellationToken);
-
-			using var message = new MimeMessage();
-			message.From.Add(new MailboxAddress(_options.FromName, _options.FromAddress));
-			message.To.Add(MailboxAddress.Parse(to));
-			message.Subject = subject;
-			message.Body = new TextPart("plain") { Text = body };
+			using var mimeMessage = CreateMimeMessage(message);
 
 			await rateLimiter.WaitForPermitAsync(cancellationToken);
-			await client.SendAsync(message, cancellationToken);
+			await client.SendAsync(mimeMessage, cancellationToken);
 			await client.DisconnectAsync(true, cancellationToken);
 
 			metrics.RecordSucceeded();
 		}
 		catch (Exception ex)
 		{
-			logger.LogError(ex, "Failed to send email (correlationId: {CorrelationId})", correlationId);
+			logger.LogError(ex, "Failed to send email (correlationId: {CorrelationId})", message.CorrelationId);
 			metrics.RecordFailed();
 			throw;
 		}
@@ -67,13 +53,7 @@ internal sealed class SmtpEmailService(
 
 		try
 		{
-			var secureSocketOptions = _options.EnableSsl
-				? SecureSocketOptions.StartTls
-				: SecureSocketOptions.None;
-			await client.ConnectAsync(_options.Host, _options.Port, secureSocketOptions, cancellationToken);
-
-			if (!string.IsNullOrEmpty(_options.Username))
-				await client.AuthenticateAsync(_options.Username, _options.Password ?? string.Empty, cancellationToken);
+			await ConnectAsync(client, cancellationToken);
 		}
 		catch (Exception ex)
 		{
@@ -86,24 +66,20 @@ internal sealed class SmtpEmailService(
 
 		for (var i = 0; i < messages.Count; i++)
 		{
-			var email = messages[i];
+			var message = messages[i];
 			try
 			{
-				using var message = new MimeMessage();
-				message.From.Add(new MailboxAddress(_options.FromName, _options.FromAddress));
-				message.To.Add(MailboxAddress.Parse(email.To));
-				message.Subject = email.Subject;
-				message.Body = new TextPart("plain") { Text = email.Body };
+				using var mimeMessage = CreateMimeMessage(message);
 
 				await rateLimiter.WaitForPermitAsync(cancellationToken);
-				await client.SendAsync(message, cancellationToken);
+				await client.SendAsync(mimeMessage, cancellationToken);
 
 				metrics.RecordSucceeded();
 				results[i] = true;
 			}
 			catch (Exception ex)
 			{
-				logger.LogError(ex, "Failed to send email (correlationId: {CorrelationId})", email.CorrelationId);
+				logger.LogError(ex, "Failed to send email (correlationId: {CorrelationId})", message.CorrelationId);
 				metrics.RecordFailed();
 			}
 		}
@@ -118,5 +94,43 @@ internal sealed class SmtpEmailService(
 		}
 
 		return results;
+	}
+
+	private async Task ConnectAsync(SmtpClient client, CancellationToken cancellationToken)
+	{
+		var secureSocketOptions = _options.EnableSsl
+			? SecureSocketOptions.StartTls
+			: SecureSocketOptions.None;
+		await client.ConnectAsync(_options.Host, _options.Port, secureSocketOptions, cancellationToken);
+
+		if (!string.IsNullOrEmpty(_options.Username))
+			await client.AuthenticateAsync(_options.Username, _options.Password ?? string.Empty, cancellationToken);
+	}
+
+	// Deliberately no X-Priority/Importance/Priority header: their absence means "normal"
+	// (RFC 2156), and nothing Afunto sends is urgent (#2402).
+	internal MimeMessage CreateMimeMessage(EmailMessage message)
+	{
+		var mimeMessage = new MimeMessage();
+		mimeMessage.From.Add(new MailboxAddress(_options.FromName, _options.FromAddress));
+		mimeMessage.To.Add(MailboxAddress.Parse(message.To));
+		mimeMessage.Subject = message.Content.Subject;
+
+		// RFC 3834: marks the message as machine-generated, which suppresses out-of-office
+		// auto-replies and lets clients file it as a notification rather than personal mail.
+		mimeMessage.Headers.Add("Auto-Submitted", "auto-generated");
+
+		// RFC 2369: lets mail clients offer their own "unsubscribe" control. It points at
+		// the same confirm page as the footer link, so nothing unsubscribes without a click.
+		if (message.Content.UnsubscribeUrl is { } unsubscribeUrl)
+			mimeMessage.Headers.Add(HeaderId.ListUnsubscribe, $"<{unsubscribeUrl}>");
+
+		mimeMessage.Body = new BodyBuilder
+		{
+			TextBody = message.Content.TextBody,
+			HtmlBody = message.Content.HtmlBody,
+		}.ToMessageBody();
+
+		return mimeMessage;
 	}
 }

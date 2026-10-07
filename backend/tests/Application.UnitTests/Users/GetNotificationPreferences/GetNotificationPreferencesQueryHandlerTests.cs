@@ -31,7 +31,6 @@ public class GetNotificationPreferencesQueryHandlerTests
 			notifyOnNewSignUp: false,
 			notifyOnWithdrawal: true,
 			notifyOnEngagementConfirmed: true,
-			notifyOnEngagementCancelled: true,
 			notifyOnEngagementReminder: false);
 		_userRepo.FindAsync(userId, cancellationToken).Returns(user);
 
@@ -42,7 +41,6 @@ public class GetNotificationPreferencesQueryHandlerTests
 		result.NotifyOnNewSignUp.Should().BeFalse();
 		result.NotifyOnWithdrawal.Should().BeTrue();
 		result.NotifyOnEngagementConfirmed.Should().BeTrue();
-		result.NotifyOnEngagementCancelled.Should().BeTrue();
 		result.NotifyOnEngagementReminder.Should().BeFalse();
 	}
 

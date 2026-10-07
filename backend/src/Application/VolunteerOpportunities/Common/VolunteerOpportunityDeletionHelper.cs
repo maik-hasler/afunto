@@ -106,7 +106,7 @@ internal static class VolunteerOpportunityDeletionHelper
 			opportunityId,
 			opportunity.TitleDe,
 			NotificationKind.OpportunityDeleted,
-			"Opportunity was deleted.",
+			engagementCancellationReason: null,
 
 			notifyPerEngagement: true,
 			logger,

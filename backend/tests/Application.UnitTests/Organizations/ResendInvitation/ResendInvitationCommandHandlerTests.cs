@@ -19,6 +19,7 @@ public class ResendInvitationCommandHandlerTests
 	private readonly IKeycloakUserService _keycloakUserService = Substitute.For<IKeycloakUserService>();
 	private readonly IEmailService _emailService = Substitute.For<IEmailService>();
 	private readonly IEmailTemplateRenderer _emailTemplateRenderer = Substitute.For<IEmailTemplateRenderer>();
+	private readonly IEmailLinkBuilder _emailLinkBuilder = Substitute.For<IEmailLinkBuilder>();
 	private readonly IAggregateRepository<OrganizationInvitation, OrganizationInvitationId> _invitationRepo =
 		Substitute.For<IAggregateRepository<OrganizationInvitation, OrganizationInvitationId>>();
 	private readonly IAggregateRepository<Organization, OrganizationId> _orgRepo =
@@ -44,10 +45,10 @@ public class ResendInvitationCommandHandlerTests
 		_dbContext.GetOrCreateUsersAsync(Arg.Any<IReadOnlyCollection<UserId>>(), Arg.Any<CancellationToken>())
 			.Returns(call => ((IReadOnlyCollection<UserId>)call[0]!).Select(User.Create).ToList());
 		_emailTemplateRenderer
-			.Render(Arg.Any<EmailTemplateKind>(), Arg.Any<string>(), Arg.Any<IReadOnlyDictionary<string, string>>())
-			.Returns(new EmailContent("Test Subject", "Test Body"));
+			.Render(Arg.Any<EmailDraft>())
+			.Returns(new RenderedEmail("Test Subject", "Test Body", "<p>Test Body</p>", null));
 		_sut = new ResendInvitationCommandHandler(
-			_dbContext, _unitOfWork, _keycloakUserService, _emailService, _emailTemplateRenderer);
+			_dbContext, _unitOfWork, _keycloakUserService, _emailService, _emailTemplateRenderer, _emailLinkBuilder);
 	}
 
 	private static OrganizationInvitation CreateExpiredInvitation(OrganizationId orgId)
@@ -101,7 +102,7 @@ public class ResendInvitationCommandHandlerTests
 		invitation.ExpiresOn.Should().BeAfter(DateTimeOffset.UtcNow.AddDays(OrganizationInvitation.ExpiryWindowDays - 1));
 		await _unitOfWork.Received(1).SaveChangesAsync(cancellationToken);
 		await _emailService.Received(1).SendAsync(
-			"vera@test.de", Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), cancellationToken);
+			Arg.Is<EmailMessage>(m => m.To == "vera@test.de"), cancellationToken);
 	}
 
 	[Test]
@@ -160,7 +161,7 @@ public class ResendInvitationCommandHandlerTests
 		invitation.ExpiresOn.Should().BeOnOrAfter(originalExpiry);
 		await _unitOfWork.Received(1).SaveChangesAsync(cancellationToken);
 		await _emailService.Received(1).SendAsync(
-			"vera@test.de", Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), cancellationToken);
+			Arg.Is<EmailMessage>(m => m.To == "vera@test.de"), cancellationToken);
 	}
 
 	[Test]
@@ -187,7 +188,7 @@ public class ResendInvitationCommandHandlerTests
 			.Which.Error.Type.Should().Be(ErrorType.Conflict);
 		await _unitOfWork.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
 		await _emailService.DidNotReceive().SendAsync(
-			Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+			Arg.Any<EmailMessage>(), Arg.Any<CancellationToken>());
 	}
 
 	[Test]
@@ -207,10 +208,11 @@ public class ResendInvitationCommandHandlerTests
 		await _sut.Handle(command, cancellationToken);
 
 		// Assert
-		_emailTemplateRenderer.Received(1).Render(
-			EmailTemplateKind.InvitationReceived,
-			"en",
-			Arg.Is<IReadOnlyDictionary<string, string>>(p =>
-				p!["InviteeName"] == "Vera" && p["OrganizationName"] == "Test Org"));
+		_emailTemplateRenderer.Received(1).Render(Arg.Is<EmailDraft>(d =>
+			d.Kind == EmailTemplateKind.InvitationReceived
+			&& d.Language == "en"
+			&& d.RecipientName == "Vera"
+			&& d.Placeholders["OrganizationName"] == "Test Org"
+			&& d.Placeholders["ExpiryDays"] == "14"));
 	}
 }

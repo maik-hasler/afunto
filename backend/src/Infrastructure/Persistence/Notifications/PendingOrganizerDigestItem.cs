@@ -11,6 +11,9 @@ internal sealed class PendingOrganizerDigestItem
 
 	public Guid OrganizerId { get; init; }
 
+	// Where the digest's button links to. Null only for rows queued before #2402.
+	public Guid? OrganizationId { get; init; }
+
 	public string OpportunityTitle { get; init; } = string.Empty;
 
 	public string VolunteerName { get; init; } = string.Empty;
@@ -25,6 +28,7 @@ internal sealed class PendingOrganizerDigestItem
 
 	public static PendingOrganizerDigestItem Create(
 		Guid organizerId,
+		Guid organizationId,
 		string opportunityTitle,
 		string volunteerName,
 		EmailNotificationType kind,
@@ -33,6 +37,7 @@ internal sealed class PendingOrganizerDigestItem
 		{
 			Id = Guid.CreateVersion7(),
 			OrganizerId = organizerId,
+			OrganizationId = organizationId,
 			OpportunityTitle = opportunityTitle,
 			VolunteerName = volunteerName,
 			Kind = kind,

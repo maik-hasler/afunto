@@ -70,9 +70,6 @@ internal sealed class UserConfiguration
 		builder.Property(u => u.NotifyOnEngagementConfirmed)
 			.HasDefaultValue(true);
 
-		builder.Property(u => u.NotifyOnEngagementCancelled)
-			.HasDefaultValue(true);
-
 		builder.Property(u => u.NotifyOnEngagementReminder)
 			.HasDefaultValue(true);
 

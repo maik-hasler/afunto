@@ -17,7 +17,8 @@ internal sealed class CreateInvitationCommandHandler(
 	IKeycloakOrganizationService keycloakOrganizationService,
 	IKeycloakUserService keycloakUserService,
 	IEmailService emailService,
-	IEmailTemplateRenderer emailTemplateRenderer)
+	IEmailTemplateRenderer emailTemplateRenderer,
+	IEmailLinkBuilder emailLinkBuilder)
 	: ICommandHandler<CreateInvitationCommand, CreateInvitationResult>
 {
 	public async ValueTask<CreateInvitationResult> Handle(
@@ -62,20 +63,14 @@ internal sealed class CreateInvitationCommandHandler(
 		var inviteeUser = (await dbContext.GetOrCreateUsersAsync([request.InviteeId], cancellationToken))[0];
 		var inviteeLanguage = SupportedLanguages.Resolve(inviteeUser.PreferredLanguage);
 
-		var content = emailTemplateRenderer.Render(
-			EmailTemplateKind.InvitationReceived,
+		var draft = InvitationEmail.Draft(
 			inviteeLanguage,
-			new Dictionary<string, string>
-			{
-				["InviteeName"] = inviteeProfile.FirstName ?? inviteeProfile.Username,
-				["OrganizationName"] = org.Name,
-			});
+			inviteeProfile.FirstName ?? inviteeProfile.Username,
+			org.Name,
+			emailLinkBuilder);
 
 		await emailService.SendAsync(
-			inviteeProfile.Email,
-			content.Subject,
-			content.Body,
-			invitation.Id.Value.ToString(),
+			new EmailMessage(inviteeProfile.Email, emailTemplateRenderer.Render(draft), invitation.Id.Value.ToString()),
 			cancellationToken);
 
 		return new CreateInvitationResult(invitation.Id, invitation.ExpiresOn);

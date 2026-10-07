@@ -420,6 +420,36 @@ public class UpdateVolunteerOpportunityCommandHandlerTests
 	}
 
 	[Test]
+	public async Task Handle_ShouldRingTheBellButSendNoEmail_WhenOnlyTheOccurrenceChanges(
+		CancellationToken cancellationToken)
+	{
+		// Arrange
+		var opportunityId = Guid.CreateVersion7();
+		var opportunity = CreateOpportunity();
+		var activeVolunteer = Guid.NewGuid();
+
+		_opportunityRepo
+			.FindAsync(VolunteerOpportunityId.Create(opportunityId).GetValueOrThrow(), cancellationToken)
+			.Returns(opportunity);
+
+		_engagementReadRepository
+			.GetActiveVolunteerIdsByOpportunityAsync(VolunteerOpportunityId.Create(opportunityId).GetValueOrThrow(), Arg.Any<TimeSlotId?>(), cancellationToken)
+			.Returns([activeVolunteer]);
+
+		var command = new UpdateVolunteerOpportunityCommand(
+			opportunityId, "Altes Thema", null, "Alte Beschreibung", null, false, DefaultAddress, Occurrence.Recurring, ParticipationType.IndividualContact, CheckInMethod.None, null, [], DefaultRequestingUserId);
+
+		// Act
+		await _sut.Handle(command, cancellationToken);
+
+		// Assert - every booked date stays where and when it was, so no email (#2402)
+		await _notifRepo.Received(1).AddAsync(
+			Arg.Is<Notification>(n => n!.Kind == NotificationKind.OpportunityUpdated && n.RecipientId.Value == activeVolunteer),
+			cancellationToken);
+		opportunity.Events.Should().NotContain(e => e is VolunteerOpportunityUpdatedDomainEvent);
+	}
+
+	[Test]
 	public async Task Handle_ShouldNotNotifyVolunteers_WhenOnlyCosmeticFieldsChange(
 		CancellationToken cancellationToken)
 	{
