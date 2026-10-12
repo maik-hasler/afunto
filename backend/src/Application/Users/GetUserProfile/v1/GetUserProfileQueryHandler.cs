@@ -1,5 +1,4 @@
 using Application.Common.Keycloak;
-using Application.Common.Localization;
 using Application.Common.Messaging;
 using Application.Common.Persistence;
 
@@ -18,8 +17,7 @@ internal sealed class GetUserProfileQueryHandler(
 			request.UserId.Value,
 			cancellationToken);
 
-		var user = await dbContext.GetOrCreateUserAsync(
-			request.UserId, SupportedLanguages.Resolve(request.RequestLanguage), cancellationToken);
+		var user = await dbContext.GetOrCreateUserAsync(request.UserId, cancellationToken);
 
 		return new MyProfileResponse(
 			keycloakUser.Id,
@@ -32,7 +30,6 @@ internal sealed class GetUserProfileQueryHandler(
 			user.Phone,
 			user.Skills,
 			user.Languages,
-			user.PreferredContact?.ToString(),
-			SupportedLanguages.Resolve(user.PreferredLanguage));
+			user.PreferredContact?.ToString());
 	}
 }

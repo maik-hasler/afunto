@@ -2056,168 +2056,6 @@
         }
       }
     },
-    "/v1/users/me/notification-preferences": {
-      "put": {
-        "tags": [
-          "Users"
-        ],
-        "operationId": "UpdateNotificationPreferences",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateNotificationPreferencesRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      },
-      "get": {
-        "tags": [
-          "Users"
-        ],
-        "operationId": "GetNotificationPreferences",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NotificationPreferencesResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/users/{userId}/unsubscribe": {
-      "get": {
-        "tags": [
-          "Users"
-        ],
-        "operationId": "Unsubscribe",
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "type",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/v1/admin/users/{userId}/enabled": {
       "put": {
         "tags": [
@@ -8882,8 +8720,7 @@
           "phone",
           "skills",
           "languages",
-          "preferredContact",
-          "preferredLanguage"
+          "preferredContact"
         ],
         "type": "object",
         "properties": {
@@ -8944,32 +8781,6 @@
               "null",
               "string"
             ]
-          },
-          "preferredLanguage": {
-            "type": "string"
-          }
-        }
-      },
-      "NotificationPreferencesResponse": {
-        "required": [
-          "notifyOnNewSignUp",
-          "notifyOnWithdrawal",
-          "notifyOnEngagementConfirmed",
-          "notifyOnEngagementReminder"
-        ],
-        "type": "object",
-        "properties": {
-          "notifyOnNewSignUp": {
-            "type": "boolean"
-          },
-          "notifyOnWithdrawal": {
-            "type": "boolean"
-          },
-          "notifyOnEngagementConfirmed": {
-            "type": "boolean"
-          },
-          "notifyOnEngagementReminder": {
-            "type": "boolean"
           }
         }
       },
@@ -10423,29 +10234,6 @@
           }
         }
       },
-      "UpdateNotificationPreferencesRequest": {
-        "required": [
-          "notifyOnNewSignUp",
-          "notifyOnWithdrawal",
-          "notifyOnEngagementConfirmed",
-          "notifyOnEngagementReminder"
-        ],
-        "type": "object",
-        "properties": {
-          "notifyOnNewSignUp": {
-            "type": "boolean"
-          },
-          "notifyOnWithdrawal": {
-            "type": "boolean"
-          },
-          "notifyOnEngagementConfirmed": {
-            "type": "boolean"
-          },
-          "notifyOnEngagementReminder": {
-            "type": "boolean"
-          }
-        }
-      },
       "UpdateOrganizationRequest": {
         "required": [
           "name",
@@ -10606,12 +10394,6 @@
             }
           },
           "preferredContact": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "preferredLanguage": {
             "type": [
               "null",
               "string"

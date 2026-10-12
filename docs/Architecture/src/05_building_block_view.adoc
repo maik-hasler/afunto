@@ -81,7 +81,7 @@ include::../images/module-backend.puml[]
 ....
 
 Rationale for this decomposition::
-The modules are cut by business function, following the fact that a change request almost always arrives phrased as one ("organizers need to invite members", "volunteers should get a reminder"). The cut is carried through the layers that hold use cases and business rules: `Api/`, `Application/` and `Domain/` each contain the same module folders, so a feature is one folder per layer rather than a diff spread across shared service classes. `Infrastructure/` is the deliberate exception - it is organized by adapted technology (`Persistence/`, `Email/`, `Keycloak/`, `Storage/`, `Geocoding/`, `Maps/`), because an adapter belongs to the external system it wraps, not to the module that happens to call it first. Only where an implementation is genuinely module-specific rather than technology-specific does a module folder reappear there (`Infrastructure/Achievements/` for the badge catalog, `Infrastructure/VolunteerOpportunities/` for PIN generation).
+The modules are cut by business function, following the fact that a change request almost always arrives phrased as one ("organizers need to invite members", "volunteers should be able to withdraw"). The cut is carried through the layers that hold use cases and business rules: `Api/`, `Application/` and `Domain/` each contain the same module folders, so a feature is one folder per layer rather than a diff spread across shared service classes. `Infrastructure/` is the deliberate exception - it is organized by adapted technology (`Persistence/`, `Email/`, `Keycloak/`, `Storage/`, `Geocoding/`, `Maps/`), because an adapter belongs to the external system it wraps, not to the module that happens to call it first. Only where an implementation is genuinely module-specific rather than technology-specific does a module folder reappear there (`Infrastructure/Achievements/` for the badge catalog, `Infrastructure/VolunteerOpportunities/` for PIN generation).
 
 Two cuts are worth explaining because they do not follow entity ownership. *Invitations* is split from *Organizations* by actor rather than by aggregate: the organizer's side (create, resend, dismiss) lives in Organizations, the invitee's side (list, accept, decline) in Invitations, because the two are reached by different roles through different screens. *Maps*, *Meta* and *Sitemap* are thin modules with no aggregate of their own; they exist as modules because they are separately addressable capabilities with their own endpoints, not because they own domain state.
 
@@ -96,7 +96,7 @@ Contained Building Blocks::
 |`{Api,Application,Domain,Infrastructure}/VolunteerOpportunities/`
 
 |Engagements
-|Sign-up and withdrawal, confirmation and cancellation by the organizer, check-in, feedback, reminders and calendar.
+|Sign-up and withdrawal, confirmation and cancellation by the organizer, check-in, feedback and calendar.
 |`{Api,Application,Domain}/Engagements/`
 
 |Organizations
@@ -108,7 +108,7 @@ Contained Building Blocks::
 |`{Api,Application}/Invitations/`
 
 |Users
-|Profiles, notification preferences, streaks, account deletion, and the admin-facing user administration.
+|Profiles, streaks, account deletion, and the admin-facing user administration.
 |`{Api,Application,Domain}/Users/`
 
 |Achievements
@@ -140,8 +140,8 @@ Contained Building Blocks::
 |`{Api,Application}/Sitemap/`
 
 |Shared Kernel
-|Cross-module infrastructure every module depends on: `ISender` dispatch and pipeline behaviors, `Result`/`Error` primitives, authorization guards, pagination, persistence/storage/email ports, the outbox, and the background job host.
-|`Application/Common/`, `Domain/{Primitives,Common}/`, `Infrastructure/{Common,Persistence,Email,Keycloak,Storage,Geocoding,RateLimiting,BackgroundJobs}/`, `Aspire/ServiceDefaults/`
+|Cross-module infrastructure every module depends on: `ISender` dispatch and pipeline behaviors, `Result`/`Error` primitives, authorization guards, pagination, persistence/storage ports, the outbox, and the background job host.
+|`Application/Common/`, `Domain/{Primitives,Common}/`, `Infrastructure/{Persistence,Keycloak,Storage,Geocoding,RateLimiting,BackgroundJobs}/`, `Aspire/ServiceDefaults/`
 |===
 
 Modules communicate in one of two ways. Direct calls go inward through the shared kernel only for reads a use case cannot complete without (Engagements reads opportunity status and slot capacity). Everything reactive - notifications, achievements - runs off domain events raised by the aggregate and dispatched after commit, so the module that causes an event never references the modules that react to it.

@@ -414,13 +414,10 @@ public class UpdateVolunteerOpportunityCommandHandlerTests
 		await _notifRepo.Received(1).AddAsync(
 			Arg.Is<Notification>(n => n!.Kind == NotificationKind.OpportunityUpdated && n.RecipientId.Value == activeVolunteer),
 			cancellationToken);
-		opportunity.Events.OfType<VolunteerOpportunityUpdatedDomainEvent>()
-			.Should().ContainSingle()
-			.Which.TimeSlotId.Should().BeNull();
 	}
 
 	[Test]
-	public async Task Handle_ShouldRingTheBellButSendNoEmail_WhenOnlyTheOccurrenceChanges(
+	public async Task Handle_ShouldRingTheBell_WhenOnlyTheOccurrenceChanges(
 		CancellationToken cancellationToken)
 	{
 		// Arrange
@@ -442,11 +439,10 @@ public class UpdateVolunteerOpportunityCommandHandlerTests
 		// Act
 		await _sut.Handle(command, cancellationToken);
 
-		// Assert - every booked date stays where and when it was, so no email (#2402)
+		// Assert
 		await _notifRepo.Received(1).AddAsync(
 			Arg.Is<Notification>(n => n!.Kind == NotificationKind.OpportunityUpdated && n.RecipientId.Value == activeVolunteer),
 			cancellationToken);
-		opportunity.Events.Should().NotContain(e => e is VolunteerOpportunityUpdatedDomainEvent);
 	}
 
 	[Test]
@@ -476,7 +472,6 @@ public class UpdateVolunteerOpportunityCommandHandlerTests
 		await _notifRepo.DidNotReceive().AddAsync(
 			Arg.Any<Notification>(),
 			cancellationToken);
-		opportunity.Events.Should().NotContain(e => e is VolunteerOpportunityUpdatedDomainEvent);
 	}
 
 	[Test]

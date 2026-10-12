@@ -186,9 +186,7 @@ if (!isDesignTimeToolInvocation)
 		app.Configuration.GetConnectionString("afunto"),
 		app.Configuration["Keycloak:ClientSecret"],
 		app.Configuration["Authentication:Authority"],
-		app.Configuration.GetSection("Cors:Origins").Get<string[]>(),
-		app.Configuration["Smtp:Host"],
-		app.Configuration["Smtp:Port"]);
+		app.Configuration.GetSection("Cors:Origins").Get<string[]>());
 
 	if (missingConfiguration.Count > 0)
 		throw new InvalidOperationException(

@@ -34,9 +34,9 @@ public class GetUserProfileQueryHandlerTests
 
 		var user = User.Create(userId);
 		user.SetPhone("+49 30 1234567");
-		_dbContext.GetOrCreateUserAsync(userId, Arg.Any<string?>(), cancellationToken).Returns(user);
+		_dbContext.GetOrCreateUserAsync(userId, cancellationToken).Returns(user);
 
-		var result = await _sut.Handle(new GetUserProfileQuery(userId, null), cancellationToken);
+		var result = await _sut.Handle(new GetUserProfileQuery(userId), cancellationToken);
 
 		result.Phone.Should().Be("+49 30 1234567");
 	}
@@ -46,45 +46,11 @@ public class GetUserProfileQueryHandlerTests
 		CancellationToken cancellationToken)
 	{
 		var user = User.Create(DefaultUserId);
-		_dbContext.GetOrCreateUserAsync(DefaultUserId, "en", cancellationToken).Returns(user);
-		var query = new GetUserProfileQuery(DefaultUserId, "en");
+		_dbContext.GetOrCreateUserAsync(DefaultUserId, cancellationToken).Returns(user);
+		var query = new GetUserProfileQuery(DefaultUserId);
 
 		await _sut.Handle(query, cancellationToken);
 
-		await _dbContext.Received(1).GetOrCreateUserAsync(DefaultUserId, "en", cancellationToken);
-	}
-
-	[Test]
-	public async Task Handle_ShouldDefaultPreferredLanguageToGerman_WhenRequestLanguageIsUnsupported(
-		CancellationToken cancellationToken)
-	{
-		// Arrange
-		var user = User.Create(DefaultUserId);
-		_dbContext.GetOrCreateUserAsync(DefaultUserId, "de", cancellationToken).Returns(user);
-		var query = new GetUserProfileQuery(DefaultUserId, "fr");
-
-		// Act
-		var result = await _sut.Handle(query, cancellationToken);
-
-		// Assert
-		result.PreferredLanguage.Should().Be("de");
-	}
-
-	[Test]
-	public async Task Handle_ShouldReturnExistingPreferredLanguage_WhenUserRowAlreadyExists(
-		CancellationToken cancellationToken)
-	{
-		// Arrange
-
-		var existingUser = User.Create(DefaultUserId);
-		existingUser.SetPreferredLanguage("de");
-		_dbContext.GetOrCreateUserAsync(DefaultUserId, "en", cancellationToken).Returns(existingUser);
-		var query = new GetUserProfileQuery(DefaultUserId, "en");
-
-		// Act
-		var result = await _sut.Handle(query, cancellationToken);
-
-		// Assert
-		result.PreferredLanguage.Should().Be("de");
+		await _dbContext.Received(1).GetOrCreateUserAsync(DefaultUserId, cancellationToken);
 	}
 }

@@ -42,14 +42,8 @@ import {
 } from "../../components/icons";
 import AchievementsSection from "./AchievementsSection";
 import DangerZoneCard from "./DangerZoneCard";
-import NotificationPreferencesSection from "./NotificationPreferencesSection";
-import {
-	useProfileForm,
-	type ContactPref,
-	type PreferredLanguage,
-} from "./useProfileForm";
+import { useProfileForm, type ContactPref } from "./useProfileForm";
 import { useAvatarUpload } from "./useAvatarUpload";
-import { useNotificationPreferencesForm } from "./useNotificationPreferencesForm";
 
 // Keyed by the property names the API blames in its per-field 400, so a
 // rejection can name the limit the field actually broke (#2320).
@@ -230,10 +224,6 @@ export default function ProfileOverviewPage() {
 
 	const form = useProfileForm(profile);
 	const avatarUpload = useAvatarUpload(setAvatarUrl);
-	const notificationPrefs = useNotificationPreferencesForm();
-	const [notificationSaveError, setNotificationSaveError] = useState<
-		string | null
-	>(null);
 
 	async function loadProfile() {
 		const retryDelaysMs = [500, 1000, 2000];
@@ -323,7 +313,6 @@ export default function ProfileOverviewPage() {
 		e.preventDefault();
 		setSaving(true);
 		setSaveError(null);
-		setNotificationSaveError(null);
 		setInvalidFields([]);
 		setSuccessMessage(null);
 		const savedValues = {
@@ -334,25 +323,10 @@ export default function ProfileOverviewPage() {
 			skills: form.state.skills,
 			languages: form.state.languages,
 			preferredContact: form.state.preferredContact || undefined,
-			preferredLanguage: form.state.preferredLanguage,
 		};
 
-		// Two independent resources under one Save/Cancel: the profile fields
-		// and the notification preferences below them. Either can fail on its
-		// own, so both run and are reported separately rather than one bailing
-		// out the other (#2354).
-		const [profileResult, preferencesResult] = await Promise.allSettled([
-			api.updateUserProfile({ body: savedValues }),
-			notificationPrefs.preferences
-				? api.updateNotificationPreferences({
-						body: notificationPrefs.preferences,
-					})
-				: Promise.resolve(undefined),
-		]);
-
-		let bothSucceeded = true;
-
-		if (profileResult.status === "fulfilled") {
+		try {
+			await api.updateUserProfile({ body: savedValues });
 			setProfile((prev) =>
 				prev ? ({ ...prev, ...savedValues } as MyProfileResponse) : prev,
 			);
@@ -365,40 +339,26 @@ export default function ProfileOverviewPage() {
 						(profile?.username ?? ""),
 				);
 			}
-		} else {
-			bothSucceeded = false;
+			setSuccessMessage(t("profile.savedSuccess"));
+			setEditing(false);
+		} catch (error) {
 			// The server names the fields it rejected; say which they are
 			// instead of dropping that into a bare "saving failed" (#2320).
-			const rejected = getInvalidFieldNames(profileResult.reason);
+			const rejected = getInvalidFieldNames(error);
 			setInvalidFields(rejected);
 			setSaveError(
 				rejected.length > 0
 					? t("profile.saveFieldError")
 					: t("profile.saveError"),
 			);
+		} finally {
+			setSaving(false);
 		}
-
-		if (preferencesResult.status === "fulfilled") {
-			if (notificationPrefs.preferences) {
-				notificationPrefs.commit(notificationPrefs.preferences);
-			}
-		} else {
-			bothSucceeded = false;
-			setNotificationSaveError(t("notificationPreferences.saveError"));
-		}
-
-		if (bothSucceeded) {
-			setSuccessMessage(t("profile.savedSuccess"));
-			setEditing(false);
-		}
-		setSaving(false);
 	}
 
 	function handleCancel() {
 		form.reset(profile);
-		notificationPrefs.reset();
 		setSaveError(null);
-		setNotificationSaveError(null);
 		setInvalidFields([]);
 		setEditing(false);
 	}
@@ -466,14 +426,6 @@ export default function ProfileOverviewPage() {
 								message={saveError}
 								className="mb-4"
 								data-testid="profile-save-error"
-							/>
-						)}
-
-						{notificationSaveError && (
-							<ErrorBanner
-								message={notificationSaveError}
-								className="mb-4"
-								data-testid="notification-preferences-save-error"
 							/>
 						)}
 
@@ -651,7 +603,6 @@ export default function ProfileOverviewPage() {
 											languages={form.state.languages}
 											preferredContact={form.state.preferredContact || null}
 											phone={form.state.phone || null}
-											preferredLanguage={form.state.preferredLanguage}
 										/>
 									</div>
 								))}
@@ -933,44 +884,6 @@ export default function ProfileOverviewPage() {
 												]}
 											/>
 										</Field>
-
-										<Field
-											label={t("profile.fieldPreferredLanguage")}
-											id="preferred-language"
-										>
-											<Dropdown
-												id="preferred-language"
-												value={form.state.preferredLanguage}
-												onChange={(v) =>
-													form.setPreferredLanguage(v as PreferredLanguage)
-												}
-												className={inputClass}
-												options={[
-													{
-														value: "de",
-														label: t("profile.preferredLanguageDe"),
-													},
-													{
-														value: "en",
-														label: t("profile.preferredLanguageEn"),
-													},
-												]}
-											/>
-											{/* Interface language and email language are set
-												independently, and nothing used to point out that
-												they had drifted apart (#2328). */}
-											{form.state.preferredLanguage !== i18n.language && (
-												<p className="mt-1 text-xs text-gray-500">
-													{t("profile.preferredLanguageDiffersHint", {
-														language: t(
-															form.state.preferredLanguage === "en"
-																? "language.contentEn"
-																: "language.contentDe",
-														),
-													})}
-												</p>
-											)}
-										</Field>
 									</div>
 
 									{/* Sticky, and inside the form rather than above it: the
@@ -1002,14 +915,6 @@ export default function ProfileOverviewPage() {
 								</form>
 							)}
 						</section>
-
-						<NotificationPreferencesSection
-							editing={editing}
-							preferences={notificationPrefs.preferences}
-							loading={notificationPrefs.loading}
-							loadError={notificationPrefs.loadError}
-							onToggle={notificationPrefs.toggle}
-						/>
 					</>
 				)}
 

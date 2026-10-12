@@ -46,7 +46,7 @@ The app itself is served in German by default, since Afunto's primary audience i
 ## Features
 
 - **Browse and filter opportunities** across a list view, a mini calendar, and city/location autocomplete.
-- **Sign up for a specific time slot ("engagement")** - withdraw if plans change, reactivate later within limits, get reminders, and check in on the day.
+- **Sign up for a specific time slot ("engagement")** - withdraw if plans change, reactivate later within limits, get notified in the app, and check in on the day.
 - **Rate your engagement afterwards** with a rating and comment, editable for a short window after submission.
 - **Organizations post opportunities** with scheduled time slots (occurrences) and defined participation types.
 - **Organizer dashboard** with a customizable widget layout: a review queue that confirms or declines sign-ups without leaving the board, the next occurrences and how full each one is, a calendar, and opt-in tiles for volunteer numbers, the team and quick check-in.
@@ -112,7 +112,7 @@ The Aspire AppHost provisions PostgreSQL, Keycloak, the backend API, and the Vit
 | Keycloak | http://localhost:8080 | - (no master-realm admin console login is bootstrapped locally; sign in to the app itself with a test user below) |
 | pgAdmin | http://localhost:5050 | - (opens straight to the dashboard, no login prompt) |
 | PostgreSQL | localhost:5432 | postgres / *auto-generated per run - see the `postgres` resource in the Aspire dashboard* |
-| Mailpit | http://localhost:1080 | - (no auth, captures outgoing email) |
+| Mailpit | http://localhost:1080 | - (no auth, captures the emails Keycloak sends) |
 
 ### Test users
 
@@ -136,7 +136,7 @@ Bring your own:
 
 - **PostgreSQL** (18, or compatible) - the backend needs its own database, separate from Keycloak's own (see `keycloak/README.md`)
 - **An S3-compatible object store** (e.g. RustFS) - organization logos, user avatars, and opportunity banners
-- **An SMTP relay** - outgoing notification and reminder email
+- **An SMTP relay** - Keycloak's own account emails (address verification, password reset); the backend sends no email
 - **Keycloak** - the `afunto-keycloak` image, or any Keycloak instance importing the same realm
 
 The backend and frontend both also make outbound HTTPS calls to OpenStreetMap Nominatim for geocoding - no configuration needed, but it must be reachable from wherever you run them.
@@ -161,19 +161,11 @@ Required variables crash the container at startup outside Development (`Required
 | `Keycloak__Realm` | No | Keycloak realm name | `afunto` |
 | `Keycloak__ClientId` | No | Keycloak client id for the backend's service account | `backend` |
 | `Authentication__ValidIssuers__0` | No | Acceptable JWT issuer(s) - needed in practice even though not startup-validated | `https://login.example.com/realms/afunto` |
-| `Smtp__Host` | No | SMTP relay hostname | `smtp.example.com` |
-| `Smtp__Port` | No | SMTP port | `587` |
-| `Smtp__FromAddress` | No | From-address for outgoing email | `noreply@example.com` |
-| `Smtp__FromName` | No | From-name for outgoing email | `Afunto` |
-| `Smtp__Username` | No | SMTP auth username | - |
-| `Smtp__Password` | No | SMTP auth password | - |
-| `Smtp__EnableSsl` | No | Use STARTTLS when connecting to the relay | `true` |
 | `Storage__Endpoint` | No | S3-compatible endpoint the backend writes to | `http://storage:9000` |
 | `Storage__AccessKey` | No | Access key for the bucket-scoped service account | - |
 | `Storage__SecretKey` | No | Secret key for the bucket-scoped service account | - |
 | `Storage__BucketName` | No | Bucket for avatars, logos, and opportunity banners | `afunto` |
 | `Storage__PublicEndpoint` | No | Public origin uploaded files are served from, if different from `Storage__Endpoint` (e.g. an internal vs. a public hostname) - must match the frontend's `STORAGE_PUBLIC_URL` below | `https://storage.example.com` |
-| `Api__PublicBaseUrl` | No | Reserved for the backend's own public base URL - bound at startup but not currently read by any request path | `https://api.example.com` |
 | `TrustedNetworks__Cidrs__0` | No | CIDR(s) trusted to set `X-Forwarded-For` - the reverse proxy in front of this image; defaults cover loopback and RFC1918 private ranges | `10.0.0.0/8` |
 | `Database__MigrateOnStartup` | No | Apply pending EF Core migrations automatically when the container starts | `true` |
 | `Database__SeedOnStartup` | No | **Never enable outside development.** Seeds demo data - ten fake volunteer opportunities at real Leipzig addresses onto the live public browse page, two fake organizations in your production Keycloak realm, and an organizer role grant to a hardcoded placeholder account (#2211) | `false` |
@@ -189,8 +181,6 @@ Required variables crash the container at startup outside Development (`Required
 | `RateLimiting__Write__WindowSeconds` | No | Write rate-limit window | `60` |
 | `Outbox__BatchSize` | No | Domain events processed per outbox poll | `20` |
 | `Outbox__PollIntervalSeconds` | No | Outbox poll interval | `5` |
-| `EngagementReminder__MaxBatchSize` | No | Max engagement reminders sent per poll | `500` |
-| `EngagementReminder__PollIntervalHours` | No | Engagement reminder poll interval | `1` |
 | `OutputCaching__LongPublicReadSeconds` | No | Cache duration for long-lived public reads | `3600` |
 | `OutputCaching__ShortPublicReadSeconds` | No | Cache duration for short-lived public reads | `60` |
 

@@ -17,7 +17,11 @@ public class AccountDeletionTests(IntegrationTestFixture fixture)
 			await fixture.CreateEphemeralUserAsync(cancellationToken);
 		var ephemeralClient = await fixture.CreateAuthenticatedClientAsync(ephemeralUsername, ephemeralPassword);
 
-		var (thirdPartyUserId, _, _) = await fixture.CreateEphemeralUserAsync(cancellationToken);
+		var (thirdPartyUserId, thirdPartyUsername, thirdPartyPassword) =
+			await fixture.CreateEphemeralUserAsync(cancellationToken);
+		// Reporting needs a local user row, which a first profile load creates.
+		var thirdPartyClient = await fixture.CreateAuthenticatedClientAsync(thirdPartyUsername, thirdPartyPassword);
+		await thirdPartyClient.GetUserProfileAsync(cancellationToken);
 
 		var olafClient = await fixture.CreateAuthenticatedClientAsync("olaf", "olaf123");
 		var org = await olafClient.CreateOrganizationAsync(

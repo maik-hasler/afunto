@@ -72,7 +72,7 @@ internal sealed class UpdateTimeSlotCommandHandler(
 			DateTimeOffset.UtcNow).ThrowIfFailure();
 
 		// A capacity-only edit changes nothing for anyone already signed up, so it notifies
-		// nobody - neither by bell nor by email (#2402).
+		// nobody (#2402).
 		if (rescheduled)
 		{
 			await OpportunityNotificationHelper.NotifyActiveVolunteersAsync(
@@ -83,8 +83,6 @@ internal sealed class UpdateTimeSlotCommandHandler(
 				cancellationToken,
 				timeSlotId,
 				opportunity.TitleDe);
-
-			opportunity.NotifyVolunteersOfReschedule(timeSlotId);
 		}
 
 		return new UpdateTimeSlotResult(1, []);

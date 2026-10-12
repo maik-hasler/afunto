@@ -55,24 +55,6 @@ internal sealed class UserConfiguration
 		builder.Property(u => u.PreferredContact)
 			.HasConversion<string>();
 
-		builder.Property(u => u.PreferredLanguage)
-			.HasMaxLength(5);
-
-		builder.Property(u => u.UnsubscribeToken)
-			.HasDefaultValueSql("gen_random_uuid()");
-
-		builder.Property(u => u.NotifyOnNewSignUp)
-			.HasDefaultValue(true);
-
-		builder.Property(u => u.NotifyOnWithdrawal)
-			.HasDefaultValue(true);
-
-		builder.Property(u => u.NotifyOnEngagementConfirmed)
-			.HasDefaultValue(true);
-
-		builder.Property(u => u.NotifyOnEngagementReminder)
-			.HasDefaultValue(true);
-
 		builder.Property(u => u.IsDeleted)
 			.HasDefaultValue(false);
 

@@ -7,9 +7,7 @@ public static class RequiredConfigurationValidator
 		string? connectionString,
 		string? keycloakClientSecret,
 		string? authenticationAuthority,
-		string[]? corsOrigins,
-		string? smtpHost,
-		string? smtpPort)
+		string[]? corsOrigins)
 	{
 		if (isDevelopment)
 			return [];
@@ -27,12 +25,6 @@ public static class RequiredConfigurationValidator
 
 		if (corsOrigins is not { Length: > 0 })
 			missing.Add("Cors:Origins");
-
-		if (string.IsNullOrWhiteSpace(smtpHost))
-			missing.Add("Smtp:Host");
-
-		if (string.IsNullOrWhiteSpace(smtpPort))
-			missing.Add("Smtp:Port");
 
 		return missing;
 	}

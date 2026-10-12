@@ -14,8 +14,6 @@ namespace Microsoft.Extensions.Hosting;
 
 public static class ServiceDefaultsExtensions
 {
-	private const string EmailMeterName = "Afunto.Email";
-
 	private const string OutboxMeterName = "Afunto.Outbox";
 
 	public static TBuilder AddServiceDefaults<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
@@ -49,7 +47,6 @@ public static class ServiceDefaultsExtensions
 					.AddAspNetCoreInstrumentation()
 					.AddHttpClientInstrumentation()
 					.AddRuntimeInstrumentation()
-					.AddMeter(EmailMeterName)
 					.AddMeter(OutboxMeterName)
 					.AddPrometheusExporter();
 			})

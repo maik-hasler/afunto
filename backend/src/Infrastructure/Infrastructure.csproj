@@ -2,8 +2,6 @@
 
 	<ItemGroup>
 		<PackageReference Include="AWSSDK.S3" />
-		<PackageReference Include="MailKit" />
-		<PackageReference Include="MimeKit" />
 		<PackageReference Include="EFCore.NamingConventions" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
@@ -17,10 +15,6 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Application\Application.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<EmbeddedResource Include="Email\Templates\*.json" />
 	</ItemGroup>
 
 	<ItemGroup>

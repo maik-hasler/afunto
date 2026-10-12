@@ -14,15 +14,10 @@ public class UpdateUserProfileCommandHandlerTests
 	private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
 	private readonly UpdateUserProfileCommandHandler _sut;
 
-	private static readonly UserId DefaultUserId = UserId.New();
-
 	public UpdateUserProfileCommandHandlerTests()
 	{
 		_sut = new UpdateUserProfileCommandHandler(_keycloakUserService, _dbContext, _unitOfWork);
 	}
-
-	private static UpdateUserProfileCommand CreateCommand(string preferredLanguage) =>
-		new(DefaultUserId, "Vera", "Volunteer", "Bio", null, [], [], null, preferredLanguage);
 
 	[Test]
 	public async Task Handle_ShouldSetPhone_OnExistingUserRow(
@@ -30,10 +25,10 @@ public class UpdateUserProfileCommandHandlerTests
 	{
 		var userId = UserId.New();
 		var user = User.Create(userId);
-		_dbContext.GetOrCreateUserAsync(userId, Arg.Any<string?>(), cancellationToken).Returns(user);
+		_dbContext.GetOrCreateUserAsync(userId, cancellationToken).Returns(user);
 
 		var command = new UpdateUserProfileCommand(
-			userId, "Vera", "Volunteer", "Bio", "+49 30 1234567", [], [], null, "de");
+			userId, "Vera", "Volunteer", "Bio", "+49 30 1234567", [], [], null);
 
 		await _sut.Handle(command, cancellationToken);
 
@@ -47,10 +42,10 @@ public class UpdateUserProfileCommandHandlerTests
 		var userId = UserId.New();
 		var user = User.Create(userId);
 		user.SetPhone("+49 30 1234567");
-		_dbContext.GetOrCreateUserAsync(userId, Arg.Any<string?>(), cancellationToken).Returns(user);
+		_dbContext.GetOrCreateUserAsync(userId, cancellationToken).Returns(user);
 
 		var command = new UpdateUserProfileCommand(
-			userId, "Vera", "Volunteer", "Bio", null, [], [], null, "de");
+			userId, "Vera", "Volunteer", "Bio", null, [], [], null);
 
 		await _sut.Handle(command, cancellationToken);
 
@@ -63,47 +58,13 @@ public class UpdateUserProfileCommandHandlerTests
 	{
 		var userId = UserId.New();
 		var user = User.Create(userId);
-		_dbContext.GetOrCreateUserAsync(userId, Arg.Any<string?>(), cancellationToken).Returns(user);
+		_dbContext.GetOrCreateUserAsync(userId, cancellationToken).Returns(user);
 
 		var command = new UpdateUserProfileCommand(
-			userId, "Vera", "Volunteer", "Bio", "+49 30 1234567", [], [], null, "de");
+			userId, "Vera", "Volunteer", "Bio", "+49 30 1234567", [], [], null);
 
 		await _sut.Handle(command, cancellationToken);
 
 		user.Phone.Should().Be("+49 30 1234567");
-	}
-
-	[Test]
-	public async Task Handle_ShouldSetPreferredLanguage_OnALazilyCreatedUserRow(
-		CancellationToken cancellationToken)
-	{
-		// Arrange
-		var user = User.Create(DefaultUserId);
-		_dbContext.GetOrCreateUserAsync(DefaultUserId, Arg.Any<string?>(), cancellationToken).Returns(user);
-		var command = CreateCommand("en");
-
-		// Act
-		await _sut.Handle(command, cancellationToken);
-
-		// Assert
-		user.PreferredLanguage.Should().Be("en");
-	}
-
-	[Test]
-	public async Task Handle_ShouldOverwritePreferredLanguage_OnAnExistingUserRow(
-		CancellationToken cancellationToken)
-	{
-		// Arrange
-
-		var existingUser = User.Create(DefaultUserId);
-		existingUser.SetPreferredLanguage("de");
-		_dbContext.GetOrCreateUserAsync(DefaultUserId, Arg.Any<string?>(), cancellationToken).Returns(existingUser);
-		var command = CreateCommand("en");
-
-		// Act
-		await _sut.Handle(command, cancellationToken);
-
-		// Assert
-		existingUser.PreferredLanguage.Should().Be("en");
 	}
 }

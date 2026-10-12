@@ -1,4 +1,3 @@
-using Application.Common.Email;
 using Application.Common.Exceptions;
 using Application.Common.Keycloak;
 using Application.Common.Persistence;
@@ -16,9 +15,6 @@ public class CreateInvitationCommandHandlerTests
 	private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
 	private readonly IKeycloakOrganizationService _keycloakOrgService = Substitute.For<IKeycloakOrganizationService>();
 	private readonly IKeycloakUserService _keycloakUserService = Substitute.For<IKeycloakUserService>();
-	private readonly IEmailService _emailService = Substitute.For<IEmailService>();
-	private readonly IEmailTemplateRenderer _emailTemplateRenderer = Substitute.For<IEmailTemplateRenderer>();
-	private readonly IEmailLinkBuilder _emailLinkBuilder = Substitute.For<IEmailLinkBuilder>();
 	private readonly IAggregateRepository<Organization, OrganizationId> _orgRepo =
 		Substitute.For<IAggregateRepository<Organization, OrganizationId>>();
 	private readonly CreateInvitationCommandHandler _sut;
@@ -44,13 +40,8 @@ public class CreateInvitationCommandHandlerTests
 		_keycloakUserService
 			.GetUserAsync(DefaultInviteeId.Value, Arg.Any<CancellationToken>())
 			.Returns(new KeycloakUserProfile(DefaultInviteeId.Value, "vera", "Vera", "Miller", "vera@test.de"));
-		_dbContext.GetOrCreateUsersAsync(Arg.Any<IReadOnlyCollection<UserId>>(), Arg.Any<CancellationToken>())
-			.Returns(call => ((IReadOnlyCollection<UserId>)call[0]!).Select(User.Create).ToList());
-		_emailTemplateRenderer
-			.Render(Arg.Any<EmailDraft>())
-			.Returns(new RenderedEmail("Test Subject", "Test Body", "<p>Test Body</p>", null));
 		_sut = new CreateInvitationCommandHandler(
-			_dbContext, _unitOfWork, _keycloakOrgService, _keycloakUserService, _emailService, _emailTemplateRenderer, _emailLinkBuilder);
+			_dbContext, _unitOfWork, _keycloakOrgService, _keycloakUserService);
 	}
 
 	[Test]
@@ -89,8 +80,6 @@ public class CreateInvitationCommandHandlerTests
 			Arg.Is<OrganizationInvitation>(i => i != null && i.IntendedRole == OrganizationMemberRole.Member),
 			cancellationToken);
 		await _unitOfWork.Received(1).SaveChangesAsync(cancellationToken);
-		await _emailService.Received(1).SendAsync(
-			Arg.Is<EmailMessage>(m => m.To == "vera@test.de"), cancellationToken);
 	}
 
 	[Test]
@@ -108,45 +97,6 @@ public class CreateInvitationCommandHandlerTests
 		// Assert
 		await act.Should().ThrowAsync<ResultFailureException>()
 			.WithMessage("*pending invitation*");
-		await _emailService.DidNotReceive().SendAsync(
-			Arg.Any<EmailMessage>(), Arg.Any<CancellationToken>());
-	}
-
-	[Test]
-	public async Task Handle_ShouldRenderInvitationEmail_InInviteesPreferredLanguage(
-		CancellationToken cancellationToken)
-	{
-		// Arrange
-		var invitee = User.Create(DefaultInviteeId);
-		invitee.SetPreferredLanguage("en");
-		_dbContext.GetOrCreateUsersAsync(Arg.Any<IReadOnlyCollection<UserId>>(), Arg.Any<CancellationToken>())
-			.Returns([invitee]);
-		var command = new CreateInvitationCommand(DefaultOrgId, DefaultInviteeId, OrganizationMemberRole.Member, DefaultInvitedById);
-
-		// Act
-		await _sut.Handle(command, cancellationToken);
-
-		// Assert
-		_emailTemplateRenderer.Received(1).Render(Arg.Is<EmailDraft>(d =>
-			d.Kind == EmailTemplateKind.InvitationReceived
-			&& d.Language == "en"
-			&& d.RecipientName == "Vera"
-			&& d.Placeholders["OrganizationName"] == "Test Org"
-			&& d.Placeholders["ExpiryDays"] == "14"));
-	}
-
-	[Test]
-	public async Task Handle_ShouldDefaultToGerman_WhenInviteeHasNoPreferredLanguage(
-		CancellationToken cancellationToken)
-	{
-		// Arrange
-		var command = new CreateInvitationCommand(DefaultOrgId, DefaultInviteeId, OrganizationMemberRole.Member, DefaultInvitedById);
-
-		// Act
-		await _sut.Handle(command, cancellationToken);
-
-		// Assert
-		_emailTemplateRenderer.Received(1).Render(Arg.Is<EmailDraft>(d =>
-			d.Kind == EmailTemplateKind.InvitationReceived && d.Language == "de"));
+		await _unitOfWork.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
 	}
 }

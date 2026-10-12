@@ -15,7 +15,7 @@ internal sealed class UploadUserAvatarCommandHandler(
 	{
 		var contentType = ImageUploadValidator.EnsureValid(request.Content, request.ContentType, "Avatar");
 
-		var user = await dbContext.GetOrCreateUserAsync(request.UserId, preferredLanguage: null, cancellationToken);
+		var user = await dbContext.GetOrCreateUserAsync(request.UserId, cancellationToken);
 		var previousAvatarUrl = user.AvatarUrl;
 
 		var ext = ImageUploadValidator.GetExtension(contentType);

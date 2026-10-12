@@ -118,8 +118,6 @@ var keycloak = builder.AddContainer("keycloak", "quay.io/keycloak/keycloak", "26
 
 var keycloakEndpoint = keycloak.GetEndpoint("http");
 
-var mailpitSmtpEndpoint = mailpit.GetEndpoint("smtp");
-
 var anonymousReadPermitLimit = builder.Configuration["RateLimiting:Read:AnonymousPermitLimit"] ?? "10000";
 
 var backend = builder.AddProject<Projects.Api>("backend")
@@ -134,8 +132,6 @@ var backend = builder.AddProject<Projects.Api>("backend")
 	.WithEnvironment("Keycloak__BaseUrl",
 		ReferenceExpression.Create($"{keycloakEndpoint}"))
 	.WithEnvironment("Keycloak__ClientSecret", "backend-secret")
-	.WithEnvironment("Smtp__Host", mailpitSmtpEndpoint.Property(EndpointProperty.Host))
-	.WithEnvironment("Smtp__Port", mailpitSmtpEndpoint.Property(EndpointProperty.Port))
 	.WithEnvironment("Storage__Endpoint", ReferenceExpression.Create($"{storageApiEndpoint}"))
 	.WithEnvironment("Storage__AccessKey", "storage")
 	.WithEnvironment("Storage__SecretKey", "storage123")

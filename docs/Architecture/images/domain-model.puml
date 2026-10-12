@@ -69,7 +69,6 @@ package Users <<Rectangle>> {
 		Skills
 		Languages
 		PreferredContact
-		EmailPreferences
 	}
 
 	class UserStreak <<aggregate root>> {

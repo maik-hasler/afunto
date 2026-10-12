@@ -23,21 +23,9 @@ public sealed class User
 
 	public PreferredContact? PreferredContact { get; private set; }
 
-	public string? PreferredLanguage { get; private set; }
-
 	public bool IsDeleted { get; private set; }
 
 	public DateTimeOffset? DeletedOn { get; private set; }
-
-	public Guid UnsubscribeToken { get; private set; }
-
-	public bool NotifyOnNewSignUp { get; private set; } = true;
-
-	public bool NotifyOnWithdrawal { get; private set; } = true;
-
-	public bool NotifyOnEngagementConfirmed { get; private set; } = true;
-
-	public bool NotifyOnEngagementReminder { get; private set; } = true;
 
 	public DateTimeOffset CreatedOn { get; private set; }
 
@@ -47,10 +35,7 @@ public sealed class User
 	private User() : base(default) { }
 #pragma warning restore CS8618
 
-	private User(UserId id) : base(id)
-	{
-		UnsubscribeToken = Guid.NewGuid();
-	}
+	private User(UserId id) : base(id) { }
 
 	public static User Create(UserId id) => new(id);
 
@@ -82,60 +67,6 @@ public sealed class User
 	public void SetPreferredContact(PreferredContact? preferredContact)
 	{
 		PreferredContact = preferredContact;
-	}
-
-	public void SetPreferredLanguage(string? preferredLanguage)
-	{
-		PreferredLanguage = preferredLanguage;
-	}
-
-	public void UpdateNotificationPreferences(
-		bool notifyOnNewSignUp,
-		bool notifyOnWithdrawal,
-		bool notifyOnEngagementConfirmed,
-		bool notifyOnEngagementReminder)
-	{
-		NotifyOnNewSignUp = notifyOnNewSignUp;
-		NotifyOnWithdrawal = notifyOnWithdrawal;
-		NotifyOnEngagementConfirmed = notifyOnEngagementConfirmed;
-		NotifyOnEngagementReminder = notifyOnEngagementReminder;
-	}
-
-	public bool IsSubscribedTo(EmailNotificationType type) => type switch
-	{
-		EmailNotificationType.NewSignUp => NotifyOnNewSignUp,
-		EmailNotificationType.Withdrawal => NotifyOnWithdrawal,
-		EmailNotificationType.EngagementConfirmed => NotifyOnEngagementConfirmed,
-		EmailNotificationType.EngagementReminder => NotifyOnEngagementReminder,
-		_ => true,
-	};
-
-	public Result Unsubscribe(EmailNotificationType type, Guid token)
-	{
-		if (token != UnsubscribeToken)
-			return Result.Failure(Error.Forbidden("User.InvalidUnsubscribeToken", "The unsubscribe link is invalid or has already been used with a different token."));
-
-		switch (type)
-		{
-			case EmailNotificationType.NewSignUp:
-				NotifyOnNewSignUp = false;
-				break;
-			case EmailNotificationType.Withdrawal:
-				NotifyOnWithdrawal = false;
-				break;
-			case EmailNotificationType.EngagementConfirmed:
-				NotifyOnEngagementConfirmed = false;
-				break;
-			case EmailNotificationType.EngagementReminder:
-				NotifyOnEngagementReminder = false;
-				break;
-			default:
-
-				return Result.Failure(Error.Validation(
-					"User.UnknownEmailNotificationType", $"Unknown email notification type '{type}'."));
-		}
-
-		return Result.Success();
 	}
 
 	public void MarkAccountDeleted()

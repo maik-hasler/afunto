@@ -57,10 +57,6 @@ internal sealed class EngagementConfiguration
 			.IsRequired()
 			.HasDefaultValue(0);
 
-		builder.Property(e => e.ReminderSentAt);
-
-		builder.Property(e => e.StatusNotifiedAt);
-
 		builder.Property(e => e.FeedbackRating);
 
 		builder.ToTable(t => t.HasCheckConstraint(

@@ -28,7 +28,6 @@ beforeEach(() => {
 		languages: [],
 		phone: undefined,
 		preferredContact: undefined,
-		preferredLanguage: undefined,
 		avatarUrl: undefined,
 	});
 	api.getMyStreaks.mockResolvedValue({

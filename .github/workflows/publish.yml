@@ -334,11 +334,6 @@ jobs:
 
       - name: Run backend image against the test stack
         run: |
-          # Smtp__Host/Smtp__Port are dummy values (no SMTP server on this network) -
-          # RequiredConfigurationValidator (#2285) fails startup outside Development if
-          # they're blank, but this smoke test never triggers an email send, so nothing
-          # ever dials them.
-          #
           # smoke-keycloak is plain HTTP - no TLS termination in front of it, unlike a
           # real deployment's Authority. Without Authentication__RequireHttpsMetadata=false,
           # JwtBearerHandler throws "MetadataAddress or Authority must use HTTPS" on every
@@ -356,8 +351,6 @@ jobs:
             -e Authentication__RequireHttpsMetadata=false \
             -e Authentication__ValidIssuers__0=http://smoke-keycloak:8080/realms/afunto \
             -e Cors__Origins__0=http://localhost \
-            -e Smtp__Host=localhost \
-            -e Smtp__Port=1025 \
             -e Storage__Endpoint=http://smoke-storage:9000 \
             -e Storage__AccessKey=storage \
             -e Storage__SecretKey=storage123 \

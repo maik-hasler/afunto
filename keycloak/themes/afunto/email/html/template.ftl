@@ -1,8 +1,6 @@
 <#--
-	The same card the backend's own emails use (backend/src/Infrastructure/Email/HtmlEmailWriter.cs):
-	brand-50 page, white card, the wordmark, one brand-700 button, a muted footer. Keep the two
-	in step - a new user gets this theme's verification email first and the backend's emails
-	after, and both should read as one product (#2402). Every value is auto-escaped by the
+	brand-50 page, white card, the wordmark, one brand-700 button, a muted footer (#2402).
+	Keycloak's emails are the only ones the product sends. Every value is auto-escaped by the
 	HTML output format, newEmail included.
 -->
 <#function greeting>

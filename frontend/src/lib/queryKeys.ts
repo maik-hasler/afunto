@@ -35,8 +35,6 @@ export const queryKeys = {
 		me: () => [...queryKeys.profile.all, "me"] as const,
 		achievements: () => [...queryKeys.profile.all, "achievements"] as const,
 		streaks: () => [...queryKeys.profile.all, "streaks"] as const,
-		notificationPreferences: () =>
-			[...queryKeys.profile.all, "notification-preferences"] as const,
 	},
 
 	dashboard: {

@@ -13,7 +13,7 @@ internal sealed class DeleteUserAvatarCommandHandler(
 		DeleteUserAvatarCommand request,
 		CancellationToken cancellationToken = default)
 	{
-		var user = await dbContext.GetOrCreateUserAsync(request.UserId, preferredLanguage: null, cancellationToken);
+		var user = await dbContext.GetOrCreateUserAsync(request.UserId, cancellationToken);
 
 		if (user.AvatarUrl is not null)
 		{

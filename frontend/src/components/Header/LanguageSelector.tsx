@@ -1,9 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useAuth } from "react-oidc-context";
-import { useApiClient } from "../../hooks/useApiClient";
 import { useDismissableOverlay } from "../../hooks/useDismissableOverlay";
-import { dispatchToast } from "../../lib/toastBus";
 import { ChevronDownIcon } from "../icons";
 
 const LANGUAGES = [
@@ -19,8 +16,6 @@ export default function LanguageSelector({
 	transparent?: boolean;
 }) {
 	const { i18n, t } = useTranslation();
-	const auth = useAuth();
-	const api = useApiClient();
 	const [open, setOpen] = useState(false);
 	const ref = useDismissableOverlay<HTMLDivElement>(open, () => setOpen(false));
 
@@ -29,39 +24,11 @@ export default function LanguageSelector({
 		: "en";
 	const current = LANGUAGES.find((l) => l.code === currentCode) ?? LANGUAGES[0];
 
-	// The interface language and the account's email language are two separate
-	// settings, and switching one used to change nothing about the other with
-	// no word to the user - so an English interface kept sending German email
-	// (#2328). Say so at the moment the two diverge; the profile is where it
-	// gets changed.
-	async function warnIfEmailLanguageDiffers(uiLanguage: LangCode) {
-		if (!auth.isAuthenticated) return;
-		try {
-			const profile = await api.getUserProfile({});
-			const emailLanguage = profile.preferredLanguage === "en" ? "en" : "de";
-			if (emailLanguage === uiLanguage) return;
-			dispatchToast(
-				"info",
-				i18n.t("language.emailLanguageDiffers", {
-					language: i18n.t(
-						emailLanguage === "en"
-							? "language.contentEn"
-							: "language.contentDe",
-					),
-				}),
-			);
-		} catch {
-			// A failed lookup is not worth turning a language switch into an
-			// error - the profile hint still states the divergence.
-		}
-	}
-
 	async function selectLanguage(code: LangCode) {
 		setOpen(false);
 		if (code === currentCode) return;
 		await i18n.changeLanguage(code);
 		localStorage.setItem("afunto:language-explicit", "true");
-		await warnIfEmailLanguageDiffers(code);
 	}
 
 	return (

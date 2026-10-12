@@ -11,6 +11,5 @@ public sealed record UpdateUserProfileCommand(
 	string? Phone,
 	IReadOnlyList<string> Skills,
 	IReadOnlyList<string> Languages,
-	PreferredContact? PreferredContactValue,
-	string PreferredLanguage)
+	PreferredContact? PreferredContactValue)
 	: ICommand<bool>;

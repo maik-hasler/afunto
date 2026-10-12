@@ -69,5 +69,5 @@ ifndef::imagesdir[:imagesdir: ../images]
 |The user interface, end-user documentation, and all code, commits, issues, and pull requests are in English. The UI supports multiple languages via internationalization.
 
 |ASCII-only formatting
-|Plain ASCII hyphens only (no U+2013 en dash or U+2014 em dash) in source files; tab indentation per `.editorconfig`. Both are enforced by CI (`.github/workflows/lint.yml`). German user-facing content (`frontend/src/locales/de.json`, `backend/src/Infrastructure/Email/Templates/de.json`) is exempt and uses the en dash, since German typography requires it there.
+|Plain ASCII hyphens only (no U+2013 en dash or U+2014 em dash) in source files; tab indentation per `.editorconfig`. Both are enforced by CI (`.github/workflows/lint.yml`). German user-facing content (`frontend/src/locales/de.json`) is exempt and uses the en dash, since German typography requires it there.
 |===

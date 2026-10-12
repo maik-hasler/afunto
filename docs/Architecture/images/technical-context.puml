@@ -16,7 +16,7 @@ System_Ext(github_actions, "GitHub Actions", "CI: builds, tests, and publishes i
 System_Ext(keycloak, "Keycloak", "Identity provider (OIDC, JWT), self-hosted")
 System_Ext(postgres, "PostgreSQL", "Application and realm database, self-hosted")
 System_Ext(nominatim, "OpenStreetMap Nominatim", "Address geocoding (public, rate-limited)")
-System_Ext(smtp, "SMTP mail server", "Outbound notification and reminder emails")
+System_Ext(smtp, "SMTP mail server", "Outbound account emails (verification, password reset), sent by Keycloak")
 System_Ext(objectstore, "Object storage (RustFS / S3)", "Binary assets: logos, avatars, banners")
 
 Rel(volunteer, browser, "Opens")
@@ -27,7 +27,7 @@ Rel(github_actions, ghcr, "Publishes images to")
 Rel(afunto, keycloak, "Authenticates via / validates JWT", "OIDC, JWKS")
 Rel(afunto, postgres, "Reads / writes", "TCP / SQL")
 Rel(afunto, nominatim, "Geocodes addresses", "HTTPS")
-Rel(afunto, smtp, "Sends email", "SMTP")
+Rel(keycloak, smtp, "Sends account email", "SMTP")
 Rel(afunto, objectstore, "Stores / serves assets", "S3 API")
 
 @enduml

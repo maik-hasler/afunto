@@ -59,8 +59,6 @@ public class OutboxMessageSerializationTests
 			EngagementId.New(), UserId.New(), VolunteerOpportunityId.New(), 5);
 		yield return new EngagementReactivatedDomainEvent(
 			EngagementId.New(), UserId.New(), VolunteerOpportunityId.New());
-		yield return new EngagementReminderDueDomainEvent(
-			EngagementId.New(), UserId.New(), VolunteerOpportunityId.New(), TimeSlotId.New());
 		yield return new EngagementWithdrawnDomainEvent(
 			EngagementId.New(), UserId.New(), VolunteerOpportunityId.New());
 		yield return new OrganizationDeletedDomainEvent(CoreOrganizationId.New());
@@ -77,7 +75,5 @@ public class OutboxMessageSerializationTests
 			VolunteerOpportunityId.New(), CoreOrganizationId.New());
 		yield return new VolunteerOpportunityUnpublishedDomainEvent(
 			VolunteerOpportunityId.New(), CoreOrganizationId.New());
-		yield return new VolunteerOpportunityUpdatedDomainEvent(
-			VolunteerOpportunityId.New(), TimeSlotId: null);
 	}
 }

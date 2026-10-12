@@ -36,7 +36,7 @@ public class UploadUserAvatarCommandHandlerTests
 		// Arrange
 		var userId = UserId.New();
 		var user = User.Create(userId);
-		_dbContext.GetOrCreateUserAsync(userId, Arg.Any<string?>(), cancellationToken).Returns(user);
+		_dbContext.GetOrCreateUserAsync(userId, cancellationToken).Returns(user);
 
 		var command = new UploadUserAvatarCommand(userId, PngBytes, "image/png");
 
@@ -56,7 +56,7 @@ public class UploadUserAvatarCommandHandlerTests
 
 		var userId = UserId.New();
 		var user = User.Create(userId);
-		_dbContext.GetOrCreateUserAsync(userId, Arg.Any<string?>(), cancellationToken).Returns(user);
+		_dbContext.GetOrCreateUserAsync(userId, cancellationToken).Returns(user);
 
 		var command = new UploadUserAvatarCommand(userId, PngBytes, "image/png");
 
@@ -76,7 +76,7 @@ public class UploadUserAvatarCommandHandlerTests
 
 		var userId = UserId.New();
 		var user = User.Create(userId);
-		_dbContext.GetOrCreateUserAsync(userId, Arg.Any<string?>(), cancellationToken).Returns(user);
+		_dbContext.GetOrCreateUserAsync(userId, cancellationToken).Returns(user);
 		var command = new UploadUserAvatarCommand(userId, PngBytes, "image/png");
 
 		// Act
@@ -100,7 +100,7 @@ public class UploadUserAvatarCommandHandlerTests
 		var userId = UserId.New();
 		var user = User.Create(userId);
 		user.SetAvatarUrl("https://example.com/user-avatars/old-key/old.png");
-		_dbContext.GetOrCreateUserAsync(userId, Arg.Any<string?>(), cancellationToken).Returns(user);
+		_dbContext.GetOrCreateUserAsync(userId, cancellationToken).Returns(user);
 		_fileStorage
 			.GetObjectKeyFromPublicUrl("https://example.com/user-avatars/old-key/old.png")
 			.Returns("user-avatars/old-key/old.png");
@@ -121,7 +121,7 @@ public class UploadUserAvatarCommandHandlerTests
 		// Arrange
 		var userId = UserId.New();
 		var user = User.Create(userId);
-		_dbContext.GetOrCreateUserAsync(userId, Arg.Any<string?>(), cancellationToken).Returns(user);
+		_dbContext.GetOrCreateUserAsync(userId, cancellationToken).Returns(user);
 		var command = new UploadUserAvatarCommand(userId, PngBytes, "image/png");
 
 		// Act
@@ -140,7 +140,7 @@ public class UploadUserAvatarCommandHandlerTests
 		var userId = UserId.New();
 		var user = User.Create(userId);
 		user.SetAvatarUrl("https://example.com/user-avatars/old-key/old.png");
-		_dbContext.GetOrCreateUserAsync(userId, Arg.Any<string?>(), cancellationToken).Returns(user);
+		_dbContext.GetOrCreateUserAsync(userId, cancellationToken).Returns(user);
 		_fileStorage
 			.GetObjectKeyFromPublicUrl("https://example.com/user-avatars/old-key/old.png")
 			.Returns("user-avatars/old-key/old.png");

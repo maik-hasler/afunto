@@ -1,6 +1,4 @@
-using Application.Common.Email;
 using Application.Common.Exceptions;
-using Application.Common.Keycloak;
 using Application.Common.Persistence;
 using Application.Organizations.ResendInvitation.v1;
 using AwesomeAssertions;
@@ -9,21 +7,14 @@ using Domain.Primitives;
 using Domain.Users;
 using NSubstitute;
 
-
 namespace Application.UnitTests.Organizations.ResendInvitation;
 
 public class ResendInvitationCommandHandlerTests
 {
 	private readonly IApplicationDbContext _dbContext = Substitute.For<IApplicationDbContext>();
 	private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
-	private readonly IKeycloakUserService _keycloakUserService = Substitute.For<IKeycloakUserService>();
-	private readonly IEmailService _emailService = Substitute.For<IEmailService>();
-	private readonly IEmailTemplateRenderer _emailTemplateRenderer = Substitute.For<IEmailTemplateRenderer>();
-	private readonly IEmailLinkBuilder _emailLinkBuilder = Substitute.For<IEmailLinkBuilder>();
 	private readonly IAggregateRepository<OrganizationInvitation, OrganizationInvitationId> _invitationRepo =
 		Substitute.For<IAggregateRepository<OrganizationInvitation, OrganizationInvitationId>>();
-	private readonly IAggregateRepository<Organization, OrganizationId> _orgRepo =
-		Substitute.For<IAggregateRepository<Organization, OrganizationId>>();
 	private readonly ResendInvitationCommandHandler _sut;
 
 	private static readonly OrganizationId DefaultOrgId = OrganizationId.New();
@@ -33,22 +24,10 @@ public class ResendInvitationCommandHandlerTests
 	public ResendInvitationCommandHandlerTests()
 	{
 		_dbContext.OrganizationInvitations.Returns(_invitationRepo);
-		_dbContext.Organizations.Returns(_orgRepo);
-		_orgRepo.FindAsync(DefaultOrgId, Arg.Any<CancellationToken>())
-			.Returns(Organization.Create(DefaultOrgId, "Test Org").Value);
 		_dbContext
 			.IsOrganizerAsync(DefaultOrgId, DefaultRequestingUserId, Arg.Any<CancellationToken>())
 			.Returns(true);
-		_keycloakUserService
-			.GetUserAsync(DefaultInviteeId.Value, Arg.Any<CancellationToken>())
-			.Returns(new KeycloakUserProfile(DefaultInviteeId.Value, "vera", "Vera", "Miller", "vera@test.de"));
-		_dbContext.GetOrCreateUsersAsync(Arg.Any<IReadOnlyCollection<UserId>>(), Arg.Any<CancellationToken>())
-			.Returns(call => ((IReadOnlyCollection<UserId>)call[0]!).Select(User.Create).ToList());
-		_emailTemplateRenderer
-			.Render(Arg.Any<EmailDraft>())
-			.Returns(new RenderedEmail("Test Subject", "Test Body", "<p>Test Body</p>", null));
-		_sut = new ResendInvitationCommandHandler(
-			_dbContext, _unitOfWork, _keycloakUserService, _emailService, _emailTemplateRenderer, _emailLinkBuilder);
+		_sut = new ResendInvitationCommandHandler(_dbContext, _unitOfWork);
 	}
 
 	private static OrganizationInvitation CreateExpiredInvitation(OrganizationId orgId)
@@ -85,7 +64,7 @@ public class ResendInvitationCommandHandlerTests
 	}
 
 	[Test]
-	public async Task Handle_ShouldResetToPendingAndSendEmail_WhenInvitationIsExpired(
+	public async Task Handle_ShouldResetToPending_WhenInvitationIsExpired(
 		CancellationToken cancellationToken)
 	{
 		// Arrange
@@ -101,8 +80,6 @@ public class ResendInvitationCommandHandlerTests
 		invitation.Status.Should().Be(InvitationStatus.Pending);
 		invitation.ExpiresOn.Should().BeAfter(DateTimeOffset.UtcNow.AddDays(OrganizationInvitation.ExpiryWindowDays - 1));
 		await _unitOfWork.Received(1).SaveChangesAsync(cancellationToken);
-		await _emailService.Received(1).SendAsync(
-			Arg.Is<EmailMessage>(m => m.To == "vera@test.de"), cancellationToken);
 	}
 
 	[Test]
@@ -143,7 +120,7 @@ public class ResendInvitationCommandHandlerTests
 	}
 
 	[Test]
-	public async Task Handle_ShouldExtendExpiryAndSendEmail_WhenInvitationIsStillPending(
+	public async Task Handle_ShouldExtendExpiry_WhenInvitationIsStillPending(
 		CancellationToken cancellationToken)
 	{
 		// Arrange
@@ -160,8 +137,6 @@ public class ResendInvitationCommandHandlerTests
 		invitation.Status.Should().Be(InvitationStatus.Pending);
 		invitation.ExpiresOn.Should().BeOnOrAfter(originalExpiry);
 		await _unitOfWork.Received(1).SaveChangesAsync(cancellationToken);
-		await _emailService.Received(1).SendAsync(
-			Arg.Is<EmailMessage>(m => m.To == "vera@test.de"), cancellationToken);
 	}
 
 	[Test]
@@ -187,32 +162,5 @@ public class ResendInvitationCommandHandlerTests
 		(await act.Should().ThrowAsync<ResultFailureException>())
 			.Which.Error.Type.Should().Be(ErrorType.Conflict);
 		await _unitOfWork.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
-		await _emailService.DidNotReceive().SendAsync(
-			Arg.Any<EmailMessage>(), Arg.Any<CancellationToken>());
-	}
-
-	[Test]
-	public async Task Handle_ShouldRenderInvitationEmail_InInviteesPreferredLanguage(
-		CancellationToken cancellationToken)
-	{
-		// Arrange
-		var invitation = CreateExpiredInvitation(DefaultOrgId);
-		_invitationRepo.FindAsync(invitation.Id, cancellationToken).Returns(invitation);
-		var invitee = User.Create(DefaultInviteeId);
-		invitee.SetPreferredLanguage("en");
-		_dbContext.GetOrCreateUsersAsync(Arg.Any<IReadOnlyCollection<UserId>>(), Arg.Any<CancellationToken>())
-			.Returns([invitee]);
-		var command = new ResendInvitationCommand(DefaultOrgId, invitation.Id, DefaultRequestingUserId);
-
-		// Act
-		await _sut.Handle(command, cancellationToken);
-
-		// Assert
-		_emailTemplateRenderer.Received(1).Render(Arg.Is<EmailDraft>(d =>
-			d.Kind == EmailTemplateKind.InvitationReceived
-			&& d.Language == "en"
-			&& d.RecipientName == "Vera"
-			&& d.Placeholders["OrganizationName"] == "Test Org"
-			&& d.Placeholders["ExpiryDays"] == "14"));
 	}
 }
