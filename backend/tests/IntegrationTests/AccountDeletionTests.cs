@@ -16,6 +16,8 @@ public class AccountDeletionTests(IntegrationTestFixture fixture)
 		var (ephemeralUserId, ephemeralUsername, ephemeralPassword) =
 			await fixture.CreateEphemeralUserAsync(cancellationToken);
 		var ephemeralClient = await fixture.CreateAuthenticatedClientAsync(ephemeralUsername, ephemeralPassword);
+		// The SPA loads the profile on every sign-in, which is what creates the local user row.
+		await ephemeralClient.GetUserProfileAsync(cancellationToken);
 
 		var (thirdPartyUserId, thirdPartyUsername, thirdPartyPassword) =
 			await fixture.CreateEphemeralUserAsync(cancellationToken);
