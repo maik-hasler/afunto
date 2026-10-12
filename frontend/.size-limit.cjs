@@ -49,7 +49,11 @@ module.exports = [
 	},
 	{
 		name: "Generated API client",
-		path: "dist/assets/apiError-*.js",
+		// Rolldown names a shared chunk after one of its modules, so this follows the
+		// client wherever it lands: `apiError-*` until the email removal shrank it
+		// enough to share a chunk with `formClasses` (11.3 kB gzipped, form recipes
+		// included). Re-point it if the next build moves the client again.
+		path: "dist/assets/formClasses-*.js",
 		limit: "12 kB",
 		gzip: true,
 	},
