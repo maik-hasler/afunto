@@ -60,7 +60,7 @@ Local development is optimized for fast iteration. All services run on `localhos
 |Mailpit
 |`ghcr.io/axllent/mailpit`
 |1080 / 1025
-|Captures outbound email (web UI on 1080, SMTP on 1025)
+|Captures the emails Keycloak sends (web UI on 1080, SMTP on 1025)
 
 |RustFS
 |`rustfs/rustfs`
@@ -113,7 +113,7 @@ Container images are the release artifacts, pulled by tag from GHCR. The backend
 |S3-compatible; holds organization logos, user avatars and opportunity banners. The backend authenticates with a bucket-scoped service account rather than root credentials (#1353)
 
 |SMTP relay
-|Outbound notification and reminder email
+|Outbound account email, sent by Keycloak only (verification, password reset)
 
 |OpenStreetMap Nominatim
 |Address geocoding at write time and city-autocomplete search, both proxied through the backend so the frontend never calls it directly (ADR-4, ADR-5)

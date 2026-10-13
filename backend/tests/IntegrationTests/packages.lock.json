@@ -210,11 +210,6 @@
         "resolved": "4.0.102.8",
         "contentHash": "90B9Skhl+ORbtWNXrrmGdGhGvAfZiPmZafRYrB/xHelZjePIwPvXioqz9UiiF1vo21eDLzTnXh5EC4RjbNWsFQ=="
       },
-      "BouncyCastle.Cryptography": {
-        "type": "Transitive",
-        "resolved": "2.7.0",
-        "contentHash": "U+12df8UEWHgBi04YVf/Lgi2dy3SItlIYvHjjEVa/BngCQIzDCDRBk50DDByCfDvSbe5pRNFr3b7UrVK2kMcLw=="
-      },
       "Fractions": {
         "type": "Transitive",
         "resolved": "7.3.0",
@@ -1122,11 +1117,6 @@
         "resolved": "10.0.8",
         "contentHash": "+dJsbPJ3FyUbTZNplFj0RCKePFizmv6ewDV46JE9q/IVH4c3xTCftHfHelLsAKf0jryIPqgMb5GpS0x7TAY3mg=="
       },
-      "System.Security.Cryptography.Pkcs": {
-        "type": "Transitive",
-        "resolved": "10.0.0",
-        "contentHash": "UPWqLSygJlFerRi9XNIuM0a1VC8gHUIufyP24xQ0sc+XimqUAEcjpOz9DhKpyDjH+5B/wO3RpC0KpkEeDj/ddg=="
-      },
       "System.Threading.RateLimiting": {
         "type": "Transitive",
         "resolved": "8.0.0",
@@ -1199,7 +1189,6 @@
           "AWSSDK.S3": "[4.0.104.1, 4.0.104.1]",
           "Application": "[1.0.0, )",
           "EFCore.NamingConventions": "[10.0.1, 10.0.1]",
-          "MailKit": "[4.18.0, 4.18.0]",
           "Microsoft.EntityFrameworkCore.Design": "[10.0.12, 10.0.12]",
           "Microsoft.EntityFrameworkCore.Relational": "[10.0.12, 10.0.12]",
           "Microsoft.Extensions.Configuration.Binder": "[10.0.12, 10.0.12]",
@@ -1207,7 +1196,6 @@
           "Microsoft.Extensions.Hosting.Abstractions": "[10.0.12, 10.0.12]",
           "Microsoft.Extensions.Http": "[10.0.12, 10.0.12]",
           "Microsoft.Extensions.Http.Resilience": "[10.10.0, 10.10.0]",
-          "MimeKit": "[4.18.1, 4.18.1]",
           "Npgsql.EntityFrameworkCore.PostgreSQL": "[10.0.3, 10.0.3]"
         }
       },
@@ -1351,15 +1339,6 @@
           "Microsoft.EntityFrameworkCore": "[10.0.1, 11.0.0)",
           "Microsoft.EntityFrameworkCore.Relational": "[10.0.1, 11.0.0)",
           "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.1"
-        }
-      },
-      "MailKit": {
-        "type": "CentralTransitive",
-        "requested": "[4.18.0, 4.18.0]",
-        "resolved": "4.18.0",
-        "contentHash": "Sk+n5f4uVKiQKECOCPcFcYtYpIt9rcli7dDboSkWM2TBbTYE7EpfudL+e5a6TFp9eMHOzNYOydzZh0b+zFGK4A==",
-        "dependencies": {
-          "MimeKit": "4.18.0"
         }
       },
       "Microsoft.AspNetCore.Authentication.JwtBearer": {
@@ -1542,16 +1521,6 @@
         "dependencies": {
           "Microsoft.Extensions.Http": "10.0.12",
           "Microsoft.Extensions.ServiceDiscovery.Abstractions": "10.10.0"
-        }
-      },
-      "MimeKit": {
-        "type": "CentralTransitive",
-        "requested": "[4.18.1, 4.18.1]",
-        "resolved": "4.18.1",
-        "contentHash": "D8AfFVMFVJldWmhQWCziC9nWUN/zayFFBAKpyjVyCeh0tqBiI9jtUVuMrKgWw1EGnCp09msDZldbRvp2jfUehQ==",
-        "dependencies": {
-          "BouncyCastle.Cryptography": "2.7.0",
-          "System.Security.Cryptography.Pkcs": "10.0.0"
         }
       },
       "Npgsql.EntityFrameworkCore.PostgreSQL": {

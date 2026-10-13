@@ -22,10 +22,9 @@ jobs:
 
       - name: Ban em/en dashes (U+2014, U+2013)
         run: |
-          # frontend/src/locales/de.json and backend/src/Infrastructure/Email/Templates/de.json
-          # are German user-facing content, not source - they use the en dash (Gedankenstrich)
-          # per CONTRIBUTING.md's Language Convention. Everything else stays ASCII-only.
-          if grep -rPnI '[\x{2013}\x{2014}]' . | grep -vE '^\./(frontend/src/locales/de\.json|backend/src/Infrastructure/Email/Templates/de\.json):'; then
+          # frontend/src/locales/de.json is German user-facing content, not source - it uses
+          # the en dash (Gedankenstrich) per CONTRIBUTING.md's Language Convention. Everything else stays ASCII-only.
+          if grep -rPnI '[\x{2013}\x{2014}]' . | grep -vE '^\./frontend/src/locales/de\.json:'; then
             echo "::error::Em/en dashes found - use plain ASCII hyphens (-) instead"
             exit 1
           fi

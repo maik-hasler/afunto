@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import userEvent from "@testing-library/user-event";
 import { act, screen, waitFor } from "@testing-library/react";
 import { dispatchToast } from "../lib/toastBus";
 import { renderWithProviders } from "../test/render";
@@ -55,5 +56,33 @@ describe("ToastProvider", () => {
 		expect(sentinel).not.toBeNull();
 		expect(sentinel?.querySelectorAll("[role='alert']")).toHaveLength(0);
 		expect(screen.getByRole("alert")).toBeInTheDocument();
+	});
+
+	it("removes a toast when its dismiss button is clicked", async () => {
+		renderWithProviders(<div />);
+		act(() => {
+			dispatchToast("info", "Saved somewhere.");
+		});
+
+		await userEvent.click(screen.getByRole("button", { name: "Dismiss" }));
+
+		expect(screen.queryByText("Saved somewhere.")).not.toBeInTheDocument();
+	});
+
+	it("tints each level differently", () => {
+		renderWithProviders(<div />);
+		act(() => {
+			dispatchToast("error", "An error.");
+			dispatchToast("warning", "A warning.");
+			dispatchToast("success", "A success.");
+			dispatchToast("info", "An info.");
+		});
+
+		const tint = (text: string) =>
+			screen.getByText(text).closest("[role='alert']")?.className;
+		expect(tint("An error.")).toContain("bg-red-600");
+		expect(tint("A warning.")).toContain("bg-yellow-700");
+		expect(tint("A success.")).toContain("bg-green-700");
+		expect(tint("An info.")).toContain("bg-gray-700");
 	});
 });

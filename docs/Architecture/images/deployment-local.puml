@@ -41,7 +41,7 @@ Rel(frontend, backend, "REST API", "HTTP :5000")
 Rel(frontend, keycloak, "OIDC", "HTTP :8080")
 Rel(backend, postgres, "SQL / EF Core", "TCP :5432")
 Rel(backend, keycloak, "JWKS + Admin API", "HTTP :8080")
-Rel(backend, mailpit, "SMTP", "TCP :1025")
+Rel(keycloak, mailpit, "SMTP", "TCP :1025")
 Rel(backend, storage, "S3 API", "HTTP :9000")
 Rel(pgadmin, postgres, "DB management", "TCP :5432")
 

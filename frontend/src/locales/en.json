@@ -683,7 +683,7 @@
       "invitationSentOn": "Sent {{date}}",
       "invitationExpiresOn": "Expires {{date}}",
       "invitationExpiredOn": "Expired {{date}}",
-      "pendingInvitationsHint": "Invitees get an email and an in-app notification, and stay listed here until they accept or decline. An invitation that is not answered by its expiry date lapses - resend it to start a fresh window.",
+      "pendingInvitationsHint": "Invitees get an in-app notification and stay listed here until they accept or decline. An invitation that is not answered by its expiry date lapses - resend it to start a fresh window.",
       "roleMemberDescription": "Members see the organization's internal pages and its opportunities.",
       "organisatorDescription": "Organizers can do everything members can, plus publish and manage opportunities, check volunteers in, invite people, change roles, and edit the organization's profile.",
       "dangerZone": "Delete organization",
@@ -907,7 +907,7 @@
     "privacyPolicy": {
       "title": "Privacy Policy",
       "metaDescription": "What personal data Afunto collects, why, how long it is kept, and the rights you have under the GDPR.",
-      "lastUpdated": "Last updated: August 7, 2026",
+      "lastUpdated": "Last updated: October 12, 2026",
       "section1Title": "Responsible party",
       "section1Body": "{{name}}\n{{address}}\nEmail: <emailLink>{{email}}</emailLink>\nWebsite: <websiteLink>{{website}}</websiteLink>",
       "operatorNotConfigured": "This deployment's operator hasn't configured a responsible party for data protection yet.",
@@ -929,8 +929,8 @@
       "section3cLinkNominatim": "Nominatim Usage Policy",
       "section4Title": "Uploaded images",
       "section4Body": "When you upload a profile picture, or your organization adds a logo or an opportunity banner image, the file is stored on our self-hosted, S3-compatible object storage (RustFS). From the moment it is uploaded, the file is accessible via a public URL with no access restriction and no login required. A backup copy is additionally stored off-host, see the \"Hosting and backups\" section.",
-      "section5Title": "Transactional emails",
-      "section5Body": "We send emails that are necessary to operate your account and use the platform: to confirm your email address and to reset your password (via our authentication service, Keycloak), and notifications about sign-ups, confirmations, cancellations, reminders, and invitations. These are sent through an SMTP delivery provider with whom a data processing agreement under Art. 28 GDPR is in place. The legal basis is performance of the usage agreement with you (Art. 6(1)(b) GDPR). Notifications that are not required to operate your account can be unsubscribed from in your profile settings or via the unsubscribe link in the respective email.",
+      "section5Title": "Account emails",
+      "section5Body": "We only send the emails that operating your account requires, through our authentication service, Keycloak: to confirm your email address, to reset your password, and for account actions you started yourself or an administrator requested from you, such as changing your email address. Each of these contains a link you have to follow to finish the action. We send no other notifications by email; sign-ups, confirmations, cancellations and invitations appear as notifications in the app. The emails are sent through an SMTP delivery provider with whom a data processing agreement under Art. 28 GDPR is in place. The legal basis is performance of the usage agreement with you (Art. 6(1)(b) GDPR).",
       "section6Title": "Hosting and backups",
       "section6Body": "This platform - including its database and object storage - runs on a server operated by Hetzner Online GmbH, Industriestr. 25, 91710 Gunzenhausen, Germany. The database and object storage are additionally backed up locally every day; these backups are further mirrored to a separate Hetzner Online GmbH object storage bucket so the platform can be restored if the server fails or is lost. Hetzner processes this data as our processor under Art. 28 GDPR; a corresponding data processing agreement (DPA) is in place with Hetzner. The legal basis is our legitimate interest (Art. 6(1)(f) GDPR) in operating the platform reliably and being able to recover from data loss.",
       "section7Title": "Logging of security-relevant actions",
@@ -988,7 +988,7 @@
       "organizersQ4": "What is the difference between a member and an organizer?",
       "organizersA4": "Members see the organization's internal pages and its opportunities. Organizers can do everything members can, plus publish and manage opportunities, check volunteers in, invite people, change roles, and edit the organization's profile. Every organization keeps at least one organizer, so the last one cannot be demoted or leave.",
       "organizersQ5": "How do invitations to my organization work?",
-      "organizersA5": "Invite people from the \"Members\" tab of your organization's dashboard and pick the role they should get. They receive an email and an in-app notification, and the invitation stays listed as pending until they accept or decline. Unanswered invitations expire after 14 days - the pending row shows the exact date, and you can resend an invitation at any time to start a fresh window or revoke it.",
+      "organizersA5": "Invite people from the \"Members\" tab of your organization's dashboard and pick the role they should get. They receive an in-app notification, and the invitation stays listed as pending until they accept or decline. Unanswered invitations expire after 14 days - the pending row shows the exact date, and you can resend an invitation at any time to start a fresh window or revoke it.",
       "generalTitle": "General",
       "generalQ1": "Does using Afunto cost anything?",
       "generalA1": "No. Afunto is completely free and open source - for volunteers and organizations.",
@@ -1061,10 +1061,7 @@
       "en": "English",
       "switchLanguage": "Switch language",
       "switchLanguageCurrent": "{{code}} - Switch language, currently {{language}}",
-      "switchedFromAccount": "Switched to {{language}} based on your account",
-      "contentDe": "German",
-      "contentEn": "English",
-      "emailLanguageDiffers": "Your notification emails still arrive in {{language}}. Change that under \"Email language\" in your profile."
+      "switchedFromAccount": "Switched to {{language}} based on your account"
     },
     "auth": {
       "completing": "Completing sign-in…",
@@ -1083,18 +1080,8 @@
       "backHome": "Back to home"
     },
     "unsubscribe": {
-      "title": "You've been unsubscribed",
-      "description": "You have been unsubscribed from this type of email. You can re-enable it any time from your notification preferences in your profile.",
-      "manageInProfile": "Manage notification preferences"
-    },
-    "unsubscribeConfirm": {
-      "title": "Unsubscribe from emails?",
-      "description": "Confirm you want to stop receiving \"{{type}}\" emails. This link works once you click confirm below - opening this page alone does not unsubscribe you.",
-      "confirm": "Confirm unsubscribe",
-      "invalidLink": "The link is incomplete or no longer valid. You can still manage every email type in your notification preferences.",
-      "invalidTitle": "This unsubscribe link doesn't work",
-      "confirming": "Unsubscribing…",
-      "failed": "We couldn't unsubscribe you. Try the link again, or manage your emails in your notification preferences."
+      "title": "Afunto no longer sends these emails",
+      "description": "Afunto no longer sends notification emails, so there is nothing left to unsubscribe from. Only emails about your account, such as password reset and address verification, still arrive. Everything else shows up in the bell menu while you are signed in."
     },
     "report": {
       "title": "Report content",
@@ -1307,10 +1294,6 @@
       "preferredContactEmail": "Email",
       "preferredContactPhone": "Phone",
       "preferredContactNone": "No preference",
-      "fieldPreferredLanguage": "Email language",
-      "preferredLanguageDe": "Deutsch",
-      "preferredLanguageEn": "English",
-      "preferredLanguageDiffersHint": "Emails arrive in {{language}}, which is not the language the site is currently shown in.",
       "savedSuccess": "Profile saved.",
       "saveError": "Failed to save profile.",
       "loadError": "Could not load profile.",
@@ -1323,19 +1306,6 @@
     },
     "myEngagementsPage": {
       "title": "My sign-ups"
-    },
-    "notificationPreferences": {
-      "title": "Email notifications",
-      "description": "Choose which emails you want to receive. Cancellations and changes to the time or place of your sign-ups always reach you by email, so you never turn up for nothing.",
-      "inAppNotice": "These settings control email only. You'll always see this and other activity - like opportunity changes or organization invitations - as notifications in the bell menu; that can't be turned off.",
-      "organizerGroupLabel": "As an organizer",
-      "volunteerGroupLabel": "As a volunteer",
-      "newSignUp": "New sign-ups for opportunities you organize",
-      "withdrawal": "Volunteer withdrawals from opportunities you organize",
-      "engagementConfirmed": "Your sign-up is confirmed",
-      "engagementReminder": "Reminder before your opportunity starts",
-      "saveError": "Failed to save notification preferences.",
-      "loadError": "Could not load notification preferences."
     },
     "achievements": {
       "loading": "Loading…",
@@ -1673,9 +1643,7 @@
         "NotFound": "User not found.",
         "AlreadyDeleted": "User is already hidden.",
         "NotDeleted": "User is not hidden.",
-        "InvalidUnsubscribeToken": "The unsubscribe link is invalid or has already been used with a different token.",
-        "SoleOrganizerOfOrganizations": "You are the sole organizer of one or more organizations. Transfer ownership to another organizer or delete these organizations before deleting your account.",
-        "UnknownNotificationType": "This unsubscribe link points at an email type that no longer exists."
+        "SoleOrganizerOfOrganizations": "You are the sole organizer of one or more organizations. Transfer ownership to another organizer or delete these organizations before deleting your account."
       },
       "Users": {
         "CannotModifyServiceAccount": "The backend's own service account cannot be modified.",

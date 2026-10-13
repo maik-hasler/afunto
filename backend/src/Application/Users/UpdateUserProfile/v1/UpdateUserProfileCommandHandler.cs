@@ -20,14 +20,13 @@ internal sealed class UpdateUserProfileCommandHandler(
 			request.LastName,
 			cancellationToken);
 
-		var user = await dbContext.GetOrCreateUserAsync(request.UserId, preferredLanguage: null, cancellationToken);
+		var user = await dbContext.GetOrCreateUserAsync(request.UserId, cancellationToken);
 
 		user.ChangeBio(request.Bio);
 		user.SetPhone(request.Phone);
 		user.UpdateSkills(request.Skills);
 		user.UpdateLanguages(request.Languages);
 		user.SetPreferredContact(request.PreferredContactValue);
-		user.SetPreferredLanguage(request.PreferredLanguage);
 
 		await unitOfWork.SaveChangesAsync(cancellationToken);
 

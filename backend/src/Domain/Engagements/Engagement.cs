@@ -28,14 +28,6 @@ public sealed class Engagement
 
 	public bool IsCheckedIn { get; private set; }
 
-	public DateTimeOffset? ReminderSentAt { get; private set; }
-
-	// When the volunteer was emailed about the current Status - null until then, and reset
-	// by every status change. The email handlers claim all of a volunteer's unnotified
-	// engagements on one opportunity at once, so a bulk confirmation or a cancelled series
-	// costs the volunteer one email instead of one per date (#2402).
-	public DateTimeOffset? StatusNotifiedAt { get; private set; }
-
 	public int? FeedbackRating { get; private set; }
 
 	public string? FeedbackComment { get; private set; }
@@ -53,9 +45,6 @@ public sealed class Engagement
 	public const int MaxReactivationCount = 5;
 
 	public const int FeedbackEditWindowDays = 14;
-
-	// How far ahead of a time slot's start the reminder email goes out.
-	public static readonly TimeSpan ReminderLeadTime = TimeSpan.FromHours(25);
 
 #pragma warning disable CS8618
 	private Engagement() : base(default) { }
@@ -133,7 +122,6 @@ public sealed class Engagement
 			return Result.Failure(Error.Conflict("Engagement.NotPending", "Only pending engagements can be confirmed."));
 
 		Status = EngagementStatus.Confirmed;
-		StatusNotifiedAt = null;
 		AddEvent(new EngagementConfirmedDomainEvent(Id, VolunteerId!.Value, OpportunityId));
 		return Result.Success();
 	}
@@ -148,7 +136,6 @@ public sealed class Engagement
 
 		CancellationReason = reason;
 		Status = EngagementStatus.Cancelled;
-		StatusNotifiedAt = null;
 		AddEvent(new EngagementCancelledDomainEvent(Id, VolunteerId!.Value, OpportunityId, reason, opportunityTitle));
 		return Result.Success();
 	}
@@ -165,7 +152,6 @@ public sealed class Engagement
 			return Result.Failure(Error.Conflict("Engagement.CheckedIn", "A checked-in engagement can no longer be withdrawn."));
 
 		Status = EngagementStatus.Withdrawn;
-		StatusNotifiedAt = null;
 		AddEvent(new EngagementWithdrawnDomainEvent(Id, VolunteerId!.Value, OpportunityId));
 		return Result.Success();
 	}
@@ -205,8 +191,6 @@ public sealed class Engagement
 		FeedbackRating = null;
 		FeedbackComment = null;
 		FeedbackSubmittedAt = null;
-		ReminderSentAt = null;
-		StatusNotifiedAt = null;
 		Status = EngagementStatus.Pending;
 		if (wasWithdrawnByVolunteer)
 			ReactivationCount++;

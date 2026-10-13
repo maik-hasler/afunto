@@ -9,7 +9,6 @@ using Domain.Organizations;
 using Domain.Reports;
 using Domain.Users;
 using Domain.VolunteerOpportunities;
-using Infrastructure.Persistence.Notifications;
 using Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 
@@ -572,27 +571,8 @@ internal sealed class ApplicationDbContext(
 			.IgnoreQueryFilters()
 			.FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
 
-	public async Task<List<User>> GetOrCreateUsersAsync(
-		IReadOnlyCollection<UserId> userIds,
-		CancellationToken cancellationToken = default)
-	{
-		var existing = await Set<User>()
-			.IgnoreQueryFilters()
-			.Where(u => userIds.Contains(u.Id))
-			.ToListAsync(cancellationToken);
-
-		var missingIds = userIds.Except(existing.Select(u => u.Id));
-		var created = missingIds.Select(User.Create).ToList();
-
-		if (created.Count > 0)
-			await Set<User>().AddRangeAsync(created, cancellationToken);
-
-		return [.. existing, .. created];
-	}
-
 	public async Task<User> GetOrCreateUserAsync(
 		UserId userId,
-		string? preferredLanguage,
 		CancellationToken cancellationToken = default)
 	{
 		var existing = await Set<User>()
@@ -602,8 +582,8 @@ internal sealed class ApplicationDbContext(
 			return existing;
 
 		await Database.ExecuteSqlInterpolatedAsync($@"
-			INSERT INTO ""user"" (id, languages, skills, preferred_language)
-			VALUES ({userId.Value}, '[]', '[]', {preferredLanguage})
+			INSERT INTO ""user"" (id, languages, skills)
+			VALUES ({userId.Value}, '[]', '[]')
 			ON CONFLICT (id) DO NOTHING", cancellationToken);
 
 		return await Set<User>()
@@ -672,62 +652,6 @@ internal sealed class ApplicationDbContext(
 	public Task<bool> CanConnectAsync(
 		CancellationToken cancellationToken = default) =>
 		Database.CanConnectAsync(cancellationToken);
-
-	public async Task<List<Engagement>> ClaimStatusNotificationsAsync(
-		UserId volunteerId,
-		VolunteerOpportunityId opportunityId,
-		EngagementStatus status,
-		DateTimeOffset now,
-		CancellationToken cancellationToken = default)
-	{
-		var candidates = await Set<Engagement>()
-			.AsNoTracking()
-			.Where(e => e.VolunteerId == volunteerId
-				&& e.OpportunityId == opportunityId
-				&& e.Status == status
-				&& e.StatusNotifiedAt == null)
-			.ToListAsync(cancellationToken);
-
-		var claimed = new List<Engagement>(candidates.Count);
-		foreach (var candidate in candidates)
-		{
-			var affected = await Set<Engagement>()
-				.Where(e => e.Id == candidate.Id && e.Status == status && e.StatusNotifiedAt == null)
-				.ExecuteUpdateAsync(s => s.SetProperty(e => e.StatusNotifiedAt, now), cancellationToken);
-
-			if (affected == 1)
-				claimed.Add(candidate);
-		}
-
-		return claimed;
-	}
-
-	public async Task ReleaseStatusNotificationsAsync(
-		IReadOnlyCollection<EngagementId> engagementIds,
-		CancellationToken cancellationToken = default) =>
-		await Set<Engagement>()
-			.Where(e => engagementIds.Contains(e.Id))
-			.ExecuteUpdateAsync(s => s.SetProperty(e => e.StatusNotifiedAt, (DateTimeOffset?)null), cancellationToken);
-
-	public async Task MarkRemindersSentAsync(
-		IReadOnlyCollection<EngagementId> engagementIds,
-		DateTimeOffset now,
-		CancellationToken cancellationToken = default) =>
-		await Set<Engagement>()
-			.Where(e => engagementIds.Contains(e.Id) && e.ReminderSentAt == null)
-			.ExecuteUpdateAsync(s => s.SetProperty(e => e.ReminderSentAt, now), cancellationToken);
-
-	public async Task EnqueueOrganizerDigestItemAsync(
-		UserId organizerId,
-		OrganizationId organizationId,
-		string opportunityTitle,
-		string volunteerName,
-		EmailNotificationType kind,
-		CancellationToken cancellationToken = default) =>
-		await Set<PendingOrganizerDigestItem>().AddAsync(
-			PendingOrganizerDigestItem.Create(
-				organizerId.Value, organizationId.Value, opportunityTitle, volunteerName, kind, DateTime.UtcNow),
-			cancellationToken);
 
 	protected override void OnModelCreating(
 		ModelBuilder modelBuilder) =>

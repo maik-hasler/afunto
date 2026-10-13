@@ -104,9 +104,16 @@ The following table lists the relevant architecture decisions. Each decision lin
 |14
 |Email
 |Send an email only when someone else decided or changed something the recipient needs to know to turn up, or when they have to act; bundle status emails per volunteer and opportunity.
-|Accepted
+|Superseded by ADR-15
 |2026-10-07
 |link:ADRs/14_email_only_for_what_the_recipient_must_know.html[Email]
+
+|15
+|No email from the backend
+|The backend sends no email; the only emails are Keycloak's own account emails. Everything else is a bell notification.
+|Accepted
+|2026-10-12
+|link:ADRs/15_no_email_from_the_backend.html[No email]
 
 |===
 

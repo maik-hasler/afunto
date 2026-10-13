@@ -16,7 +16,7 @@ System_Boundary(afunto, "Afunto") {
 }
 
 System_Ext(objectstore, "Object storage (RustFS / S3)", "Stores binary assets: logos, avatars, banners")
-System_Ext(smtp, "SMTP mail server", "Outbound notification and reminder emails")
+System_Ext(smtp, "SMTP mail server", "Outbound account emails (verification, password reset), sent by Keycloak")
 System_Ext(nominatim, "OpenStreetMap Nominatim", "Address geocoding (public, rate-limited)")
 
 Rel(volunteer, frontend, "Uses", "HTTPS")
@@ -28,7 +28,7 @@ Rel(backend, db, "Reads and writes", "TCP / SQL (EF Core)")
 Rel(backend, keycloak, "Validates JWT via JWKS", "HTTPS")
 Rel(backend, keycloak, "Manages orgs / users via Admin API", "HTTPS")
 Rel(backend, objectstore, "Stores / serves assets", "S3 API")
-Rel(backend, smtp, "Sends email", "SMTP")
+Rel(keycloak, smtp, "Sends account email", "SMTP")
 Rel(backend, nominatim, "Geocodes addresses", "HTTPS")
 Rel(keycloak, db, "Stores realm data", "TCP / SQL")
 

@@ -9,8 +9,7 @@ public sealed record UpdateUserProfileRequest(
 	[MaxLength(30)] string? Phone = null,
 	IReadOnlyList<string>? Skills = null,
 	IReadOnlyList<string>? Languages = null,
-	[MaxLength(200)] string? PreferredContact = null,
-	[MaxLength(5)] string? PreferredLanguage = null)
+	[MaxLength(200)] string? PreferredContact = null)
 {
 	public const int MaxSkillsCount = 50;
 

@@ -126,9 +126,10 @@ lets the maintainer sequence the cleanup.
 
 Admin-only surfaces look orphaned from the normal navigation - check
 role-gated routes before flagging. External entry points reach routes with
-no in-app link: QR codes, notification emails and Keycloak redirects.
-Search the email and notification templates for URLs before declaring a
-route orphaned.
+no in-app link: QR codes, emails already sent (the backend sends none any
+more, but `/unsubscribe` stays for links in old ones) and Keycloak redirects.
+Search the Keycloak email theme and the notification code for URLs before
+declaring a route orphaned.
 
 The generated API client is committed on purpose and hook-protected - it is
 not junk. There is no root `package.json` and no root `scripts/` directory;

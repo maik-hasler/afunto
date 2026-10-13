@@ -683,7 +683,7 @@
       "invitationSentOn": "Gesendet am {{date}}",
       "invitationExpiresOn": "Läuft ab am {{date}}",
       "invitationExpiredOn": "Abgelaufen am {{date}}",
-      "pendingInvitationsHint": "Eingeladene erhalten eine E-Mail und eine Benachrichtigung in der App und bleiben hier gelistet, bis sie annehmen oder ablehnen. Eine Einladung, die bis zum Ablaufdatum unbeantwortet bleibt, verfällt – sende sie erneut, um die Frist neu zu starten.",
+      "pendingInvitationsHint": "Eingeladene erhalten eine Benachrichtigung in der App und bleiben hier gelistet, bis sie annehmen oder ablehnen. Eine Einladung, die bis zum Ablaufdatum unbeantwortet bleibt, verfällt – sende sie erneut, um die Frist neu zu starten.",
       "roleMemberDescription": "Mitglieder sehen die internen Seiten der Organisation und ihre Einsätze.",
       "organisatorDescription": "Organisator:innen können alles, was Mitglieder können, und zusätzlich Einsätze veröffentlichen und verwalten, Freiwillige einchecken, Personen einladen, Rollen ändern und das Profil der Organisation bearbeiten.",
       "dangerZone": "Organisation löschen",
@@ -907,7 +907,7 @@
     "privacyPolicy": {
       "title": "Datenschutzerklärung",
       "metaDescription": "Welche personenbezogenen Daten Afunto erhebt, warum, wie lange sie gespeichert werden und welche Rechte du nach der DSGVO hast.",
-      "lastUpdated": "Stand: 7. August 2026",
+      "lastUpdated": "Stand: 12. Oktober 2026",
       "section1Title": "Verantwortliche Stelle",
       "section1Body": "{{name}}\n{{address}}\nE-Mail: <emailLink>{{email}}</emailLink>\nWebsite: <websiteLink>{{website}}</websiteLink>",
       "operatorNotConfigured": "Der Betreiber dieser Instanz hat noch keine verantwortliche Stelle für den Datenschutz hinterlegt.",
@@ -929,8 +929,8 @@
       "section3cLinkNominatim": "Nutzungsrichtlinie von Nominatim",
       "section4Title": "Hochgeladene Bilder",
       "section4Body": "Wenn du ein Profilbild hochlädst oder als Organisation ein Logo oder für einen Einsatz ein Banner-Bild hinterlegst, wird die Datei auf unserem selbst betriebenen, S3-kompatiblen Objektspeicher (RustFS) abgelegt. Ab dem Hochladen ist die Datei über eine öffentliche URL ohne Zugriffsbeschränkung und ohne Anmeldung abrufbar. Eine Sicherungskopie wird zusätzlich extern gespeichert, siehe Abschnitt „Hosting und Datensicherungen“.",
-      "section5Title": "Transaktionale E-Mails",
-      "section5Body": "Wir versenden E-Mails, die für den Betrieb deines Kontos und die Nutzung der Plattform erforderlich sind: zur Bestätigung deiner E-Mail-Adresse und zum Zurücksetzen deines Passworts (über unseren Authentifizierungsdienst Keycloak) sowie Benachrichtigungen zu Eintragungen, Bestätigungen, Absagen, Erinnerungen und Einladungen. Der Versand erfolgt über einen SMTP-Versanddienstleister, mit dem ein Auftragsverarbeitungsvertrag nach Art. 28 DSGVO besteht. Rechtsgrundlage ist die Erfüllung des Nutzungsvertrags mit dir (Art. 6 Abs. 1 lit. b DSGVO). Benachrichtigungen, die nicht für den Betrieb deines Kontos notwendig sind, kannst du in deinen Profileinstellungen oder über den Abmelde-Link in der jeweiligen E-Mail abbestellen.",
+      "section5Title": "E-Mails zum Konto",
+      "section5Body": "Wir versenden nur die E-Mails, die für den Betrieb deines Kontos erforderlich sind, über unseren Authentifizierungsdienst Keycloak: zur Bestätigung deiner E-Mail-Adresse, zum Zurücksetzen deines Passworts und für Kontoaktionen, die du selbst angestoßen hast oder die eine Administratorin oder ein Administrator von dir verlangt, etwa die Änderung deiner E-Mail-Adresse. Jede dieser E-Mails enthält einen Link, dem du folgen musst, um die Aktion abzuschließen. Weitere Benachrichtigungen verschicken wir nicht per E-Mail; Eintragungen, Bestätigungen, Absagen und Einladungen erscheinen als Benachrichtigungen in der App. Der Versand erfolgt über einen SMTP-Versanddienstleister, mit dem ein Auftragsverarbeitungsvertrag nach Art. 28 DSGVO besteht. Rechtsgrundlage ist die Erfüllung des Nutzungsvertrags mit dir (Art. 6 Abs. 1 lit. b DSGVO).",
       "section6Title": "Hosting und Datensicherungen",
       "section6Body": "Diese Plattform – einschließlich Datenbank und Objektspeicher – wird auf einem Server der Hetzner Online GmbH, Industriestr. 25, 91710 Gunzenhausen, Deutschland, betrieben. Datenbank und Objektspeicher werden zusätzlich täglich lokal gesichert; diese Sicherungen werden zur Wiederherstellbarkeit im Fall eines Ausfalls oder Verlusts des Servers zusätzlich in einen separaten Objektspeicher-Bucket der Hetzner Online GmbH gespiegelt. Hetzner verarbeitet diese Daten als unser Auftragsverarbeiter im Sinne von Art. 28 DSGVO; mit Hetzner besteht ein entsprechender Auftragsverarbeitungsvertrag (AVV). Rechtsgrundlage ist unser berechtigtes Interesse (Art. 6 Abs. 1 lit. f DSGVO) am zuverlässigen Betrieb und an der Ausfallsicherheit der Plattform.",
       "section7Title": "Protokollierung sicherheitsrelevanter Aktionen",
@@ -988,7 +988,7 @@
       "organizersQ4": "Was ist der Unterschied zwischen einem Mitglied und einer Organisator:in?",
       "organizersA4": "Mitglieder sehen die internen Seiten der Organisation und ihre Einsätze. Organisator:innen können alles, was Mitglieder können, und zusätzlich Einsätze veröffentlichen und verwalten, Freiwillige einchecken, Personen einladen, Rollen ändern und das Profil der Organisation bearbeiten. Jede Organisation behält mindestens eine:n Organisator:in – die letzte Person in dieser Rolle kann daher weder zurückgestuft werden noch austreten.",
       "organizersQ5": "Wie funktionieren Einladungen in meine Organisation?",
-      "organizersA5": "Lade Personen im Tab „Mitglieder“ im Dashboard deiner Organisation ein und wähle dabei die Rolle, die sie erhalten sollen. Sie bekommen eine E-Mail und eine Benachrichtigung in der App, und die Einladung bleibt als ausstehend gelistet, bis sie angenommen oder abgelehnt wird. Unbeantwortete Einladungen laufen nach 14 Tagen ab – die ausstehende Zeile zeigt das genaue Datum, und du kannst eine Einladung jederzeit erneut senden, um die Frist neu zu starten, oder sie zurückziehen.",
+      "organizersA5": "Lade Personen im Tab „Mitglieder“ im Dashboard deiner Organisation ein und wähle dabei die Rolle, die sie erhalten sollen. Sie bekommen eine Benachrichtigung in der App, und die Einladung bleibt als ausstehend gelistet, bis sie angenommen oder abgelehnt wird. Unbeantwortete Einladungen laufen nach 14 Tagen ab – die ausstehende Zeile zeigt das genaue Datum, und du kannst eine Einladung jederzeit erneut senden, um die Frist neu zu starten, oder sie zurückziehen.",
       "generalTitle": "Allgemein",
       "generalQ1": "Kostet die Nutzung von Afunto etwas?",
       "generalA1": "Nein. Afunto ist komplett kostenlos und open source – für Freiwillige und Organisationen.",
@@ -1061,10 +1061,7 @@
       "en": "English",
       "switchLanguage": "Sprache wechseln",
       "switchLanguageCurrent": "{{code}} – Sprache wechseln, aktuell {{language}}",
-      "switchedFromAccount": "Zu {{language}} gewechselt, basierend auf deinem Konto",
-      "contentDe": "Deutsch",
-      "contentEn": "Englisch",
-      "emailLanguageDiffers": "Deine Benachrichtigungs-E-Mails kommen weiterhin auf {{language}}. Ändere das im Profil unter „E-Mail-Sprache“."
+      "switchedFromAccount": "Zu {{language}} gewechselt, basierend auf deinem Konto"
     },
     "auth": {
       "completing": "Anmeldung wird abgeschlossen…",
@@ -1083,18 +1080,8 @@
       "backHome": "Zur Startseite"
     },
     "unsubscribe": {
-      "title": "Du wurdest abgemeldet",
-      "description": "Du hast diese Art von E-Mail abbestellt. Du kannst sie jederzeit in deinen Benachrichtigungseinstellungen im Profil wieder aktivieren.",
-      "manageInProfile": "Benachrichtigungseinstellungen verwalten"
-    },
-    "unsubscribeConfirm": {
-      "title": "E-Mails abbestellen?",
-      "description": "Bestätige, dass du keine E-Mails vom Typ „{{type}}“ mehr erhalten möchtest. Dieser Link wirkt erst, wenn du unten auf Bestätigen klickst – das bloße Öffnen dieser Seite bestellt nichts ab.",
-      "confirm": "Abbestellung bestätigen",
-      "invalidLink": "Der Link ist unvollständig oder nicht mehr gültig. In deinen Benachrichtigungseinstellungen kannst du weiterhin jede E-Mail-Art verwalten.",
-      "invalidTitle": "Dieser Abbestell-Link funktioniert nicht",
-      "confirming": "Wird abgemeldet …",
-      "failed": "Wir konnten die E-Mails nicht abbestellen. Versuche den Link erneut oder verwalte deine E-Mails in den Benachrichtigungseinstellungen."
+      "title": "Afunto verschickt diese E-Mails nicht mehr",
+      "description": "Afunto verschickt keine Benachrichtigungen per E-Mail mehr, du musst also nichts mehr abbestellen. Nur E-Mails zu deinem Konto, etwa zum Zurücksetzen des Passworts, kommen weiterhin an. Alles andere findest du in der Glocke, sobald du angemeldet bist."
     },
     "report": {
       "title": "Inhalt melden",
@@ -1307,10 +1294,6 @@
       "preferredContactEmail": "E-Mail",
       "preferredContactPhone": "Telefon",
       "preferredContactNone": "Keine Präferenz",
-      "fieldPreferredLanguage": "E-Mail-Sprache",
-      "preferredLanguageDe": "Deutsch",
-      "preferredLanguageEn": "English",
-      "preferredLanguageDiffersHint": "E-Mails kommen auf {{language}} – das ist nicht die Sprache, in der die Seite gerade angezeigt wird.",
       "savedSuccess": "Profil gespeichert.",
       "saveError": "Speichern fehlgeschlagen.",
       "loadError": "Profil konnte nicht geladen werden.",
@@ -1323,19 +1306,6 @@
     },
     "myEngagementsPage": {
       "title": "Meine Einsätze"
-    },
-    "notificationPreferences": {
-      "title": "E-Mail-Benachrichtigungen",
-      "description": "Wähle aus, welche E-Mails du bekommen möchtest. Absagen und Änderungen an Termin oder Ort deiner Eintragungen bekommst du immer per E-Mail, damit du nie vor verschlossener Tür stehst.",
-      "inAppNotice": "Diese Einstellungen betreffen nur E-Mails. Du siehst diese und weitere Aktivitäten – etwa Änderungen an Einsätzen oder Organisationseinladungen – immer als Benachrichtigungen im Glockenmenü; das lässt sich nicht abschalten.",
-      "organizerGroupLabel": "Als Organisator:in",
-      "volunteerGroupLabel": "Als Freiwillige:r",
-      "newSignUp": "Neue Eintragungen für Einsätze, die du organisierst",
-      "withdrawal": "Rückzüge von Freiwilligen bei Einsätzen, die du organisierst",
-      "engagementConfirmed": "Deine Eintragung wird bestätigt",
-      "engagementReminder": "Erinnerung vor Beginn deines Einsatzes",
-      "saveError": "Benachrichtigungseinstellungen konnten nicht gespeichert werden.",
-      "loadError": "Benachrichtigungseinstellungen konnten nicht geladen werden."
     },
     "achievements": {
       "loading": "Wird geladen…",
@@ -1673,9 +1643,7 @@
         "NotFound": "Nutzer:in nicht gefunden.",
         "AlreadyDeleted": "Nutzer:in ist bereits ausgeblendet.",
         "NotDeleted": "Nutzer:in ist nicht ausgeblendet.",
-        "InvalidUnsubscribeToken": "Der Abmelde-Link ist ungültig oder wurde bereits mit einem anderen Token verwendet.",
-        "SoleOrganizerOfOrganizations": "Du bist die:der einzige Organisator:in mindestens einer Organisation. Übertrage die Leitung an eine andere Person oder lösche diese Organisationen, bevor du dein Konto löschst.",
-        "UnknownNotificationType": "Dieser Abbestell-Link verweist auf eine E-Mail-Art, die es nicht mehr gibt."
+        "SoleOrganizerOfOrganizations": "Du bist die:der einzige Organisator:in mindestens einer Organisation. Übertrage die Leitung an eine andere Person oder lösche diese Organisationen, bevor du dein Konto löschst."
       },
       "Users": {
         "CannotModifyServiceAccount": "Das interne Service-Konto des Systems kann nicht geändert werden.",

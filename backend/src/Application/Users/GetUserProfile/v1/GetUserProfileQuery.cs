@@ -3,7 +3,7 @@ using Domain.Users;
 
 namespace Application.Users.GetUserProfile.v1;
 
-public sealed record GetUserProfileQuery(UserId UserId, string? RequestLanguage)
+public sealed record GetUserProfileQuery(UserId UserId)
 	: IQuery<MyProfileResponse>;
 
 public sealed record MyProfileResponse(
@@ -17,5 +17,4 @@ public sealed record MyProfileResponse(
 	string? Phone,
 	IReadOnlyList<string> Skills,
 	IReadOnlyList<string> Languages,
-	string? PreferredContact,
-	string PreferredLanguage);
+	string? PreferredContact);

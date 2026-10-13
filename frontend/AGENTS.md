@@ -307,8 +307,7 @@ even for lower-frequency "created on" timestamps.
   "Für Zeitslot eintragen", `signUp.submitWaitlist` "Verbindlich eintragen",
   `opportunities.loginPrompt` "Trag dich ein, um mitzumachen."), and the
   resulting record is an "Eintragung", not an "Anmeldung", through the
-  confirmation dialog, toasts, notifications and transactional emails
-  (`backend/src/Infrastructure/Email/Templates/de.json`). This does not
+  confirmation dialog, toasts and notifications. This does not
   apply to `IndividualContact` opportunities, which already use their own
   unambiguous "Interesse bekunden" / "Interessenbekundung" wording (#2228) -
   don't fold that into "eintragen". Adding a new German string that says

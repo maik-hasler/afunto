@@ -344,14 +344,6 @@ export type MyProfileResponse = {
     skills: Array<string>;
     languages: Array<string>;
     preferredContact: null | string;
-    preferredLanguage: string;
-};
-
-export type NotificationPreferencesResponse = {
-    notifyOnNewSignUp: boolean;
-    notifyOnWithdrawal: boolean;
-    notifyOnEngagementConfirmed: boolean;
-    notifyOnEngagementReminder: boolean;
 };
 
 export type NotificationsPage = {
@@ -652,13 +644,6 @@ export type UpdateFeedbackRequest = {
     comment: null | string;
 };
 
-export type UpdateNotificationPreferencesRequest = {
-    notifyOnNewSignUp: boolean;
-    notifyOnWithdrawal: boolean;
-    notifyOnEngagementConfirmed: boolean;
-    notifyOnEngagementReminder: boolean;
-};
-
 export type UpdateOrganizationRequest = {
     name: string;
     description: null | string;
@@ -688,7 +673,6 @@ export type UpdateUserProfileRequest = {
     skills?: null | Array<string>;
     languages?: null | Array<string>;
     preferredContact?: null | string;
-    preferredLanguage?: null | string;
 };
 
 export type UpdateVolunteerOpportunityRequest = {
@@ -1798,106 +1782,6 @@ export type UpdateUserProfileResponses = {
 };
 
 export type UpdateUserProfileResponse = UpdateUserProfileResponses[keyof UpdateUserProfileResponses];
-
-export type GetNotificationPreferencesData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/v1/users/me/notification-preferences';
-};
-
-export type GetNotificationPreferencesErrors = {
-    /**
-     * Unauthorized
-     */
-    401: ProblemDetails;
-    /**
-     * Internal Server Error
-     */
-    500: ProblemDetails;
-};
-
-export type GetNotificationPreferencesError = GetNotificationPreferencesErrors[keyof GetNotificationPreferencesErrors];
-
-export type GetNotificationPreferencesResponses = {
-    /**
-     * OK
-     */
-    200: NotificationPreferencesResponse;
-};
-
-export type GetNotificationPreferencesResponse = GetNotificationPreferencesResponses[keyof GetNotificationPreferencesResponses];
-
-export type UpdateNotificationPreferencesData = {
-    body: UpdateNotificationPreferencesRequest;
-    path?: never;
-    query?: never;
-    url: '/v1/users/me/notification-preferences';
-};
-
-export type UpdateNotificationPreferencesErrors = {
-    /**
-     * Bad Request
-     */
-    400: ProblemDetails;
-    /**
-     * Unauthorized
-     */
-    401: ProblemDetails;
-    /**
-     * Internal Server Error
-     */
-    500: ProblemDetails;
-};
-
-export type UpdateNotificationPreferencesError = UpdateNotificationPreferencesErrors[keyof UpdateNotificationPreferencesErrors];
-
-export type UpdateNotificationPreferencesResponses = {
-    /**
-     * No Content
-     */
-    204: void;
-};
-
-export type UpdateNotificationPreferencesResponse = UpdateNotificationPreferencesResponses[keyof UpdateNotificationPreferencesResponses];
-
-export type UnsubscribeData = {
-    body?: never;
-    path: {
-        userId: string;
-    };
-    query: {
-        type: string;
-        token: string;
-    };
-    url: '/v1/users/{userId}/unsubscribe';
-};
-
-export type UnsubscribeErrors = {
-    /**
-     * Bad Request
-     */
-    400: ProblemDetails;
-    /**
-     * Forbidden
-     */
-    403: ProblemDetails;
-    /**
-     * Not Found
-     */
-    404: ProblemDetails;
-};
-
-export type UnsubscribeError = UnsubscribeErrors[keyof UnsubscribeErrors];
-
-export type UnsubscribeResponses = {
-    /**
-     * No Content
-     */
-    204: void;
-};
-
-export type UnsubscribeResponse = UnsubscribeResponses[keyof UnsubscribeResponses];
 
 export type SetUserEnabledData = {
     body: SetUserEnabledRequest;

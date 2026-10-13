@@ -1,0 +1,57 @@
+== 15. No Email From the Backend
+
+=== Status
+Accepted
+
+=== Date
+2026-10-12
+
+=== Context
+ADR-14 cut the backend's emails to what a recipient must know to turn up at the right place at the right time. The product owner then went further: live testers had called the volume the first and loudest complaint, and a rule that still leaves six kinds of email (confirmation, cancellation, a changed time or place, a reminder, an invitation and an organizer digest) keeps an inbox that is judged by its worst day, not its average one. The question put was whether the backend should send nothing except what the identity provider needs to send anyway: address verification, password reset and the actions an administrator requests of an account.
+
+Before deciding, the question was weighed in three independent analyses. All three scored "no email at all" lowest against the sharper variant of ADR-14, mainly because a cancellation reaches only people who happen to open the app, and because comparable platforms keep emailing cancellations, changes and reminders. No German or EU rule requires any of the six emails. The product owner decided for the quietest option regardless, accepting the risks listed under Consequences.
+
+=== Decision
+**The backend sends no email.** The only emails the system sends are Keycloak's: address verification, password reset, an administrator's "required actions" email and the confirmation of an address change. Each carries a link the recipient has to follow to finish what they or an administrator started, which is the second half of ADR-14's rule, and each is styled by the realm's `afunto` email theme (`keycloak/AGENTS.md`).
+
+Everything that used to be an email is a notification in the in-app bell, exactly as before: sign-ups and withdrawals, confirmations, cancellations, changes to time or place, and invitations. The bell is unchanged by this decision.
+
+Removed with the emails: the SMTP client and its settings in the backend, the email templates, the reminder and organizer-digest jobs, the per-user email preferences and their unsubscribe flow, the email-language setting, and the columns and table that held their state. The backend no longer has a mail server to configure; only Keycloak does.
+
+=== Rationale
+* The complaint was about volume, and the only volume that cannot annoy anyone is none. Every remaining email would have needed a rule for what it is worth, and ADR-14 shows that such a rule gets argued case by case.
+* A sign-up, a cancellation or a changed time is information about the app's own state, and the app already shows it. A second copy in the inbox is a convenience, not a necessity, and the inbox is the channel the testers asked to see less of.
+* Deleting the mail path removes a whole class of work with it: a template language and its translation parity check, an outbox consumer with retry and idempotence concerns, two background jobs, a rate limiter, four preference toggles and an unsubscribe protocol that had to stay valid for links already sent.
+* The code is not lost. The last version with the full email pipeline is commit `22ed60d` (#2453); restoring a single email means restoring its handler and template from there, not rewriting it.
+
+=== Considered Alternatives
+
+==== Keep ADR-14 and cut further
+* Pros
+** A cancellation still reaches a volunteer who has not opened the app since signing up
+** Matches what comparable platforms do
+* Cons
+** Leaves the inbox as a channel the product owner has decided against, and every remaining email is another rule to defend
+
+==== Web push instead of email
+* Pros
+** Reaches a volunteer who has not opened the app, without an inbox
+* Cons
+** Not reliable enough on iOS to carry a cancellation (ADR-12); a separate feature, not a replacement for this decision
+
+==== Keep the code behind a switch that defaults to off
+* Pros
+** One configuration value brings the emails back
+* Cons
+** Keeps every template, job and preference alive, untested, to serve a case that git history already serves
+
+=== Consequences
+* A volunteer who does not open the app does not learn that a shift was cancelled or moved. The bell shows the change only while the app is open (it polls while the tab is), and no push channel exists. This is the largest risk of the decision. Organizers should be told to reach volunteers of a cancelled shift by other means until a push or digest channel exists.
+* An organizer who does not open the app does not learn of new sign-ups. A pending sign-up waits for the next visit, and an invitation can expire unseen; the invitee is notified in the app only.
+* The reminder before a shift has no in-app counterpart. Dropping it is part of the decision; a reminder in the bell is a possible follow-up.
+* The bell texts say that something changed, not what: the new time or place is not carried by the notification, because the email that named it is gone. Enriching the notification is the follow-up with the best ratio of effect to effort.
+* The privacy policy no longer lists notification emails (its section on account emails now names only the ones Keycloak sends), and the copy that promised an email on invitation is gone from the help and the organization settings.
+* Statements of reasons to affected users (Art. 17 DSA) have no email channel when an organizer cancels or an administrator hides content; the in-app notification is the only trace.
+* The migration drops the preference, unsubscribe-token, language, reminder and notification-claim columns and the digest table without a way back for the data. It also deletes pending outbox rows of the two event types whose handlers are gone, because the processor refuses an unknown event type. Deploy by stopping the old replicas before starting the new ones: an old replica still selects the dropped columns, and an old reminder job could write outbox rows after the cleanup.
+* Links in emails sent before this change still arrive in a browser: the frontend's `/unsubscribe` and `/unsubscribed` routes show a short page saying that nothing is sent any more. The earliest links (releases `rc.336` to `rc.343`) pointed at the API origin and now end in a 404.
+* ADR-14 is superseded. Its description of which emails exist no longer applies; its Keycloak consequence does.

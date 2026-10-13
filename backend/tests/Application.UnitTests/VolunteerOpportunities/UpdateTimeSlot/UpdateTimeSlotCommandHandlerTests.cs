@@ -243,35 +243,6 @@ public class UpdateTimeSlotCommandHandlerTests
 		await _notifRepo.DidNotReceive().AddAsync(
 			Arg.Is<Notification>(n => n!.RecipientId.Value == otherSlotVolunteer),
 			cancellationToken);
-		opportunity.Events.OfType<VolunteerOpportunityUpdatedDomainEvent>()
-			.Should().ContainSingle()
-			.Which.TimeSlotId.Should().Be(editedSlot.Id);
-	}
-
-	[Test]
-	public async Task Handle_ShouldRaiseUpdatedDomainEvent_EvenWhenNoActiveVolunteersOnEditedSlot(
-		CancellationToken cancellationToken)
-	{
-		// Arrange
-		var opportunity = CreateScheduledSlotsOpportunity();
-		var editedSlot = opportunity.AddTimeSlot(BaseStart, BaseEnd, 10, DateTimeOffset.UtcNow).Value;
-		var opportunityId = opportunity.Id.Value;
-
-		_opportunityRepo
-			.FindAsync(VolunteerOpportunityId.Create(opportunityId).GetValueOrThrow(), cancellationToken)
-			.Returns(opportunity);
-
-		var command = new UpdateTimeSlotCommand(
-			opportunityId, editedSlot.Id.Value, BaseStart.AddHours(1), BaseEnd.AddHours(1), 10, DefaultRequestingUserId);
-
-		// Act
-		await _sut.Handle(command, cancellationToken);
-
-		// Assert
-		await _notifRepo.DidNotReceive().AddAsync(Arg.Any<Notification>(), Arg.Any<CancellationToken>());
-		opportunity.Events.OfType<VolunteerOpportunityUpdatedDomainEvent>()
-			.Should().ContainSingle()
-			.Which.TimeSlotId.Should().Be(editedSlot.Id);
 	}
 
 	[Test]
@@ -297,7 +268,6 @@ public class UpdateTimeSlotCommandHandlerTests
 		// Assert - more room on the slot changes nothing for anyone already on it (#2402)
 		editedSlot.MaxParticipants.Should().Be(20);
 		await _notifRepo.DidNotReceive().AddAsync(Arg.Any<Notification>(), Arg.Any<CancellationToken>());
-		opportunity.Events.Should().NotContain(e => e is VolunteerOpportunityUpdatedDomainEvent);
 	}
 
 	[Test]
@@ -324,7 +294,6 @@ public class UpdateTimeSlotCommandHandlerTests
 
 		// Assert
 		await _notifRepo.DidNotReceive().AddAsync(Arg.Any<Notification>(), Arg.Any<CancellationToken>());
-		opportunity.Events.Should().NotContain(e => e is VolunteerOpportunityUpdatedDomainEvent);
 	}
 
 	[Test]

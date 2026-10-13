@@ -70,9 +70,9 @@ include::../images/technical-context.puml[]
 |Outbound
 |The backend proxies map tile requests (`GET /v1/maps/tiles/{zoom}/{x}/{y}.png`) to `tile.openstreetmap.org` and caches fetched tiles in-process for 24h. The frontend loads tiles from the backend, never from OpenStreetMap directly, so visitor IP addresses are not exposed to it. See ADR-5.
 
-|Backend → SMTP mail server
+|Keycloak → SMTP mail server
 |Outbound
-|The backend sends notification and reminder emails via SMTP (Mailpit locally, a real SMTP relay otherwise).
+|Keycloak sends its own account emails (address verification, password reset, administrator-requested actions) via SMTP: Mailpit locally, a real SMTP relay otherwise. The backend sends no email (ADR-15).
 
 |Backend → Object storage (RustFS / S3)
 |Outbound

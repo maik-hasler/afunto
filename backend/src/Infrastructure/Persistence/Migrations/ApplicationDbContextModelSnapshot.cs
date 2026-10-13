@@ -185,18 +185,10 @@ namespace Infrastructure.Persistence.Migrations
 						.HasDefaultValue(0)
 						.HasColumnName("reactivation_count");
 
-					b.Property<DateTimeOffset?>("ReminderSentAt")
-						.HasColumnType("timestamp with time zone")
-						.HasColumnName("reminder_sent_at");
-
 					b.Property<string>("Status")
 						.IsRequired()
 						.HasColumnType("text")
 						.HasColumnName("status");
-
-					b.Property<DateTimeOffset?>("StatusNotifiedAt")
-						.HasColumnType("timestamp with time zone")
-						.HasColumnName("status_notified_at");
 
 					b.Property<DateTimeOffset?>("TimeSlotEndDateTime")
 						.HasColumnType("timestamp with time zone")
@@ -653,30 +645,6 @@ namespace Infrastructure.Persistence.Migrations
 						.HasColumnType("timestamp with time zone")
 						.HasColumnName("modified_on");
 
-					b.Property<bool>("NotifyOnEngagementConfirmed")
-						.ValueGeneratedOnAdd()
-						.HasColumnType("boolean")
-						.HasDefaultValue(true)
-						.HasColumnName("notify_on_engagement_confirmed");
-
-					b.Property<bool>("NotifyOnEngagementReminder")
-						.ValueGeneratedOnAdd()
-						.HasColumnType("boolean")
-						.HasDefaultValue(true)
-						.HasColumnName("notify_on_engagement_reminder");
-
-					b.Property<bool>("NotifyOnNewSignUp")
-						.ValueGeneratedOnAdd()
-						.HasColumnType("boolean")
-						.HasDefaultValue(true)
-						.HasColumnName("notify_on_new_sign_up");
-
-					b.Property<bool>("NotifyOnWithdrawal")
-						.ValueGeneratedOnAdd()
-						.HasColumnType("boolean")
-						.HasDefaultValue(true)
-						.HasColumnName("notify_on_withdrawal");
-
 					b.Property<string>("Phone")
 						.HasMaxLength(30)
 						.HasColumnType("character varying(30)")
@@ -686,21 +654,10 @@ namespace Infrastructure.Persistence.Migrations
 						.HasColumnType("text")
 						.HasColumnName("preferred_contact");
 
-					b.Property<string>("PreferredLanguage")
-						.HasMaxLength(5)
-						.HasColumnType("character varying(5)")
-						.HasColumnName("preferred_language");
-
 					b.Property<string>("Skills")
 						.IsRequired()
 						.HasColumnType("text")
 						.HasColumnName("skills");
-
-					b.Property<Guid>("UnsubscribeToken")
-						.ValueGeneratedOnAdd()
-						.HasColumnType("uuid")
-						.HasColumnName("unsubscribe_token")
-						.HasDefaultValueSql("gen_random_uuid()");
 
 					b.HasKey("Id")
 						.HasName("pk_user");
@@ -982,60 +939,6 @@ namespace Infrastructure.Persistence.Migrations
 
 							t.HasCheckConstraint("ck_volunteer_opportunity_tags_count", "cardinality(tags) <= 20");
 						});
-				});
-
-			modelBuilder.Entity("Infrastructure.Persistence.Notifications.PendingOrganizerDigestItem", b =>
-				{
-					b.Property<Guid>("Id")
-						.HasColumnType("uuid")
-						.HasColumnName("id");
-
-					b.Property<DateTime?>("ClaimedOnUtc")
-						.HasColumnType("timestamp with time zone")
-						.HasColumnName("claimed_on_utc");
-
-					b.Property<DateTime?>("DigestSentOnUtc")
-						.HasColumnType("timestamp with time zone")
-						.HasColumnName("digest_sent_on_utc");
-
-					b.Property<string>("Kind")
-						.IsRequired()
-						.HasColumnType("text")
-						.HasColumnName("kind");
-
-					b.Property<DateTime>("OccurredOnUtc")
-						.HasColumnType("timestamp with time zone")
-						.HasColumnName("occurred_on_utc");
-
-					b.Property<string>("OpportunityTitle")
-						.IsRequired()
-						.HasColumnType("text")
-						.HasColumnName("opportunity_title");
-
-					b.Property<Guid?>("OrganizationId")
-						.HasColumnType("uuid")
-						.HasColumnName("organization_id");
-
-					b.Property<Guid>("OrganizerId")
-						.HasColumnType("uuid")
-						.HasColumnName("organizer_id");
-
-					b.Property<string>("VolunteerName")
-						.IsRequired()
-						.HasColumnType("text")
-						.HasColumnName("volunteer_name");
-
-					b.HasKey("Id")
-						.HasName("pk_pending_organizer_digest_item");
-
-					b.HasIndex("DigestSentOnUtc")
-						.HasDatabaseName("ix_pending_organizer_digest_item_digest_sent_on_utc");
-
-					b.HasIndex("OrganizerId")
-						.HasDatabaseName("ix_pending_organizer_digest_item_organizer_id")
-						.HasFilter("digest_sent_on_utc IS NULL");
-
-					b.ToTable("pending_organizer_digest_item", (string)null);
 				});
 
 			modelBuilder.Entity("Infrastructure.Persistence.Outbox.OutboxMessage", b =>

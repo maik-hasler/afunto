@@ -160,6 +160,7 @@ Retry with a wait before calling anything broken. A slow first paint, a
 cold container and a service-worker cache all look exactly like a bug for
 the first two seconds.
 
-Deep links reached from a QR code, a notification email or a Keycloak
+Deep links reached from a QR code, an email already sent or a Keycloak
 redirect are entered from outside by design. "Nothing links here" is not a
-finding until you have searched the email and notification templates.
+finding until you have searched the Keycloak email theme and the notification
+code.

@@ -33,7 +33,7 @@ Aspire AppHost provisions Postgres, Keycloak, backend API, and the Vite frontend
 - Routes: `/v{version:apiVersion}/...`, namespaces: `.v1`
 - Commits, commands/queries/DTOs, and async conventions: see `CONTRIBUTING.md`'s Code Style and Commit Messages sections
 - Domain vocabulary: `docs/Architecture/src/12_glossary.adoc` is canonical for the domain nouns (Engagement, Occurrence, Time Slot, Volunteer Opportunity) - check it before naming a type, an i18n key, or a UI string
-- **Never use Unicode dashes** (U+2013 en dash, U+2014 em dash) in source files - write plain ASCII hyphens (`-`) instead; CI rejects non-ASCII dashes. The one exception is German user-facing content - `frontend/src/locales/de.json` and `backend/src/Infrastructure/Email/Templates/de.json` - which uses the en dash (Gedankenstrich) as German typography requires; see `CONTRIBUTING.md`'s Language Convention
+- **Never use Unicode dashes** (U+2013 en dash, U+2014 em dash) in source files - write plain ASCII hyphens (`-`) instead; CI rejects non-ASCII dashes. The one exception is German user-facing content - `frontend/src/locales/de.json` - which uses the en dash (Gedankenstrich) as German typography requires; see `CONTRIBUTING.md`'s Language Convention
 - **Tab indentation is the default** (`.editorconfig`'s `[*]` rule) - shell scripts, AsciiDoc (`.adoc`), and PlantUML (`.puml`) all use tabs. Only `.md`, `.json`, `.yml`/`.yaml`, and `.py` (PEP 8) are overridden to spaces. CI's `editorconfig` job enforces this; when writing `.adoc` prose keep paragraphs on one unwrapped line rather than hand-wrapping with space-indented continuation lines
 
 ## Claude Code Configuration

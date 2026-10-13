@@ -13,9 +13,7 @@ public class RequiredConfigurationValidatorTests
 			connectionString: null,
 			keycloakClientSecret: null,
 			authenticationAuthority: null,
-			corsOrigins: null,
-			smtpHost: null,
-			smtpPort: null);
+			corsOrigins: null);
 
 		missing.Should().BeEmpty();
 	}
@@ -28,9 +26,7 @@ public class RequiredConfigurationValidatorTests
 			connectionString: "Host=postgres;Database=afunto",
 			keycloakClientSecret: "real-secret",
 			authenticationAuthority: "https://login.example.com/realms/afunto",
-			corsOrigins: ["https://afunto.example.com"],
-			smtpHost: "smtp.example.com",
-			smtpPort: "587");
+			corsOrigins: ["https://afunto.example.com"]);
 
 		missing.Should().BeEmpty();
 	}
@@ -46,9 +42,7 @@ public class RequiredConfigurationValidatorTests
 			connectionString: connectionString,
 			keycloakClientSecret: "real-secret",
 			authenticationAuthority: "https://login.example.com/realms/afunto",
-			corsOrigins: ["https://afunto.example.com"],
-			smtpHost: "smtp.example.com",
-			smtpPort: "587");
+			corsOrigins: ["https://afunto.example.com"]);
 
 		missing.Should().ContainSingle().Which.Should().Be("ConnectionStrings:afunto");
 	}
@@ -64,9 +58,7 @@ public class RequiredConfigurationValidatorTests
 			connectionString: "Host=postgres;Database=afunto",
 			keycloakClientSecret: keycloakClientSecret,
 			authenticationAuthority: "https://login.example.com/realms/afunto",
-			corsOrigins: ["https://afunto.example.com"],
-			smtpHost: "smtp.example.com",
-			smtpPort: "587");
+			corsOrigins: ["https://afunto.example.com"]);
 
 		missing.Should().ContainSingle().Which.Should().Be("Keycloak:ClientSecret");
 	}
@@ -82,9 +74,7 @@ public class RequiredConfigurationValidatorTests
 			connectionString: "Host=postgres;Database=afunto",
 			keycloakClientSecret: "real-secret",
 			authenticationAuthority: authenticationAuthority,
-			corsOrigins: ["https://afunto.example.com"],
-			smtpHost: "smtp.example.com",
-			smtpPort: "587");
+			corsOrigins: ["https://afunto.example.com"]);
 
 		missing.Should().ContainSingle().Which.Should().Be("Authentication:Authority");
 	}
@@ -97,9 +87,7 @@ public class RequiredConfigurationValidatorTests
 			connectionString: "Host=postgres;Database=afunto",
 			keycloakClientSecret: "real-secret",
 			authenticationAuthority: "https://login.example.com/realms/afunto",
-			corsOrigins: null,
-			smtpHost: "smtp.example.com",
-			smtpPort: "587");
+			corsOrigins: null);
 
 		missing.Should().ContainSingle().Which.Should().Be("Cors:Origins");
 	}
@@ -112,47 +100,9 @@ public class RequiredConfigurationValidatorTests
 			connectionString: "Host=postgres;Database=afunto",
 			keycloakClientSecret: "real-secret",
 			authenticationAuthority: "https://login.example.com/realms/afunto",
-			corsOrigins: [],
-			smtpHost: "smtp.example.com",
-			smtpPort: "587");
+			corsOrigins: []);
 
 		missing.Should().ContainSingle().Which.Should().Be("Cors:Origins");
-	}
-
-	[Test]
-	[Arguments(null)]
-	[Arguments("")]
-	[Arguments("   ")]
-	public void FindMissing_ShouldFlagSmtpHost_WhenNotDevelopment_AndBlank(string? smtpHost)
-	{
-		var missing = RequiredConfigurationValidator.FindMissing(
-			isDevelopment: false,
-			connectionString: "Host=postgres;Database=afunto",
-			keycloakClientSecret: "real-secret",
-			authenticationAuthority: "https://login.example.com/realms/afunto",
-			corsOrigins: ["https://afunto.example.com"],
-			smtpHost: smtpHost,
-			smtpPort: "587");
-
-		missing.Should().ContainSingle().Which.Should().Be("Smtp:Host");
-	}
-
-	[Test]
-	[Arguments(null)]
-	[Arguments("")]
-	[Arguments("   ")]
-	public void FindMissing_ShouldFlagSmtpPort_WhenNotDevelopment_AndBlank(string? smtpPort)
-	{
-		var missing = RequiredConfigurationValidator.FindMissing(
-			isDevelopment: false,
-			connectionString: "Host=postgres;Database=afunto",
-			keycloakClientSecret: "real-secret",
-			authenticationAuthority: "https://login.example.com/realms/afunto",
-			corsOrigins: ["https://afunto.example.com"],
-			smtpHost: "smtp.example.com",
-			smtpPort: smtpPort);
-
-		missing.Should().ContainSingle().Which.Should().Be("Smtp:Port");
 	}
 
 	[Test]
@@ -163,16 +113,12 @@ public class RequiredConfigurationValidatorTests
 			connectionString: null,
 			keycloakClientSecret: null,
 			authenticationAuthority: null,
-			corsOrigins: null,
-			smtpHost: null,
-			smtpPort: null);
+			corsOrigins: null);
 
 		missing.Should().BeEquivalentTo(
 			"ConnectionStrings:afunto",
 			"Keycloak:ClientSecret",
 			"Authentication:Authority",
-			"Cors:Origins",
-			"Smtp:Host",
-			"Smtp:Port");
+			"Cors:Origins");
 	}
 }

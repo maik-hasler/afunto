@@ -74,11 +74,6 @@ internal sealed class UpdateVolunteerOpportunityCommandHandler(
 				opportunityTitle: opportunity.TitleDe);
 		}
 
-		// Email only for a new place: an occurrence switch leaves every booked slot exactly
-		// where and when it was, so the bell notification above is enough (#2402).
-		if (relocated)
-			opportunity.NotifyVolunteersOfRelocation();
-
 		return true;
 	}
 

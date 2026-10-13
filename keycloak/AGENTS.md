@@ -58,9 +58,9 @@ The theme overrides the four emails this realm can send, each as HTML and plain 
 | `executeActions.ftl` | an admin's "send required actions email" |
 | `email-update-confirmation.ftl` | a user changing their address while `verifyEmail` is on |
 
-Each is three lines calling the shared `html/template.ftl` / `text/template.ftl` layout with an intro, a button label, the link and a closing note; the copy lives in `messages/messages_{de,en}.properties`. The layout mirrors the backend's own `HtmlEmailWriter` (card, wordmark, one brand-700 button, muted footer) - change both together, since a user receives both kinds. Values are auto-escaped by FreeMarker's HTML output format, so `newEmail` and names need no `kcSanitize`. The messages are MessageFormat patterns like the login theme's: avoid apostrophes in English or double them.
+Each is three lines calling the shared `html/template.ftl` / `text/template.ftl` layout with an intro, a button label, the link and a closing note; the copy lives in `messages/messages_{de,en}.properties`. The layout is a single card (wordmark, one brand-700 button, muted footer) in the app's brand colours. Values are auto-escaped by FreeMarker's HTML output format, so `newEmail` and names need no `kcSanitize`. The messages are MessageFormat patterns like the login theme's: avoid apostrophes in English or double them.
 
-Not overridden, deliberately: the organization invite (the app sends its own, `IKeycloakOrganizationService` never triggers Keycloak's), the `event-*` emails (they need the `email` event listener, which this realm does not enable), identity-provider linking and the SMTP test email. They fall back to base.
+Not overridden, deliberately: the organization invite (the app invites in-app, `IKeycloakOrganizationService` never triggers Keycloak's), the `event-*` emails (they need the `email` event listener, which this realm does not enable), identity-provider linking and the SMTP test email. They fall back to base.
 
 Covered by `backend/tests/IntegrationTests/Email/RealmSmtpDeliveryTests.cs`, which asserts the themed subject of a real verification email delivered to Mailpit.
 

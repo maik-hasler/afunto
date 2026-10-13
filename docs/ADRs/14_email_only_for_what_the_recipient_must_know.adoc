@@ -1,7 +1,7 @@
 == 14. Email Only for What the Recipient Must Know
 
 === Status
-Accepted
+Superseded by ADR-15
 
 === Date
 2026-10-07

@@ -39,9 +39,6 @@ const TermsOfUsePage = lazy(() => import("./pages/TermsOfUsePage"));
 const ContactPage = lazy(() => import("./pages/ContactPage"));
 const HelpPage = lazy(() => import("./pages/HelpPage"));
 const UnsubscribePage = lazy(() => import("./pages/UnsubscribePage"));
-const UnsubscribeConfirmPage = lazy(
-	() => import("./pages/UnsubscribeConfirmPage"),
-);
 const VolunteerOpportunityDetailPage = lazy(
 	() => import("./pages/VolunteerOpportunityDetailPage"),
 );
@@ -242,7 +239,8 @@ export function AppRoutes() {
 					<Route path="/terms-of-use" element={<TermsOfUsePage />} />
 					<Route path="/contact" element={<ContactPage />} />
 					<Route path="/help" element={<HelpPage />} />
-					<Route path="/unsubscribe" element={<UnsubscribeConfirmPage />} />
+					{/* Links in emails sent before the backend stopped sending any. */}
+					<Route path="/unsubscribe" element={<UnsubscribePage />} />
 					<Route path="/unsubscribed" element={<UnsubscribePage />} />
 					<Route
 						path="/volunteer-opportunities/:opportunityId"

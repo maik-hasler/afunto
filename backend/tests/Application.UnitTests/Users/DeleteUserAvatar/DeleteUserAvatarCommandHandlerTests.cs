@@ -27,7 +27,7 @@ public class DeleteUserAvatarCommandHandlerTests
 		var userId = UserId.New();
 		var user = User.Create(userId);
 		user.SetAvatarUrl("https://example.com/user-avatars/some-key/avatar.png");
-		_dbContext.GetOrCreateUserAsync(userId, Arg.Any<string?>(), cancellationToken).Returns(user);
+		_dbContext.GetOrCreateUserAsync(userId, cancellationToken).Returns(user);
 		_fileStorage
 			.GetObjectKeyFromPublicUrl("https://example.com/user-avatars/some-key/avatar.png")
 			.Returns("user-avatars/some-key/avatar.png");
@@ -50,7 +50,7 @@ public class DeleteUserAvatarCommandHandlerTests
 		// Arrange
 		var userId = UserId.New();
 		var user = User.Create(userId);
-		_dbContext.GetOrCreateUserAsync(userId, Arg.Any<string?>(), cancellationToken).Returns(user);
+		_dbContext.GetOrCreateUserAsync(userId, cancellationToken).Returns(user);
 
 		var command = new DeleteUserAvatarCommand(userId);
 
@@ -71,7 +71,7 @@ public class DeleteUserAvatarCommandHandlerTests
 		var userId = UserId.New();
 		var user = User.Create(userId);
 		user.SetAvatarUrl("https://example.com/user-avatars/some-key/avatar.png");
-		_dbContext.GetOrCreateUserAsync(userId, Arg.Any<string?>(), cancellationToken).Returns(user);
+		_dbContext.GetOrCreateUserAsync(userId, cancellationToken).Returns(user);
 		_fileStorage
 			.GetObjectKeyFromPublicUrl("https://example.com/user-avatars/some-key/avatar.png")
 			.Returns((string?)null);
@@ -96,7 +96,7 @@ public class DeleteUserAvatarCommandHandlerTests
 		var userId = UserId.New();
 		var user = User.Create(userId);
 		user.SetAvatarUrl("https://example.com/user-avatars/some-key/avatar.png");
-		_dbContext.GetOrCreateUserAsync(userId, Arg.Any<string?>(), cancellationToken).Returns(user);
+		_dbContext.GetOrCreateUserAsync(userId, cancellationToken).Returns(user);
 		_fileStorage
 			.GetObjectKeyFromPublicUrl("https://example.com/user-avatars/some-key/avatar.png")
 			.Returns("user-avatars/some-key/avatar.png");

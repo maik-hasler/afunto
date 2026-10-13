@@ -89,8 +89,6 @@ const ALLOWED_IDENTICAL_KEYS = new Set(
 		"invitations.accepting",
 		"invitations.declining",
 		"imageCrop.zoomLabel",
-		"profile.preferredLanguageDe",
-		"profile.preferredLanguageEn",
 		"administration.title",
 		"administration.users.adminBadge",
 		"administration.reports.reason.Spam",
@@ -102,13 +100,6 @@ const ALLOWED_IDENTICAL_KEYS = new Set(
 		"contact.eyebrow",
 	].map((k) => `translation.${k}`),
 );
-
-const EMAIL_TEMPLATE_ALLOWED_IDENTICAL_KEYS = new Set([
-	// A .NET format string, not copy.
-	"layout.timePattern",
-	// The same word in both languages.
-	"layout.online",
-]);
 
 const PLURAL_EXEMPT_KEYS = new Set(
 	[
@@ -365,31 +356,22 @@ function runParityChecks(enPath, dePath, label) {
 	const enValues = flattenValues(en);
 	const deValues = flattenValues(de);
 
-	const identicalAllowlist =
-		label === "locales" ? ALLOWED_IDENTICAL_KEYS : EMAIL_TEMPLATE_ALLOWED_IDENTICAL_KEYS;
-
 	return [
 		...checkKeyParity(enKeys, deKeys),
-		...checkIdenticalValues(enValues, deValues, identicalAllowlist, label),
+		...checkIdenticalValues(enValues, deValues, ALLOWED_IDENTICAL_KEYS, label),
 		...checkPlaceholderDrift(enValues, deValues, enKeys, label),
 		...checkPluralCompleteness(enValues, deValues, label),
 		...checkPluralSuffixParity(enKeys, deKeys, label),
 		...checkAnmeldenReservedForAuth(enValues, deValues, label),
 		...checkGermanRegister(deValues, label),
-		...(label === "locales" ? checkUnusedKeys(enKeys) : []),
+		...checkUnusedKeys(enKeys),
 	];
 }
 
 const localesDir = join(__dirname, "../src/locales");
-const emailTemplatesDir = join(__dirname, "../../backend/src/Infrastructure/Email/Templates");
 
 const errors = [
 	...runParityChecks(join(localesDir, "en.json"), join(localesDir, "de.json"), "locales"),
-	...runParityChecks(
-		join(emailTemplatesDir, "en.json"),
-		join(emailTemplatesDir, "de.json"),
-		"email templates",
-	),
 ];
 
 if (errors.length > 0) {
@@ -398,4 +380,4 @@ if (errors.length > 0) {
 }
 
 const totalKeys = flattenKeys(JSON.parse(readFileSync(join(localesDir, "en.json"), "utf8"))).size;
-console.log(`All ${totalKeys} locale keys match between de.json and en.json, plus email templates - no drift detected.`);
+console.log(`All ${totalKeys} locale keys match between de.json and en.json - no drift detected.`);

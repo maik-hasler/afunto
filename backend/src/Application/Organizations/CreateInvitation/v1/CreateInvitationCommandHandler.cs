@@ -1,8 +1,6 @@
 using Application.Common.Authorization;
-using Application.Common.Email;
 using Application.Common.Exceptions;
 using Application.Common.Keycloak;
-using Application.Common.Localization;
 using Application.Common.Messaging;
 using Application.Common.Persistence;
 using Domain.Notifications;
@@ -15,17 +13,14 @@ internal sealed class CreateInvitationCommandHandler(
 	IApplicationDbContext dbContext,
 	IUnitOfWork unitOfWork,
 	IKeycloakOrganizationService keycloakOrganizationService,
-	IKeycloakUserService keycloakUserService,
-	IEmailService emailService,
-	IEmailTemplateRenderer emailTemplateRenderer,
-	IEmailLinkBuilder emailLinkBuilder)
+	IKeycloakUserService keycloakUserService)
 	: ICommandHandler<CreateInvitationCommand, CreateInvitationResult>
 {
 	public async ValueTask<CreateInvitationResult> Handle(
 		CreateInvitationCommand request,
 		CancellationToken cancellationToken = default)
 	{
-		var org = await dbContext.Organizations.FindAsync(request.OrganizationId, cancellationToken)
+		_ = await dbContext.Organizations.FindAsync(request.OrganizationId, cancellationToken)
 			?? throw new ResultFailureException(Error.NotFound("Organization.NotFound", "Organization not found."));
 
 		await OwnershipGuard.EnsureIsOrganizerAsync(
@@ -34,7 +29,7 @@ internal sealed class CreateInvitationCommandHandler(
 			request.InvitedById,
 			cancellationToken);
 
-		var inviteeProfile = await keycloakUserService.GetUserAsync(request.InviteeId.Value, cancellationToken);
+		_ = await keycloakUserService.GetUserAsync(request.InviteeId.Value, cancellationToken);
 
 		var members = await keycloakOrganizationService.GetMembersAsync(request.OrganizationId.Value, cancellationToken);
 		if (members.Any(m => m.UserId == request.InviteeId.Value))
@@ -59,19 +54,6 @@ internal sealed class CreateInvitationCommandHandler(
 		await dbContext.Notifications.AddAsync(notification, cancellationToken);
 
 		await unitOfWork.SaveChangesAsync(cancellationToken);
-
-		var inviteeUser = (await dbContext.GetOrCreateUsersAsync([request.InviteeId], cancellationToken))[0];
-		var inviteeLanguage = SupportedLanguages.Resolve(inviteeUser.PreferredLanguage);
-
-		var draft = InvitationEmail.Draft(
-			inviteeLanguage,
-			inviteeProfile.FirstName ?? inviteeProfile.Username,
-			org.Name,
-			emailLinkBuilder);
-
-		await emailService.SendAsync(
-			new EmailMessage(inviteeProfile.Email, emailTemplateRenderer.Render(draft), invitation.Id.Value.ToString()),
-			cancellationToken);
 
 		return new CreateInvitationResult(invitation.Id, invitation.ExpiresOn);
 	}

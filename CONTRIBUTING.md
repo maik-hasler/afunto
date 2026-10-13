@@ -15,12 +15,12 @@ Every contribution counts - bug reports, ideas, documentation, or code.
 
 A PR that adds or changes UI text must update both `en.json` (the source) and `de.json` (the translation) - see `frontend/AGENTS.md`.
 
-**German copy conventions**, kept for consistency across every string in `de.json` and the German rows of `backend/src/Infrastructure/Email/Templates/`:
+**German copy conventions**, kept for consistency across every string in `de.json`:
 
 - **Register:** "du" throughout, never "Sie" - including the privacy policy and terms of use. One register everywhere beats a formal/informal split between legal pages and the rest of the product.
 - **Quotation marks:** „German quotes“ (`„...“`), never straight `"..."` or other styles.
-- **Dashes:** unlike the ASCII-only rule for source files above, German prose here uses the en dash (Gedankenstrich, U+2013) with a space on each side for parenthetical asides and ranges - not the plain ASCII hyphen `-`. This is content, not code: `.github/workflows/lint.yml`'s dash ban excludes `frontend/src/locales/de.json` and `backend/src/Infrastructure/Email/Templates/de.json` for exactly this reason. A hyphenated compound word (`Mikro-Ehrenamt`) has no surrounding spaces and stays an ASCII hyphen either way.
-- **"Anmelden" is reserved for authentication** (signing in/out) and must never be reused for signing up to participate in an Einsatz - the two are unrelated actions and using the same verb for both is confusing at the exact point a volunteer decides to join. Participation uses "eintragen" (button: "Für Zeitslot eintragen" / "Verbindlich eintragen", noun: "Eintragung") throughout the sign-up flow, its confirmation dialogs, toasts, notifications and emails; see `frontend/AGENTS.md`'s Copy Conventions for the full split (#2237).
+- **Dashes:** unlike the ASCII-only rule for source files above, German prose here uses the en dash (Gedankenstrich, U+2013) with a space on each side for parenthetical asides and ranges - not the plain ASCII hyphen `-`. This is content, not code: `.github/workflows/lint.yml`'s dash ban excludes `frontend/src/locales/de.json` for exactly this reason. A hyphenated compound word (`Mikro-Ehrenamt`) has no surrounding spaces and stays an ASCII hyphen either way.
+- **"Anmelden" is reserved for authentication** (signing in/out) and must never be reused for signing up to participate in an Einsatz - the two are unrelated actions and using the same verb for both is confusing at the exact point a volunteer decides to join. Participation uses "eintragen" (button: "Für Zeitslot eintragen" / "Verbindlich eintragen", noun: "Eintragung") throughout the sign-up flow, its confirmation dialogs, toasts and notifications; see `frontend/AGENTS.md`'s Copy Conventions for the full split (#2237).
 
 ## Getting Started
 

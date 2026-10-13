@@ -2,7 +2,6 @@ import { useReducer, useRef } from "react";
 import type { MyProfileResponse } from "../../client";
 
 export type ContactPref = "Email" | "Phone" | "";
-export type PreferredLanguage = "de" | "en";
 
 interface FormState {
 	firstName: string;
@@ -12,7 +11,6 @@ interface FormState {
 	skills: string[];
 	languages: string[];
 	preferredContact: ContactPref;
-	preferredLanguage: PreferredLanguage;
 	skillInput: string;
 	langInput: string;
 }
@@ -24,7 +22,6 @@ type FormAction =
 	| { type: "setBio"; value: string }
 	| { type: "setPhone"; value: string }
 	| { type: "setPreferredContact"; value: ContactPref }
-	| { type: "setPreferredLanguage"; value: PreferredLanguage }
 	| { type: "setSkillInput"; value: string }
 	| { type: "setLangInput"; value: string }
 	| { type: "addSkill"; value: string }
@@ -41,7 +38,6 @@ function emptyState(): FormState {
 		skills: [],
 		languages: [],
 		preferredContact: "",
-		preferredLanguage: "de",
 		skillInput: "",
 		langInput: "",
 	};
@@ -58,7 +54,6 @@ function fromProfile(profile: MyProfileResponse | null): FormState {
 		skills: profile.skills ?? [],
 		languages: profile.languages ?? [],
 		preferredContact: pref === "Email" || pref === "Phone" ? pref : "",
-		preferredLanguage: profile.preferredLanguage === "en" ? "en" : "de",
 		skillInput: "",
 		langInput: "",
 	};
@@ -84,8 +79,6 @@ function reducer(state: FormState, action: FormAction): FormState {
 			return { ...state, phone: action.value };
 		case "setPreferredContact":
 			return { ...state, preferredContact: action.value };
-		case "setPreferredLanguage":
-			return { ...state, preferredLanguage: action.value };
 		case "setSkillInput":
 			return { ...state, skillInput: action.value };
 		case "setLangInput":
@@ -132,8 +125,6 @@ export function useProfileForm(profile: MyProfileResponse | null) {
 		setPhone: (value: string) => dispatch({ type: "setPhone", value }),
 		setPreferredContact: (value: ContactPref) =>
 			dispatch({ type: "setPreferredContact", value }),
-		setPreferredLanguage: (value: PreferredLanguage) =>
-			dispatch({ type: "setPreferredLanguage", value }),
 		setSkillInput: (value: string) =>
 			dispatch({ type: "setSkillInput", value }),
 		setLangInput: (value: string) => dispatch({ type: "setLangInput", value }),
