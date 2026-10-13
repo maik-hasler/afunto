@@ -153,7 +153,7 @@ jobs:
       - name: Pre-pull Docker images
         run: |
           docker pull quay.io/keycloak/keycloak:26.7.4
-          docker pull ghcr.io/axllent/mailpit:v1.31.2
+          docker pull ghcr.io/axllent/mailpit:v1.31.5
           docker pull rustfs/rustfs:1.0.0
 
       - name: Test - IntegrationTests (Aspire + Docker)
@@ -222,7 +222,7 @@ jobs:
       - name: Pre-pull Docker images
         run: |
           docker pull quay.io/keycloak/keycloak:26.7.4
-          docker pull ghcr.io/axllent/mailpit:v1.31.2
+          docker pull ghcr.io/axllent/mailpit:v1.31.5
           docker pull rustfs/rustfs:1.0.0
 
       - name: Resolve shard filter

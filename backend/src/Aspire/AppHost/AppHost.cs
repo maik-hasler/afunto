@@ -20,7 +20,7 @@ if (!isTestEnv)
 // one transient hiccup into an unrecoverable "port is already allocated"
 // retry storm (#2204). Passing port: null here lets Docker pick a free
 // ephemeral port instead, so isTestEnv runs can never collide on a fixed one.
-var mailpit = builder.AddContainer("mailpit", "ghcr.io/axllent/mailpit", "v1.31.2")
+var mailpit = builder.AddContainer("mailpit", "ghcr.io/axllent/mailpit", "v1.31.5")
 	.WithHttpEndpoint(port: isTestEnv ? null : 1080, targetPort: 8025, name: "webui", isProxied: false)
 	.WithEndpoint(port: isTestEnv ? null : 1025, targetPort: 1025, name: "smtp", scheme: "tcp", isProxied: false);
 
