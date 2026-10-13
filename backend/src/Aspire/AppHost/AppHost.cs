@@ -107,7 +107,7 @@ File.WriteAllText(
 	Path.Combine(keycloakRealmImportPath, "afunto-realm.json"),
 	localRealm.ToJsonString());
 
-var keycloak = builder.AddContainer("keycloak", "quay.io/keycloak/keycloak", "26.7.4")
+var keycloak = builder.AddContainer("keycloak", "quay.io/keycloak/keycloak", "26.8.1")
 	.WithEnvironment("KC_DB", "dev-file")
 	.WithBindMount(keycloakRealmImportPath, "/opt/keycloak/data/import", isReadOnly: true)
 	.WithBindMount(keycloakThemePath, "/opt/keycloak/themes/afunto", isReadOnly: true)

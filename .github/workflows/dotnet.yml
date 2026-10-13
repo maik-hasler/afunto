@@ -308,7 +308,7 @@ jobs:
 
       - name: Pre-pull Docker images
         run: |
-          docker pull quay.io/keycloak/keycloak:26.7.4
+          docker pull quay.io/keycloak/keycloak:26.8.1
           docker pull ghcr.io/axllent/mailpit:v1.31.2
           docker pull rustfs/rustfs:1.0.0
 
@@ -372,7 +372,7 @@ jobs:
 
       - name: Pre-pull Docker images
         run: |
-          docker pull quay.io/keycloak/keycloak:26.7.4
+          docker pull quay.io/keycloak/keycloak:26.8.1
           docker pull ghcr.io/axllent/mailpit:v1.31.2
           docker pull rustfs/rustfs:1.0.0
 

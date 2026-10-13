@@ -16,7 +16,7 @@ Deployment_Node(machine, "Developer Machine", "Windows / macOS / Linux") {
 		}
 
 		Deployment_Node(keycloak_node, "keycloak (container)") {
-			Container(keycloak, "Identity Provider", "Keycloak 26.7.4 (upstream, dev-file DB)", ":8080")
+			Container(keycloak, "Identity Provider", "Keycloak 26.8.1 (upstream, dev-file DB)", ":8080")
 		}
 
 		Deployment_Node(postgres_node, "postgres (container)") {

@@ -152,7 +152,7 @@ jobs:
 
       - name: Pre-pull Docker images
         run: |
-          docker pull quay.io/keycloak/keycloak:26.7.4
+          docker pull quay.io/keycloak/keycloak:26.8.1
           docker pull ghcr.io/axllent/mailpit:v1.31.2
           docker pull rustfs/rustfs:1.0.0
 
@@ -221,7 +221,7 @@ jobs:
 
       - name: Pre-pull Docker images
         run: |
-          docker pull quay.io/keycloak/keycloak:26.7.4
+          docker pull quay.io/keycloak/keycloak:26.8.1
           docker pull ghcr.io/axllent/mailpit:v1.31.2
           docker pull rustfs/rustfs:1.0.0
 
@@ -300,7 +300,7 @@ jobs:
             -e KC_SMTP_HOST=localhost -e KC_SMTP_PORT=1025 -e KC_SMTP_FROM=noreply@example.test \
             -e KC_SMTP_USER=test -e KC_SMTP_PASSWORD=test \
             -v "$IMPORT_DIR:/opt/keycloak/data/import:ro" \
-            quay.io/keycloak/keycloak:26.7.4 start-dev --import-realm
+            quay.io/keycloak/keycloak:26.8.1 start-dev --import-realm
 
           docker run -d --name smoke-storage --network backend-smoke-test -p 19000:9000 \
             -e RUSTFS_ACCESS_KEY=storage -e RUSTFS_SECRET_KEY=storage123 \
