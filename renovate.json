@@ -10,8 +10,7 @@
   "dependencyDashboard": true,
   "osvVulnerabilityAlerts": true,
   "vulnerabilityAlerts": {
-    "description": "Applied after every packageRule: re-enables a major that is otherwise suppressed and keeps a human on every security PR",
-    "enabled": true,
+    "description": "Security PRs open at once and never automerge, so a human reads every one",
     "automerge": false
   },
   "automerge": false,
@@ -56,11 +55,14 @@
       "automerge": true
     },
     {
-      "description": "Production majors are not proposed; only a vulnerability alert (osvVulnerabilityAlerts) opens one, and a human merges it",
+      "description": "Majors get their own PR per group (separateMajorMinor) and are never automerged, so they stay visible; the dev, test and CI rules below opt back in",
       "matchUpdateTypes": [
         "major"
       ],
-      "enabled": false
+      "automerge": false,
+      "addLabels": [
+        "major"
+      ]
     },
     {
       "description": "One PR per production area, so a red build points at a small set of packages",
@@ -99,7 +101,6 @@
       "matchManagers": [
         "github-actions"
       ],
-      "enabled": true,
       "automerge": true,
       "groupName": "GitHub Actions",
       "groupSlug": "github-actions"
@@ -112,7 +113,6 @@
         "devDependencies",
         "packageManager"
       ],
-      "enabled": true,
       "automerge": true,
       "groupName": "frontend dev dependencies",
       "groupSlug": "frontend-dev"
@@ -133,7 +133,6 @@
         "Microsoft.Extensions.Diagnostics.Testing",
         "NSwag.MSBuild"
       ],
-      "enabled": true,
       "automerge": true,
       "groupName": "backend test dependencies",
       "groupSlug": "backend-test"

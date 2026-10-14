@@ -191,14 +191,14 @@ Renovate runs on Mondays at 06:00 (Europe/Berlin) and only proposes versions tha
 
 | Group | Contents | Majors |
 |-------|----------|--------|
-| `frontend dependencies` | npm `dependencies` | not proposed |
-| `backend dependencies` | NuGet packages, `msbuild-sdk`, `dotnet-ef`, `dotnet-sdk` | not proposed |
-| `container images` | Keycloak, Mailpit, RustFS, Docker base images | not proposed |
+| `frontend dependencies` | npm `dependencies` | own PR, manual merge |
+| `backend dependencies` | NuGet packages, `msbuild-sdk`, `dotnet-ef`, `dotnet-sdk` | own PR, manual merge |
+| `container images` | Keycloak, Mailpit, RustFS, Docker base images | own PR, manual merge |
 | `frontend dev dependencies` | npm `devDependencies` and the `packageManager` pin | automerged |
 | `backend test dependencies` | test and build-tool packages listed in `renovate.json` | automerged |
 | `GitHub Actions` | workflow actions | automerged |
 
-Anything that ships to users gets no major-version PR. The one exception is a vulnerability alert (`osvVulnerabilityAlerts`): it opens its PR at once, and `vulnerabilityAlerts.automerge: false` keeps a human on every one. To take a production major, bump it by hand. A new test-only NuGet package must be added to the `backend test dependencies` rule, or it stays on the production rules (the safe default).
+Majors of anything that ships to users arrive as a separate PR per group, labelled `major`, and are never automerged: you see them and decide. Majors of dev, test and CI dependencies merge on green CI like everything else, because they never ship. Security PRs (`osvVulnerabilityAlerts`) open at once and never automerge either (`vulnerabilityAlerts.automerge: false`). A new test-only NuGet package must be added to the `backend test dependencies` rule, or it stays on the production rules (the safe default).
 
 Automerge relies on the required status checks of the `main` branch protection. Without them Renovate would merge unchecked.
 
