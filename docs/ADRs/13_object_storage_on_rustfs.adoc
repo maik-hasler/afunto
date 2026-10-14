@@ -103,5 +103,5 @@ Each candidate ran the backend's real storage service, then still on the `Minio`
 * RustFS is young: 1.0.0 was published on 2026-09-16. Its pre-1.0 releases had serious advisories (for example CVE-2026-40937, an authorization bypass in the admin API, fixed in 1.0.0-alpha.94), all fixed before 1.0. Renovate proposes every stable release.
 * Revisit this decision if RustFS changes its license, stops releasing for three months, or ships a security fix late. The replacement starts with SeaweedFS and must pass `FileStorageContractTests`.
 * `rc` is pre-1.0 (0.1.36 at the time of writing). It runs only in `storage-init`, which stops the deploy if the policy is not attached afterwards; backups do not depend on it.
-* AWS publishes `AWSSDK.S3` almost daily, so Renovate takes it weekly.
+* AWS publishes `AWSSDK.S3` almost daily, so Renovate takes it weekly. Since all Renovate runs are weekly now, the package needs no rule of its own and falls into the `backend dependencies` group.
 * Staging starts on RustFS with empty storage and a reset database rather than a migration of the old bucket.

@@ -4,12 +4,20 @@
     "config:recommended"
   ],
   "schedule": [
-    "* 6 * * *"
+    "* 6 * * 1"
   ],
   "timezone": "Europe/Berlin",
   "dependencyDashboard": true,
   "osvVulnerabilityAlerts": true,
+  "vulnerabilityAlerts": {
+    "description": "Applied after every packageRule: re-enables a major that is otherwise suppressed and keeps a human on every security PR",
+    "enabled": true,
+    "automerge": false
+  },
   "automerge": false,
+  "automergeStrategy": "squash",
+  "minimumReleaseAge": "3 days",
+  "prHourlyLimit": 0,
   "labels": [
     "dependencies",
     "renovate"
@@ -38,28 +46,97 @@
       "enabled": false
     },
     {
-      "matchManagers": [
-        "nuget"
+      "description": "Non-major updates merge on their own once CI is green",
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "pin",
+        "digest"
       ],
-      "matchPackageNames": [
-        "TUnit{/,}**"
-      ],
-      "groupName": "TUnit",
-      "groupSlug": "tunit"
+      "automerge": true
     },
     {
-      "description": "AWS publishes AWSSDK.S3 almost every day. Each bump runs the full pipeline, and a weekly one is enough for an S3 client (ADR-13).",
+      "description": "Production majors are not proposed; only a vulnerability alert (osvVulnerabilityAlerts) opens one, and a human merges it",
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "One PR per production area, so a red build points at a small set of packages",
+      "matchManagers": [
+        "npm"
+      ],
+      "groupName": "frontend dependencies",
+      "groupSlug": "frontend"
+    },
+    {
+      "matchManagers": [
+        "nuget",
+        "msbuild-sdk"
+      ],
+      "groupName": "backend dependencies",
+      "groupSlug": "backend"
+    },
+    {
+      "description": "Tools versioned in lockstep with the backend packages, found by regex managers",
+      "matchDepNames": [
+        "dotnet-ef",
+        "dotnet-sdk"
+      ],
+      "groupName": "backend dependencies",
+      "groupSlug": "backend"
+    },
+    {
+      "matchDatasources": [
+        "docker"
+      ],
+      "groupName": "container images",
+      "groupSlug": "container-images"
+    },
+    {
+      "description": "Dev, test and CI dependencies: majors merge on green CI too, because they never ship",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "enabled": true,
+      "automerge": true,
+      "groupName": "GitHub Actions",
+      "groupSlug": "github-actions"
+    },
+    {
+      "matchManagers": [
+        "npm"
+      ],
+      "matchDepTypes": [
+        "devDependencies",
+        "packageManager"
+      ],
+      "enabled": true,
+      "automerge": true,
+      "groupName": "frontend dev dependencies",
+      "groupSlug": "frontend-dev"
+    },
+    {
+      "description": "Test and build-tooling packages in Directory.Packages.props; a package missing here defaults to the production rules (safe side)",
       "matchManagers": [
         "nuget"
       ],
       "matchPackageNames": [
-        "AWSSDK.**"
+        "TUnit{/,}**",
+        "AwesomeAssertions",
+        "Deque.AxeCore.Playwright",
+        "NetArchTest.Rules",
+        "NSubstitute",
+        "Respawn",
+        "Aspire.Hosting.Testing",
+        "Microsoft.Extensions.Diagnostics.Testing",
+        "NSwag.MSBuild"
       ],
-      "groupName": "AWS SDK",
-      "groupSlug": "awssdk",
-      "schedule": [
-        "* 6 * * 1"
-      ]
+      "enabled": true,
+      "automerge": true,
+      "groupName": "backend test dependencies",
+      "groupSlug": "backend-test"
     }
   ],
   "customManagers": [

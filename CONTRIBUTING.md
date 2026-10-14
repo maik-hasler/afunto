@@ -185,6 +185,23 @@ Dependencies are managed by [Renovate](https://docs.renovatebot.com/) (config: `
 
 The default `rangeStrategy` is `pin` - any new dependency range gets pinned to an exact version (e.g. NuGet `[10.0.7]`, npm `19.2.5`). The one exception is the `msbuild-sdk` manager: SDK references like `Aspire.AppHost.Sdk` must stay floating because bracketed pins (`[13.2.4]`) break SDK resolution. Two `packageRules` enforce this - one sets `rangeStrategy: replace` for all msbuild-sdk updates, the other disables `pin` update PRs entirely. Both rules must stay separate; merging them would only apply `replace` to pin updates and let the global `pin` strategy leak into regular version bumps.
 
+### Update cadence and automerge
+
+Renovate runs on Mondays at 06:00 (Europe/Berlin) and only proposes versions that are at least 3 days old (`minimumReleaseAge`). Updates arrive as a few grouped pull requests instead of one per package, and green CI merges them as one squash commit each:
+
+| Group | Contents | Majors |
+|-------|----------|--------|
+| `frontend dependencies` | npm `dependencies` | not proposed |
+| `backend dependencies` | NuGet packages, `msbuild-sdk`, `dotnet-ef`, `dotnet-sdk` | not proposed |
+| `container images` | Keycloak, Mailpit, RustFS, Docker base images | not proposed |
+| `frontend dev dependencies` | npm `devDependencies` and the `packageManager` pin | automerged |
+| `backend test dependencies` | test and build-tool packages listed in `renovate.json` | automerged |
+| `GitHub Actions` | workflow actions | automerged |
+
+Anything that ships to users gets no major-version PR. The one exception is a vulnerability alert (`osvVulnerabilityAlerts`): it opens its PR at once, and `vulnerabilityAlerts.automerge: false` keeps a human on every one. To take a production major, bump it by hand. A new test-only NuGet package must be added to the `backend test dependencies` rule, or it stays on the production rules (the safe default).
+
+Automerge relies on the required status checks of the `main` branch protection. Without them Renovate would merge unchecked.
+
 ## Architecture Decisions
 
 Significant architectural decisions are documented as ADRs under `docs/ADRs/`.
