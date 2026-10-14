@@ -27,7 +27,7 @@ var mailpit = builder.AddContainer("mailpit", "ghcr.io/axllent/mailpit", "v1.31.
 // S3-compatible object storage, see ADR-13 for why RustFS replaced MinIO. The
 // resource is named for its role, not the product, so a future swap touches
 // only this block.
-var storage = builder.AddContainer("storage", "rustfs/rustfs", "1.0.0")
+var storage = builder.AddContainer("storage", "rustfs/rustfs", "1.0.1")
 	.WithEnvironment("RUSTFS_ACCESS_KEY", "storage")
 	.WithEnvironment("RUSTFS_SECRET_KEY", "storage123")
 	.WithHttpEndpoint(port: isTestEnv ? null : 9000, targetPort: 9000, name: "api", isProxied: false)
