@@ -9,22 +9,42 @@ Accepted
 === Context
 Some pull requests change what a person sees, and the maintainer wants to click through such a change in a running, publicly reachable instance before merging it. There is one deployed environment, and a second permanent one is more than the project wants to pay for. ADR-7 stops this repository at publishing release images on a version tag, so a pull request has no image anything could run.
 
-The deployment side lives in the private `mgmt-hetzner` repository: it runs one short-lived stack per labelled pull request (frontend, backend and Keycloak per pull request; databases and a bucket per pull request on a shared preview Postgres and object store kept apart from production), and tears each stack down again once its pull request no longer qualifies. That side needs images to pull, and a reliable way to tell an image for the pull request's current commit from one that is still building.
+The deployment side lives in the private `mgmt-hetzner` repository: it runs one short-lived stack per requested pull request (frontend, backend and Keycloak per pull request; databases and a bucket per pull request on a shared preview Postgres and object store kept apart from production), and tears each stack down again once its pull request closes. That side needs images to pull, a reliable way to tell an image for the pull request's current commit from one that is still building, and a signal when to act. Its Actions minutes are billed, so it must not poll.
 
 === Decision
-`.github/workflows/preview-images.yml` builds and pushes `afunto-backend-preview` and `afunto-frontend-preview` for every same-repository pull request carrying the `preview` label, on labelling and on every later push, and deletes that pull request's image versions when it closes.
+A maintainer asks for a preview by commenting `/preview` on a same-repository pull request. `.github/workflows/preview-images.yml` then builds and pushes `afunto-backend-preview` and `afunto-frontend-preview` for the pull request's head commit at that moment and dispatches `mgmt-hetzner`'s deploy workflow with the pull request number and that commit. A push alone deploys nothing; the next `/preview` deploys the newer commit. `/preview stop`, and closing or merging a pull request that ever asked for a preview, dispatch the teardown. On close the workflow also deletes that pull request's image versions.
 
-Each image is tagged twice: `sha-<full head commit sha>`, which a deployer pins to, and `pr-<number>`, which moves with every push. A `sha-` tag exists only once that exact commit's image finished pushing, so its presence for both components is the "ready to deploy" signal; a deployer that does not find it keeps whatever it already runs and checks again later.
+`mgmt-hetzner` reports back by dispatching `.github/workflows/preview-comment.yml`, which posts the result (links, or why it failed, or that the preview is gone) on the pull request.
 
-Nothing else changes in ADR-7's boundary: this repository still deploys nothing, holds no credential for any environment, and knows no host name. The deployer reads the label and the head commit from the public GitHub API, so no token flows from here to `mgmt-hetzner`.
+Each image is tagged twice: `sha-<full head commit sha>`, which the deployer pins to, and `pr-<number>`, which moves with every build. A `sha-` tag exists only once that exact commit's image finished pushing, so its presence for both components is the "ready to deploy" signal; the deployer checks it before acting on a dispatch.
+
+ADR-7's boundary moves by one token: this repository still deploys nothing, reaches no host and knows no host name, but it now holds `PREVIEW_DISPATCH_TOKEN`, a fine-grained token that may start workflows in `mgmt-hetzner` and nothing else. What that workflow does with a pull request number and a commit is decided and validated there.
 
 === Rationale
 * Separate `-preview` packages keep pull request tags out of the release packages' tag list and let them be deleted without touching anything a release consumer pulls.
-* The label is the closest GitHub offers to a "deploy this" button on a pull request, and only someone with triage access can set it.
+* A comment is the closest GitHub offers to a "deploy this" button on a pull request, and it works from the mobile app. Who may use it is decided by the `author_association` GitHub itself attaches to the comment (`OWNER`, `MEMBER`, `COLLABORATOR`), not by anything the comment says.
+* `issue_comment` workflows always run as they are on `main`, so a pull request cannot change how it gets deployed.
+* Deploying on request instead of on every push spends build minutes and the deployer's billed minutes only on commits someone wants to look at.
+* The report is posted from this repository with `github-actions` as author because GitHub does not notify anyone of their own comments, and the deployer's token belongs to the maintainer.
 * Fork pull requests are excluded: their code would otherwise be built with this repository's package-write token and deployed publicly.
 * Preview images skip the release path's test gate, Trivy scan, SBOM and provenance. They are for looking at a change, the pull request's own CI still gates the merge, and the images never become a release.
 
 === Considered Alternatives
+
+==== A `preview` label, deploying every push while it is set
+The first version of this decision.
+
+* Pros
+** No token in this repository: the deployer polled the public API for labelled pull requests
+* Cons
+** Every push redeploys, wanted or not
+** Polling every ten minutes costs the private deployer repository about 4,300 billed minutes a month, twice its free allowance
+
+==== A required-reviewer environment ("Review deployments")
+* Pros
+** A real approve button
+* Cons
+** One waiting run per push piles up, and the button sits in the run, not on the pull request
 
 ==== Run the preview inside a GitHub Actions runner behind a tunnel
 Boot the whole stack in the runner, as `publish.yml`'s `backend-image-health-check` already does, and expose it through a Cloudflare quick tunnel.
@@ -43,5 +63,7 @@ Boot the whole stack in the runner, as `publish.yml`'s `backend-image-health-che
 
 === Consequences
 * The two `-preview` packages are created by the first run as private packages. Either make them public once (package settings, Change visibility) or give the deployer a `read:packages` token.
-* Removing the label stops new builds but leaves the images until the pull request closes; the deployer removes the stack as soon as the label is gone.
+* `PREVIEW_DISPATCH_TOKEN` must exist as a repository secret (fine-grained, `Actions: Read and write` on `mgmt-hetzner`); without it every `/preview` builds and then fails at the dispatch. Anyone who can push a branch here can read secrets in workflows they run, which already holds for `RELEASE_TOKEN`.
+* `mgmt-hetzner` needs the reverse token (`Actions: Read and write` on this repository) to dispatch `preview-comment.yml`; without it previews still deploy, uncommented.
+* A pull request closed while its first build still runs gets no teardown dispatch for a preview that comes up afterwards; the deployer's daily check removes previews of closed pull requests.
 * Cleanup deletes package versions with the workflow's own `GITHUB_TOKEN`, which relies on the publishing repository holding admin access to the package - the default for a package a workflow created.

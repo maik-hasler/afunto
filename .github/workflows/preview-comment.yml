@@ -1,0 +1,42 @@
+name: Preview Comment
+
+# Posts the deployer's result (preview up, failed, removed) on a pull request
+# (ADR-16). mgmt-hetzner dispatches this instead of commenting itself: its
+# token belongs to the maintainer, and GitHub does not notify anyone of their
+# own comments, while a comment by github-actions does notify the author.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: 'Pull request number'
+        required: true
+        type: string
+      body:
+        description: 'Comment body (Markdown)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  comment:
+    name: Comment on pull request ${{ inputs.pr }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PR_NUMBER: ${{ inputs.pr }}
+      BODY: ${{ inputs.body }}
+    steps:
+      - name: Comment
+        run: |
+          set -euo pipefail
+          if ! [[ "${PR_NUMBER}" =~ ^[0-9]{1,6}$ ]]; then
+            echo "::error::not a pull request number: ${PR_NUMBER}"
+            exit 1
+          fi
+          gh pr comment "${PR_NUMBER}" -R "${GITHUB_REPOSITORY}" --body "${BODY}"

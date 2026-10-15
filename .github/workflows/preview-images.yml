@@ -1,39 +1,95 @@
 name: Preview Images
 
-# Builds PR preview images for a pull request carrying the `preview` label and
-# deletes them again once the pull request closes (ADR-16). This repository
-# stops at the images: what pulls and runs them lives outside it, and the
-# contract it reads is documented in .github/AGENTS.md's "Preview Images"
-# section - change that section together with the tag scheme below.
+# Builds PR preview images when a maintainer comments `/preview` on a pull
+# request, hands the deploy to mgmt-hetzner, and removes the preview and its
+# images once the pull request closes (ADR-16). `/preview stop` removes the
+# preview early. This repository stops at the images and the dispatch: what
+# runs them lives outside it, and the contract it relies on is documented in
+# .github/AGENTS.md's "Preview Images" section - change that section together
+# with the tag scheme and the dispatch below.
+#
+# `issue_comment` always runs this file as it is on main, never a pull
+# request's copy, so a pull request cannot rewrite how it gets deployed.
 
 on:
+  issue_comment:
+    types: [created]
   pull_request:
-    types: [labeled, synchronize, reopened, closed]
+    types: [closed]
 
 env:
   REGISTRY: ghcr.io
+  DEPLOYER_REPO: maik-hasler/mgmt-hetzner
+  DEPLOYER_WORKFLOW: afunto-preview.yaml
 
 permissions:
   contents: read
 
 jobs:
+  command:
+    name: Read /preview command
+    # Only the command itself, only on a pull request, and only from someone
+    # with write access to this repository. GitHub sets author_association
+    # itself, so it cannot be claimed in the comment.
+    if: >-
+      github.event_name == 'issue_comment'
+      && github.event.issue.pull_request
+      && startsWith(github.event.comment.body, '/preview')
+      && contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pull-requests: write
+      issues: write
+    outputs:
+      action: ${{ steps.pr.outputs.action }}
+      sha: ${{ steps.pr.outputs.sha }}
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PR_NUMBER: ${{ github.event.issue.number }}
+      COMMENT_ID: ${{ github.event.comment.id }}
+      BODY: ${{ github.event.comment.body }}
+    steps:
+      # The comment event carries no head commit, and the PR may have moved
+      # since: the commit deployed is the head at the moment of the command.
+      - name: Resolve the pull request
+        id: pr
+        run: |
+          set -euo pipefail
+          # Trailing whitespace or a newline from a phone keyboard is fine,
+          # anything else after the command is not.
+          command=$(printf '%s' "${BODY}" | tr -s '[:space:]' ' ' | sed 's/ $//')
+          case "${command}" in
+            "/preview") action=up ;;
+            "/preview stop") action=down ;;
+            *) echo "::notice::Not a preview command - ignored."; exit 0 ;;
+          esac
+          gh api -X POST "/repos/${GITHUB_REPOSITORY}/issues/comments/${COMMENT_ID}/reactions" -f content=eyes >/dev/null
+          pr=$(gh api "/repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}")
+          head_repo=$(jq -r '.head.repo.full_name' <<< "${pr}")
+          state=$(jq -r '.state' <<< "${pr}")
+          if [ "${head_repo}" != "${GITHUB_REPOSITORY}" ]; then
+            gh pr comment "${PR_NUMBER}" -R "${GITHUB_REPOSITORY}" --body "Previews are only built for branches of this repository, not for forks."
+            exit 1
+          fi
+          if [ "${state}" != "open" ]; then
+            echo "::notice::#${PR_NUMBER} is ${state} - nothing to do."
+            exit 0
+          fi
+          echo "action=${action}" >> "$GITHUB_OUTPUT"
+          echo "sha=$(jq -r '.head.sha' <<< "${pr}")" >> "$GITHUB_OUTPUT"
+
   publish:
     name: Publish ${{ matrix.component }} preview image
-    # Same-repository branches only: a fork's code must never be built into an
-    # image that gets deployed publicly. An unrelated label being added must not
-    # rebuild either.
-    if: >-
-      github.event.action != 'closed'
-      && github.event.pull_request.head.repo.full_name == github.repository
-      && contains(github.event.pull_request.labels.*.name, 'preview')
-      && (github.event.action != 'labeled' || github.event.label.name == 'preview')
+    needs: command
+    if: needs.command.outputs.action == 'up'
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    # Job-level, not workflow-level: an unrelated label skips this job, and a
-    # skipped job must not cancel a build already in flight. `cleanup` shares
-    # the group, so closing the PR cancels a build that would only be deleted.
+    # A second `/preview` on the same pull request supersedes a build still
+    # running. `cleanup` shares the group, so closing the pull request cancels
+    # a build that would only be deleted.
     concurrency:
-      group: preview-images-${{ github.event.pull_request.number }}-${{ matrix.component }}
+      group: preview-images-${{ github.event.issue.number }}-${{ matrix.component }}
       cancel-in-progress: true
     permissions:
       contents: read
@@ -52,12 +108,12 @@ jobs:
             version-arg: VITE_APP_VERSION
     env:
       IMAGE: ${{ github.repository }}-${{ matrix.component }}-preview
-      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-      PR_NUMBER: ${{ github.event.pull_request.number }}
+      HEAD_SHA: ${{ needs.command.outputs.sha }}
+      PR_NUMBER: ${{ github.event.issue.number }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ needs.command.outputs.sha }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
@@ -69,9 +125,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # `sha-<full head sha>` is what a deployer pins to: it only exists once this
-      # exact commit's image finished pushing, so its presence is the "image is
-      # ready" signal. `pr-<number>` moves with every push and is for humans.
+      # `sha-<full head sha>` is what the deployer pins to: it only exists once
+      # this exact commit's image finished pushing, so its presence is the
+      # "image is ready" signal. `pr-<number>` moves with every build and is for
+      # humans.
       - name: Build and push
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
@@ -95,13 +152,98 @@ jobs:
         run: |
           echo "Pushed \`${REGISTRY}/${IMAGE}:sha-${HEAD_SHA}\` (also \`pr-${PR_NUMBER}\`)." >> "$GITHUB_STEP_SUMMARY"
 
+  dispatch:
+    name: Dispatch preview ${{ needs.command.outputs.action }}
+    needs: [command, publish]
+    # `down` skips `publish`, `up` waits for both images. A failed or
+    # cancelled build dispatches nothing.
+    if: >-
+      always()
+      && needs.command.result == 'success'
+      && (needs.command.outputs.action == 'down'
+        || (needs.command.outputs.action == 'up' && needs.publish.result == 'success'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ secrets.PREVIEW_DISPATCH_TOKEN }}
+      ACTION: ${{ needs.command.outputs.action }}
+      PR_NUMBER: ${{ github.event.issue.number }}
+      HEAD_SHA: ${{ needs.command.outputs.sha }}
+    steps:
+      - name: Dispatch to ${{ env.DEPLOYER_REPO }}
+        run: |
+          set -euo pipefail
+          if [ -z "${GH_TOKEN}" ]; then
+            echo "::error::PREVIEW_DISPATCH_TOKEN is not set - see .github/AGENTS.md, \"Preview Images\"."
+            exit 1
+          fi
+          if [ "${ACTION}" = up ]; then
+            gh workflow run "${DEPLOYER_WORKFLOW}" -R "${DEPLOYER_REPO}" -f action=up -f pr="${PR_NUMBER}" -f sha="${HEAD_SHA}"
+          else
+            gh workflow run "${DEPLOYER_WORKFLOW}" -R "${DEPLOYER_REPO}" -f action=down -f pr="${PR_NUMBER}"
+          fi
+
+  report-build-failure:
+    name: Report failed preview build
+    needs: [command, publish]
+    if: always() && needs.publish.result == 'failure'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PR_NUMBER: ${{ github.event.issue.number }}
+      HEAD_SHA: ${{ needs.command.outputs.sha }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - name: Comment on the pull request
+        run: |
+          gh pr comment "${PR_NUMBER}" -R "${GITHUB_REPOSITORY}" \
+            --body "**Preview not deployed** at ${HEAD_SHA:0:7}: the image build failed. See [the run](${RUN_URL})."
+
+  teardown:
+    name: Dispatch preview down
+    # Every closed or merged same-repository pull request on which someone
+    # with write access ever commented `/preview`. Each dispatch costs the private deployer repository a billed
+    # minute, so pull requests that never commented `/preview` (Renovate's,
+    # most others) send none.
+    if: >-
+      github.event_name == 'pull_request'
+      && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+    steps:
+      - name: Check whether a preview was requested
+        id: requested
+        run: |
+          set -euo pipefail
+          count=$(gh api --paginate "/repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" \
+            --jq '[.[] | select((.body | gsub("\\s+$"; "")) == "/preview"
+              and (.author_association | IN("OWNER", "MEMBER", "COLLABORATOR")))] | length' | awk '{ n += $1 } END { print n + 0 }')
+          echo "requested=$([ "${count}" -gt 0 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+      - name: Dispatch to ${{ env.DEPLOYER_REPO }}
+        if: steps.requested.outputs.requested == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.PREVIEW_DISPATCH_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${GH_TOKEN}" ]; then
+            echo "::error::PREVIEW_DISPATCH_TOKEN is not set - the deployer's daily check removes the preview instead."
+            exit 1
+          fi
+          gh workflow run "${DEPLOYER_WORKFLOW}" -R "${DEPLOYER_REPO}" -f action=down -f pr="${PR_NUMBER}"
+
   cleanup:
     name: Delete ${{ matrix.component }} preview images
-    # Runs for every closed same-repository PR, labelled or not: the label may
-    # have been removed before closing, and the images it left behind still
-    # need to go. Nothing to delete is not an error.
+    # Runs for every closed same-repository PR: nothing to delete is not an
+    # error, and the check costs nothing in this public repository.
     if: >-
-      github.event.action == 'closed'
+      github.event_name == 'pull_request'
       && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -121,7 +263,7 @@ jobs:
       PR_NUMBER: ${{ github.event.pull_request.number }}
     steps:
       # A version belongs to this PR when one of its tags is `pr-<number>`. Older
-      # pushes of the same PR lost that tag to the newer image, so they are
+      # builds of the same PR lost that tag to the newer image, so they are
       # matched by their `sha-` tag against the PR's commits instead.
       - name: Delete this pull request's image versions
         run: |

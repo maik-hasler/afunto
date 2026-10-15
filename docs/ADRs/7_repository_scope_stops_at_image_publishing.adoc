@@ -13,7 +13,7 @@ Accepted
 
 [NOTE]
 ====
-*Extended by ADR-16 (2026-10-15).* Besides release images on a version tag, this repository now also publishes short-lived `-preview` images for pull requests labelled `preview`. The boundary below is unchanged: deploying them happens outside this repository, which still holds no credential for any environment.
+*Extended by ADR-16 (2026-10-15).* Besides release images on a version tag, this repository now also publishes short-lived `-preview` images for pull requests a maintainer comments `/preview` on, and dispatches the deployer's workflow in `mgmt-hetzner` with a token that may start workflows there and nothing else. Deploying still happens outside this repository, which reaches no host and holds no credential for one.
 ====
 
 === Context

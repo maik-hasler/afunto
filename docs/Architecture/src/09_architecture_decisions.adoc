@@ -117,7 +117,7 @@ The following table lists the relevant architecture decisions. Each decision lin
 
 |16
 |PR preview images
-|Build and push `-preview` images for pull requests labelled `preview` and delete them when the pull request closes; deploying them stays outside this repository.
+|`/preview` on a pull request builds `-preview` images and dispatches the deploy to `mgmt-hetzner`; close or merge tears it down and deletes the images. Deploying stays outside this repository.
 |Accepted
 |2026-10-15
 |link:ADRs/16_pr_preview_images.html[PR preview images]
