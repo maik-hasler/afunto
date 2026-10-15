@@ -115,6 +115,13 @@ The following table lists the relevant architecture decisions. Each decision lin
 |2026-10-12
 |link:ADRs/15_no_email_from_the_backend.html[No email]
 
+|16
+|PR preview images
+|Build and push `-preview` images for pull requests labelled `preview` and delete them when the pull request closes; deploying them stays outside this repository.
+|Accepted
+|2026-10-15
+|link:ADRs/16_pr_preview_images.html[PR preview images]
+
 |===
 
 See <<section-solution-strategy>> for how the key decisions map to the quality goals.

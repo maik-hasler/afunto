@@ -11,6 +11,7 @@
 ├── keycloak-realm-import.yml   Verifies the committed realm still imports on the Keycloak version the released image is built from, and that its ${VAR} placeholders actually resolve
 ├── codeql.yml                  CodeQL advanced setup (csharp + javascript-typescript), report-only findings in the Security tab - see "CodeQL" below
 ├── publish.yml                 Tag-triggered: build + push backend/frontend/keycloak to GHCR, create a GitHub Release - see "Publish Workflows" below
+├── preview-images.yml          PR labelled `preview`: build + push `-preview` images to GHCR, delete them on close - see "Preview Images" below
 ├── release-rc.yml              Promotes a release/v* branch into a real tag (used by Claude Code on the web)
 ├── mutation-tests.yml          Manual (workflow_dispatch): Stryker.NET over Domain + Application and StrykerJS over frontend src/lib, report-only
 ├── lint.yml                    Ban em/en dashes + EditorConfig check
@@ -78,7 +79,7 @@ All components share a single unified repo-level tag, published to GHCR - see [V
 
 **Full release:** Tag without `-rc` suffix → images published + `latest` tag updated.
 
-Publishing is where this repository's involvement ends. Nothing here runs, hosts, or reaches into a running environment, and nothing here holds a credential for one.
+Publishing is where this repository's involvement ends (the same holds for the PR images in "Preview Images" below). Nothing here runs, hosts, or reaches into a running environment, and nothing here holds a credential for one.
 
 ### Publish flow (backend/frontend/keycloak)
 1. Run full test suite - three parallel jobs (`backend-fast-tests`/`backend-integration-tests`/`backend-visual-tests`, same split as `dotnet.yml`) that `publish-backend`, `publish-frontend`, and `publish-keycloak` all wait on via `needs:` before building anything, so a test failure blocks every image, not just the backend's. `publish-frontend` additionally `needs:` the `frontend-checks` job, which calls the reusable `frontend-checks.yml` workflow (lint/format/i18n/nginx-header checks + type-check + unit tests + a container smoke test) - see that workflow's own header comment for what `publish-frontend` skipped before #1733; keycloak has no additional test gate beyond the shared backend suite. `publish-backend` additionally `needs:` `backend-image-health-check` (#2204): a job that builds the real backend image, boots Postgres/Keycloak/RustFS containers on a Docker network, runs the image against them with `ASPNETCORE_ENVIRONMENT=Production` and `Database__MigrateOnStartup=true`, and asserts `/health` goes green before any image is allowed to publish - this is the only place the released image itself (not `dotnet run`) is ever booted before it ships, and the only place the backend's Production startup path runs against real backing services
@@ -99,6 +100,18 @@ the modern recommended mode where a language supports it). No `paths:` filter - 
 status checks" above for why that's fine here specifically. Runs on push/PR to main plus a
 weekly `schedule:`; findings land in the Security tab, same as the Trivy scans above. Never a
 required check, so it cannot block a merge or a release either way.
+
+## Preview Images (`preview-images.yml`, ADR-16)
+
+The one image path that is not tag-triggered. It exists so an operator outside this repository can run a short-lived stack per pull request; this file is the contract that operator reads.
+
+- **Trigger:** `pull_request` `labeled`/`synchronize`/`reopened`, built only when the PR carries the `preview` label and comes from this repository (never a fork). An unrelated label is skipped and does not cancel a running build (job-level `concurrency`).
+- **Packages:** `ghcr.io/<owner>/afunto-backend-preview`, `ghcr.io/<owner>/afunto-frontend-preview` - separate from the release packages so their tag lists never mix.
+- **Tags:** `sha-<full head sha>` (immutable, pin to this) and `pr-<number>` (moves with every push).
+- **Ready signal:** a deployer deploys a PR only when **both** packages carry `sha-<the PR's current head sha>`. Missing means still building or failed; keep the running stack and check again later. Never deploy `pr-<number>`, which may point at an older commit while the newer one builds.
+- **Cleanup:** on `closed`, the `cleanup` job deletes every version tagged `pr-<number>` or `sha-<any commit of the PR>`, with the workflow's own `GITHUB_TOKEN`. Removing the label alone stops builds but keeps the images until close.
+- **No gate:** no tests, Trivy scan, SBOM or provenance - the PR's own CI gates the merge, and these images never become a release.
+- **One-time setup:** the first run creates both packages as private. Make them public in their package settings, or give the deployer a `read:packages` token.
 
 ## Cutting a release from Claude Code on the web
 

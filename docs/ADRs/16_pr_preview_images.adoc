@@ -1,0 +1,47 @@
+== 16. Pull Request Preview Images
+
+=== Status
+Accepted
+
+=== Date
+2026-10-15
+
+=== Context
+Some pull requests change what a person sees, and the maintainer wants to click through such a change in a running, publicly reachable instance before merging it. There is one deployed environment, and a second permanent one is more than the project wants to pay for. ADR-7 stops this repository at publishing release images on a version tag, so a pull request has no image anything could run.
+
+The deployment side lives in the private `mgmt-hetzner` repository: it runs one short-lived stack per labelled pull request (frontend and backend per pull request; a database, a Keycloak realm and a bucket per pull request on a shared preview Postgres, Keycloak and object store kept apart from production), and tears each stack down again once its pull request no longer qualifies. That side needs images to pull, and a reliable way to tell an image for the pull request's current commit from one that is still building.
+
+=== Decision
+`.github/workflows/preview-images.yml` builds and pushes `afunto-backend-preview` and `afunto-frontend-preview` for every same-repository pull request carrying the `preview` label, on labelling and on every later push, and deletes that pull request's image versions when it closes.
+
+Each image is tagged twice: `sha-<full head commit sha>`, which a deployer pins to, and `pr-<number>`, which moves with every push. A `sha-` tag exists only once that exact commit's image finished pushing, so its presence for both components is the "ready to deploy" signal; a deployer that does not find it keeps whatever it already runs and checks again later.
+
+Nothing else changes in ADR-7's boundary: this repository still deploys nothing, holds no credential for any environment, and knows no host name. The deployer reads the label and the head commit from the public GitHub API, so no token flows from here to `mgmt-hetzner`.
+
+=== Rationale
+* Separate `-preview` packages keep pull request tags out of the release packages' tag list and let them be deleted without touching anything a release consumer pulls.
+* The label is the closest GitHub offers to a "deploy this" button on a pull request, and only someone with triage access can set it.
+* Fork pull requests are excluded: their code would otherwise be built with this repository's package-write token and deployed publicly.
+* Preview images skip the release path's test gate, Trivy scan, SBOM and provenance. They are for looking at a change, the pull request's own CI still gates the merge, and the images never become a release.
+
+=== Considered Alternatives
+
+==== Run the preview inside a GitHub Actions runner behind a tunnel
+Boot the whole stack in the runner, as `publish.yml`'s `backend-image-health-check` already does, and expose it through a Cloudflare quick tunnel.
+
+* Pros
+** No change on the production host at all, no secret, cleanup is the runner ending
+* Cons
+** A random URL per run, at most six hours per job, and several minutes of start-up every time
+** Rejected by the maintainer in favour of stable per-pull-request URLs that live as long as the pull request
+
+==== Push preview tags into the release packages
+* Pros
+** No one-time package setup
+* Cons
+** Every pull request's tags appear next to the release versions, and cleanup has to be careful never to touch a release version
+
+=== Consequences
+* The two `-preview` packages are created by the first run as private packages. Either make them public once (package settings, Change visibility) or give the deployer a `read:packages` token.
+* Removing the label stops new builds but leaves the images until the pull request closes; the deployer removes the stack as soon as the label is gone.
+* Cleanup deletes package versions with the workflow's own `GITHUB_TOKEN`, which relies on the publishing repository holding admin access to the package - the default for a package a workflow created.
