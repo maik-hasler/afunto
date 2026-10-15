@@ -106,6 +106,12 @@ jobs:
             context: frontend
             file: frontend/Dockerfile
             version-arg: VITE_APP_VERSION
+          # Themes, realm and Keycloak version as this pull request has them;
+          # the image takes no version argument.
+          - component: keycloak
+            context: keycloak
+            file: keycloak/Dockerfile
+            version-arg: ''
     env:
       IMAGE: ${{ github.repository }}-${{ matrix.component }}-preview
       HEAD_SHA: ${{ needs.command.outputs.sha }}
@@ -148,8 +154,7 @@ jobs:
           # reserve cache" on comment-triggered runs) must not fail an image that
           # already pushed.
           cache-to: type=gha,mode=max,scope=${{ matrix.component }}-preview-image,ignore-error=true
-          build-args: |
-            ${{ matrix.version-arg }}=0.0.0-pr.${{ env.PR_NUMBER }}
+          build-args: ${{ matrix.version-arg && format('{0}=0.0.0-pr.{1}', matrix.version-arg, env.PR_NUMBER) || '' }}
 
       - name: Summary
         run: |
@@ -158,7 +163,7 @@ jobs:
   dispatch:
     name: Dispatch preview ${{ needs.command.outputs.action }}
     needs: [command, publish]
-    # `down` skips `publish`, `up` waits for both images. A failed or
+    # `down` skips `publish`, `up` waits for all three images. A failed or
     # cancelled build dispatches nothing.
     if: >-
       always()
@@ -258,7 +263,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        component: [backend, frontend]
+        component: [backend, frontend, keycloak]
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       PACKAGE: ${{ github.event.repository.name }}-${{ matrix.component }}-preview
