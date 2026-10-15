@@ -6,7 +6,11 @@ export const IMAGE_UPLOAD_TYPES: readonly string[] = [
 	"image/png",
 	"image/webp",
 ];
-export const MAX_IMAGE_UPLOAD_BYTES = 2 * 1024 * 1024;
+// Caps the file the user picks, not what gets uploaded: ImageCropModal re-encodes
+// every image to a small fixed size, so the backend's 2 MB limit applies to the
+// cropped output. This cap only keeps the browser from decoding absurdly large
+// files; typical phone photos (3-15 MB) must pass it.
+export const MAX_IMAGE_SOURCE_BYTES = 20 * 1024 * 1024;
 
 export const IMAGE_UPLOAD_ACCEPT = IMAGE_UPLOAD_TYPES.join(",");
 
@@ -54,7 +58,7 @@ export function truncateFileName(fileName: string): string {
 
 export function getImageUploadHint(t: TFunction, lng: string): string {
 	return t("imageUpload.hint", {
-		max: formatFileSize(MAX_IMAGE_UPLOAD_BYTES, lng),
+		max: formatFileSize(MAX_IMAGE_SOURCE_BYTES, lng),
 	});
 }
 
@@ -68,11 +72,11 @@ export function validateImageUpload(
 	if (!IMAGE_UPLOAD_TYPES.includes(file.type))
 		return t("imageUpload.wrongType", { fileName });
 
-	if (file.size > MAX_IMAGE_UPLOAD_BYTES)
+	if (file.size > MAX_IMAGE_SOURCE_BYTES)
 		return t("imageUpload.tooLarge", {
 			fileName,
 			size: formatFileSize(file.size, lng),
-			max: formatFileSize(MAX_IMAGE_UPLOAD_BYTES, lng),
+			max: formatFileSize(MAX_IMAGE_SOURCE_BYTES, lng),
 		});
 
 	return null;
