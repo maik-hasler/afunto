@@ -6,6 +6,7 @@ import LoadMoreError from "../LoadMoreError";
 import LoadMoreButton from "../LoadMoreButton";
 import RouteState from "../RouteState";
 import OpportunityCard, { type OpportunityCardItem } from "../OpportunityCard";
+import { useMyEngagementStates } from "../../hooks/useMyEngagementStates";
 
 /** Widens the summary's nullable fields to the card's item shape, which
  * reads `undefined`. */
@@ -64,6 +65,7 @@ export default function OpportunityResultsList({
 	pageSize: number;
 }) {
 	const { t } = useTranslation();
+	const engagementStates = useMyEngagementStates();
 
 	const isInitialLoad = loading && items.length === 0;
 	const countMessage =
@@ -144,6 +146,7 @@ export default function OpportunityResultsList({
 									headingLevel={3}
 									keyword={keyword}
 									withMedia
+									viewerEngagementStatus={engagementStates.get(item.id)}
 								/>
 							))}
 						</ul>

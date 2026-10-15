@@ -235,6 +235,12 @@
       "fewSpotsLeft_other": "Only {{count}} spots left!",
       "noSpotsLeft": "This opportunity is currently full.",
       "unlimitedSpots": "Unlimited spots",
+      "viewerEngagement": {
+        "signedUp": "Signed up",
+        "signUpPending": "Sign-up pending",
+        "interestConfirmed": "Interest confirmed",
+        "interestPending": "Interest sent"
+      },
       "byInterest": "By expression of interest",
       "noOpenSpots": "No open spots",
       "noSpotsYet": "No spots yet",

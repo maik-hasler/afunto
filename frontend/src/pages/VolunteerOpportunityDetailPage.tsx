@@ -12,6 +12,10 @@ import type {
 	VolunteerOpportunityDetails,
 } from "../client";
 import { useApiClient } from "../hooks/useApiClient";
+import {
+	useInvalidateMyEngagementStates,
+	useMyEngagementStates,
+} from "../hooks/useMyEngagementStates";
 import { useOnlineStatus } from "../hooks/useOnlineStatus";
 import {
 	computeSpotsLeft,
@@ -52,6 +56,7 @@ import ModalLoadingFallback from "../components/ModalLoadingFallback";
 import PageHeaderBand from "../components/PageHeaderBand";
 import OpportunityCard, {
 	type OpportunityCardItem,
+	viewerEngagementChip,
 } from "../components/OpportunityCard";
 import RouteState from "../components/RouteState";
 import WarningBanner from "../components/WarningBanner";
@@ -285,6 +290,8 @@ export default function VolunteerOpportunityDetailPage() {
 	const location = useLocation();
 	const api = useApiClient();
 	const { t, i18n } = useTranslation();
+	const engagementStates = useMyEngagementStates();
+	const invalidateMyEngagementStates = useInvalidateMyEngagementStates();
 
 	const [opportunity, setOpportunity] =
 		useState<VolunteerOpportunityDetails | null>(null);
@@ -509,6 +516,7 @@ export default function VolunteerOpportunityDetailPage() {
 			);
 			setWithdrawTarget(null);
 			load();
+			void invalidateMyEngagementStates();
 		} catch (err) {
 			setWithdrawError(
 				getApiErrorMessage(
@@ -1034,6 +1042,18 @@ export default function VolunteerOpportunityDetailPage() {
 										<ul className="space-y-2">
 											{upcomingTimeSlots.map((ts) => {
 												const capacityInput = toCapacityInput(ts);
+												const slotEngagement = engagementsBySlot.get(ts.id);
+												// currentUserEngagements holds only Pending and
+												// Confirmed engagements; the generated type says string.
+												const slotEngagementChip = slotEngagement
+													? viewerEngagementChip(
+															slotEngagement.status === "Confirmed"
+																? "Confirmed"
+																: "Pending",
+															opportunity.participationType,
+															t,
+														)
+													: undefined;
 												const clickable =
 													canInteract &&
 													!engagementsBySlot.has(ts.id) &&
@@ -1052,6 +1072,17 @@ export default function VolunteerOpportunityDetailPage() {
 														</span>
 
 														<span className="flex shrink-0 items-center gap-1.5 text-xs text-gray-600">
+															{/* The row a viewer already holds says so, rather
+															than only dropping its chevron (#2079). */}
+															{slotEngagementChip && (
+																<Chip
+																	data-testid="opportunity-time-slot-viewer-engagement"
+																	tone={slotEngagementChip.tone}
+																	size="sm"
+																>
+																	{slotEngagementChip.label}
+																</Chip>
+															)}
 															{slotCapacityLabel(capacityInput, t)}
 															{clickable && (
 																<ChevronRightIcon className="h-3.5 w-3.5 text-gray-400" />
@@ -1308,6 +1339,7 @@ export default function VolunteerOpportunityDetailPage() {
 											key={opp.id}
 											item={toCardItem(opp)}
 											headingLevel={3}
+											viewerEngagementStatus={engagementStates.get(opp.id)}
 										/>
 									))}
 								</ul>

@@ -7,6 +7,7 @@ import OpportunityCardSkeleton from "./OpportunityCardSkeleton";
 import RouteState from "./RouteState";
 import { useApiClient } from "../hooks/useApiClient";
 import { useLoadMore } from "../hooks/useLoadMore";
+import { useMyEngagementStates } from "../hooks/useMyEngagementStates";
 import { fetchVolunteerOpportunities } from "../lib/volunteerOpportunities";
 import { ArrowRightIcon } from "./icons";
 
@@ -40,6 +41,7 @@ export default function LatestOpportunitiesSection() {
 	const { t } = useTranslation();
 	const api = useApiClient();
 	const titleId = useId();
+	const engagementStates = useMyEngagementStates();
 
 	const { items, loading, error, errorIsOffline, retryLoadMore } =
 		useLoadMore<VolunteerOpportunitySummary>((pageNumber) =>
@@ -106,6 +108,7 @@ export default function LatestOpportunitiesSection() {
 							item={toCardItem(item)}
 							headingLevel={3}
 							withMedia
+							viewerEngagementStatus={engagementStates.get(item.id)}
 						/>
 					))}
 				</ul>

@@ -26,6 +26,7 @@ import {
 	MapPinIcon,
 } from "./icons";
 import { CategoryGlyph } from "./VolunteerOpportunitiesList/CategoryGlyph";
+import type { ActiveEngagementStatus } from "../lib/engagementStatus";
 
 // `null | undefined` throughout rather than one or the other: the two DTOs
 // that satisfy this interface disagree about which they use for an absent
@@ -87,6 +88,33 @@ export function capacityChip(
 	}
 }
 
+/**
+ * The viewer's own commitment to this opportunity (#2079). Worded per
+ * participation type, because an expression of interest is not an
+ * "Eintragung" (see frontend/AGENTS.md's Copy Conventions).
+ */
+export function viewerEngagementChip(
+	status: ActiveEngagementStatus,
+	participationType: string,
+	t: TFunction,
+): { tone: ChipTone; label: string } {
+	const isInterest = participationType === "IndividualContact";
+	if (status === "Confirmed") {
+		return {
+			tone: "success",
+			label: isInterest
+				? t("opportunities.viewerEngagement.interestConfirmed")
+				: t("opportunities.viewerEngagement.signedUp"),
+		};
+	}
+	return {
+		tone: "warning",
+		label: isInterest
+			? t("opportunities.viewerEngagement.interestPending")
+			: t("opportunities.viewerEngagement.signUpPending"),
+	};
+}
+
 function dateLine(
 	item: OpportunityCardItem,
 	t: TFunction,
@@ -136,6 +164,7 @@ export default function OpportunityCard({
 	headingLevel = 2,
 	keyword,
 	withMedia = false,
+	viewerEngagementStatus,
 }: {
 	item: OpportunityCardItem;
 
@@ -153,6 +182,12 @@ export default function OpportunityCard({
 	 * only ever show placeholders.
 	 */
 	withMedia?: boolean;
+	/**
+	 * The signed-in viewer's own engagement state on this opportunity, from
+	 * `useMyEngagementStates` - a per-viewer fact neither listing DTO carries
+	 * (#2079). Absent for a visitor with no active engagement here.
+	 */
+	viewerEngagementStatus?: ActiveEngagementStatus;
 }) {
 	const { t, i18n } = useTranslation();
 	const quotes = quoteMarks(i18n.language);
@@ -160,6 +195,9 @@ export default function OpportunityCard({
 	const capacity = capacityChip(getOpportunityCapacity(item), t);
 	const date = dateLine(item, t, i18n.language);
 	const DateIcon = date.Icon;
+	const viewerEngagement = viewerEngagementStatus
+		? viewerEngagementChip(viewerEngagementStatus, item.participationType, t)
+		: undefined;
 	const title = pickLocalizedText(item.titleDe, item.titleEn, i18n.language);
 	const description = pickLocalizedText(
 		item.descriptionDe,
@@ -231,6 +269,16 @@ export default function OpportunityCard({
 						<Chip tone="neutral" size="sm" className="shrink-0">
 							{formatOccurrence(item.occurrence, t)}
 						</Chip>
+						{viewerEngagement && (
+							<Chip
+								data-testid="opportunity-viewer-engagement"
+								tone={viewerEngagement.tone}
+								size="sm"
+								className="shrink-0"
+							>
+								{viewerEngagement.label}
+							</Chip>
+						)}
 
 						<Chip
 							data-testid="opportunity-signup-mechanism"

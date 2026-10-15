@@ -228,3 +228,45 @@ describe("OpportunityCard footer row", () => {
 		);
 	});
 });
+
+describe("OpportunityCard viewer engagement chip (#2079)", () => {
+	it("shows no chip when the viewer holds no engagement", () => {
+		renderCard(base);
+
+		expect(
+			screen.queryByTestId("opportunity-viewer-engagement"),
+		).not.toBeInTheDocument();
+	});
+
+	it.each([
+		["ScheduledSlots", "Confirmed", "Signed up"],
+		["ScheduledSlots", "Pending", "Sign-up pending"],
+		["IndividualContact", "Confirmed", "Interest confirmed"],
+		["IndividualContact", "Pending", "Interest sent"],
+	] as const)(
+		"words a %s opportunity's %s engagement as %s",
+		(participationType, status, label) => {
+			renderWithProviders(
+				<OpportunityCard
+					item={{ ...base, participationType }}
+					viewerEngagementStatus={status}
+				/>,
+			);
+
+			expect(
+				screen.getByTestId("opportunity-viewer-engagement"),
+			).toHaveTextContent(label);
+		},
+	);
+
+	it("uses the 'eintragen' wording in German, not 'anmelden'", () => {
+		renderWithProviders(
+			<OpportunityCard item={base} viewerEngagementStatus="Pending" />,
+			{ lng: "de" },
+		);
+
+		expect(
+			screen.getByTestId("opportunity-viewer-engagement"),
+		).toHaveTextContent("Eintragung ausstehend");
+	});
+});
