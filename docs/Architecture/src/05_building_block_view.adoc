@@ -59,7 +59,7 @@ Contained Building Blocks::
 
 |Identity Provider
 |Third party
-|Keycloak 26.7.4
+|Keycloak 26.8.1
 |Handles user authentication via OIDC Authorization Code Flow. Manages users, roles (`user`, `organisator`, `admin`), and organizations. Issues and signs JWT access tokens.
 
 |Application Database

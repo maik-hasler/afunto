@@ -12,7 +12,7 @@ System_Boundary(afunto, "Afunto") {
 		Container(frontend, "Single Page Application", "React 19, Vite, TypeScript, Tailwind CSS 4", "Provides the web UI for volunteers, organizers and platform admins. Handles OIDC login and token management.")
 		Container(backend, "Backend API", ".NET 10, ASP.NET Core Minimal API", "Implements business logic. Exposes versioned REST API. Validates JWT tokens. Manages data via EF Core.")
 		ContainerDb_Ext(db, "Application Database", "PostgreSQL 18 [third party]", "Stores volunteer opportunities, organizations, engagements, and user associations.")
-		Container_Ext(keycloak, "Identity Provider", "Keycloak 26.7.4 [third party]", "Handles authentication via OIDC. Manages users, roles, and organizations. Issues signed JWT access tokens.")
+		Container_Ext(keycloak, "Identity Provider", "Keycloak 26.8.1 [third party]", "Handles authentication via OIDC. Manages users, roles, and organizations. Issues signed JWT access tokens.")
 }
 
 System_Ext(objectstore, "Object storage (RustFS / S3)", "Stores binary assets: logos, avatars, banners")
