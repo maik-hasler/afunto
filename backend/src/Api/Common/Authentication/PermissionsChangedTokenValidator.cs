@@ -39,8 +39,13 @@ internal static class PermissionsChangedTokenValidator
 	}
 
 	// `iat` has whole-second precision, so a token stamped in the same second as
-	// the change may still carry the old permissions - it counts as "before".
-	// A token without `iat` cannot prove it is newer and is rejected too.
+	// the change cannot be ordered against it. It counts as "after": rejecting it
+	// would also reject the renewal the client fetches right after the 401 - a
+	// self-demotion, or a Keycloak clock a fraction of a second behind the API's,
+	// would then end the session. The price is a token issued in that same second
+	// but before the change keeping the old permissions until it expires, which
+	// is what happened to every token before this check existed.
+	// A token without `iat` cannot prove it is newer and is rejected.
 	internal static bool IsIssuedBefore(JsonWebToken? token, DateTimeOffset permissionsChangedOn)
 	{
 		if (token is null || token.IssuedAt == DateTime.MinValue)
@@ -48,6 +53,6 @@ internal static class PermissionsChangedTokenValidator
 
 		var changedOnWholeSecond = DateTimeOffset.FromUnixTimeSeconds(permissionsChangedOn.ToUnixTimeSeconds());
 
-		return new DateTimeOffset(token.IssuedAt, TimeSpan.Zero) <= changedOnWholeSecond;
+		return new DateTimeOffset(token.IssuedAt, TimeSpan.Zero) < changedOnWholeSecond;
 	}
 }

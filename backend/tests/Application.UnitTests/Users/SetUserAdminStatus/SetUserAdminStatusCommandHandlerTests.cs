@@ -1,6 +1,7 @@
 using Application.Common.Exceptions;
 using Application.Common.Keycloak;
 using Application.Common.Persistence;
+using Application.UnitTests.Common.Time;
 using Application.Users.SetUserAdminStatus.v1;
 using AwesomeAssertions;
 using Domain.AuditLogs;
@@ -175,10 +176,5 @@ public class SetUserAdminStatusCommandHandlerTests
 		// Assert
 		await act.Should().ThrowAsync<ResultFailureException>();
 		await _dbContext.DidNotReceive().GetOrCreateUserAsync(Arg.Any<UserId>(), Arg.Any<CancellationToken>());
-	}
-
-	private sealed class FakeTimeProvider(DateTimeOffset utcNow) : TimeProvider
-	{
-		public override DateTimeOffset GetUtcNow() => utcNow;
 	}
 }

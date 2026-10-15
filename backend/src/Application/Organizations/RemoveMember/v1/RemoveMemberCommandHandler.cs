@@ -11,7 +11,8 @@ namespace Application.Organizations.RemoveMember.v1;
 
 internal sealed class RemoveMemberCommandHandler(
 	IApplicationDbContext dbContext,
-	IKeycloakOrganizationService keycloakOrganizationService)
+	IKeycloakOrganizationService keycloakOrganizationService,
+	TimeProvider timeProvider)
 	: ICommandHandler<RemoveMemberCommand, bool>
 {
 	public async ValueTask<bool> Handle(
@@ -63,7 +64,12 @@ internal sealed class RemoveMemberCommandHandler(
 			var remainingOrganizerOrgs = await dbContext.GetOrganizerOrganizationsAsync(userId, cancellationToken);
 
 			if (remainingOrganizerOrgs.Count == 0)
+			{
 				await keycloakOrganizationService.RevokeOrganizerRoleAsync(userId.Value, cancellationToken);
+
+				var removedUser = await dbContext.GetOrCreateUserAsync(userId, cancellationToken);
+				removedUser.RecordPermissionsChanged(timeProvider.GetUtcNow());
+			}
 		}
 
 		return true;

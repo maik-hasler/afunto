@@ -2,6 +2,7 @@ using Application.Common.Exceptions;
 using Application.Common.Keycloak;
 using Application.Common.Persistence;
 using Application.Organizations.RemoveMember.v1;
+using Application.UnitTests.Common.Time;
 using AwesomeAssertions;
 using Domain.Organizations;
 using Domain.Users;
@@ -17,13 +18,14 @@ public class RemoveMemberCommandHandlerTests
 	private readonly RemoveMemberCommandHandler _sut;
 
 	private static readonly UserId DefaultRequestingUserId = UserId.New();
+	private static readonly DateTimeOffset Now = new(2026, 10, 15, 14, 0, 0, TimeSpan.Zero);
 
 	public RemoveMemberCommandHandlerTests()
 	{
 		_dbContext
 			.GetOrganizerOrganizationsAsync(Arg.Any<UserId>(), Arg.Any<CancellationToken>())
 			.Returns(new List<Organization>());
-		_sut = new RemoveMemberCommandHandler(_dbContext, _keycloakService);
+		_sut = new RemoveMemberCommandHandler(_dbContext, _keycloakService, new FakeTimeProvider(Now));
 	}
 
 	private void AllowRequestingUserInOrg(Guid orgId)
@@ -49,6 +51,14 @@ public class RemoveMemberCommandHandlerTests
 		_dbContext
 			.CountOrganizersAsync(OrganizationId.Create(orgId).GetValueOrThrow(), Arg.Any<CancellationToken>())
 			.Returns(count);
+
+	private User TrackUser(Guid userId)
+	{
+		var id = UserId.Create(userId).GetValueOrThrow();
+		var user = User.Create(id);
+		_dbContext.GetOrCreateUserAsync(id, Arg.Any<CancellationToken>()).Returns(user);
+		return user;
+	}
 
 	private void SetRemainingOrganizerOrganizations(Guid userId, params Organization[] organizations) =>
 		_dbContext
@@ -243,6 +253,7 @@ public class RemoveMemberCommandHandlerTests
 		SetTargetIsOrganizer(orgId, userId, isOrganizer: true);
 		SetOrganizerCount(orgId, 2);
 		SetRemainingOrganizerOrganizations(userId);
+		var removedUser = TrackUser(userId);
 		var command = new RemoveMemberCommand(orgId, userId, DefaultRequestingUserId);
 
 		// Act
@@ -250,6 +261,7 @@ public class RemoveMemberCommandHandlerTests
 
 		// Assert
 		await _keycloakService.Received(1).RevokeOrganizerRoleAsync(userId, cancellationToken);
+		removedUser.PermissionsChangedOn.Should().Be(Now);
 	}
 
 	[Test]
@@ -265,6 +277,7 @@ public class RemoveMemberCommandHandlerTests
 		SetOrganizerCount(orgId, 2);
 		var otherOrg = Organization.Create(OrganizationId.New(), "Other Org").GetValueOrThrow();
 		SetRemainingOrganizerOrganizations(userId, otherOrg);
+		var removedUser = TrackUser(userId);
 		var command = new RemoveMemberCommand(orgId, userId, DefaultRequestingUserId);
 
 		// Act
@@ -272,6 +285,7 @@ public class RemoveMemberCommandHandlerTests
 
 		// Assert
 		await _keycloakService.DidNotReceive().RevokeOrganizerRoleAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
+		removedUser.PermissionsChangedOn.Should().BeNull();
 	}
 
 	[Test]

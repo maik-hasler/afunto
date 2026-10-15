@@ -3,6 +3,7 @@ using Application.Common.Exceptions;
 using Application.Common.Messaging;
 using Application.Common.Persistence;
 using Application.Engagements.ConfirmEngagement.v1;
+using Application.UnitTests.Common.Time;
 using AwesomeAssertions;
 using Domain.Common;
 using Domain.Engagements;
@@ -331,11 +332,6 @@ public class ConfirmEngagementCommandHandlerTests
 
 		streak.LastActiveIsoYear.Should().Be(2026);
 		streak.LastActiveIsoWeek.Should().Be(45);
-	}
-
-	private sealed class FakeTimeProvider(DateTimeOffset utcNow) : TimeProvider
-	{
-		public override DateTimeOffset GetUtcNow() => utcNow;
 	}
 
 	private VolunteerOpportunity CreateDefaultOpportunity() =>

@@ -23,9 +23,9 @@ public class PermissionsChangedTokenTests(IntegrationTestFixture fixture)
 		var (userId, username, password) = await fixture.CreateEphemeralUserAsync(cancellationToken);
 		await adminClient.SetUserAdminStatusAsync(
 			userId, new SetUserAdminStatusRequest { IsAdmin = true }, cancellationToken);
-		await WaitForNextTokenSecondAsync(cancellationToken);
 		var demotedClient = await fixture.CreateAuthenticatedClientAsync(username, password);
 		await demotedClient.ListUsersAsync(1, 20, null, cancellationToken);
+		await WaitForNextTokenSecondAsync(cancellationToken);
 
 		// Act
 		await adminClient.SetUserAdminStatusAsync(
@@ -47,9 +47,8 @@ public class PermissionsChangedTokenTests(IntegrationTestFixture fixture)
 			userId, new SetUserAdminStatusRequest { IsAdmin = true }, cancellationToken);
 		await adminClient.SetUserAdminStatusAsync(
 			userId, new SetUserAdminStatusRequest { IsAdmin = false }, cancellationToken);
-		await WaitForNextTokenSecondAsync(cancellationToken);
 
-		// Act
+		// Act - no wait: a token issued in the second of the change counts as fresh
 		var freshClient = await fixture.CreateAuthenticatedClientAsync(username, password);
 		var act = () => freshClient.ListUsersAsync(1, 20, null, cancellationToken);
 
@@ -66,6 +65,7 @@ public class PermissionsChangedTokenTests(IntegrationTestFixture fixture)
 		var (userId, username, password) = await fixture.CreateEphemeralUserAsync(cancellationToken);
 		var blockedClient = await fixture.CreateAuthenticatedClientAsync(username, password);
 		await blockedClient.GetUserProfileAsync(cancellationToken);
+		await WaitForNextTokenSecondAsync(cancellationToken);
 
 		// Act
 		await adminClient.SetUserEnabledAsync(
@@ -94,12 +94,12 @@ public class PermissionsChangedTokenTests(IntegrationTestFixture fixture)
 			cancellationToken);
 		var memberClient = await fixture.CreateAuthenticatedClientAsync(memberUsername, memberPassword);
 		await memberClient.AcceptInvitationAsync(invitation.InvitationId, cancellationToken);
+		await WaitForNextTokenSecondAsync(cancellationToken);
 
 		// Act
 		await ownerClient.ChangeMemberRoleAsync(
 			org.Id.Value, memberId, new ChangeMemberRoleRequest { Role = "Organizer" }, cancellationToken);
 		var oldTokenAct = () => memberClient.GetOrganizationDetailsAsync(org.Id.Value, cancellationToken);
-		await WaitForNextTokenSecondAsync(cancellationToken);
 		var freshClient = await fixture.CreateAuthenticatedClientAsync(memberUsername, memberPassword);
 		var details = await freshClient.GetOrganizationDetailsAsync(org.Id.Value, cancellationToken);
 
@@ -109,8 +109,8 @@ public class PermissionsChangedTokenTests(IntegrationTestFixture fixture)
 	}
 
 	// `iat` has whole-second precision and the API treats a token stamped in the
-	// same second as the change as issued before it - a token fetched right
-	// after the change must wait for the next second to count as fresh.
+	// same second as the change as issued after it - a token meant to count as
+	// old must be fetched at least one second before the change.
 	private static Task WaitForNextTokenSecondAsync(CancellationToken cancellationToken) =>
 		Task.Delay(TimeSpan.FromMilliseconds(1100), cancellationToken);
 }
