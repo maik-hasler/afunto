@@ -1,0 +1,147 @@
+name: Preview Images
+
+# Builds PR preview images for a pull request carrying the `preview` label and
+# deletes them again once the pull request closes (ADR-16). This repository
+# stops at the images: what pulls and runs them lives outside it, and the
+# contract it reads is documented in .github/AGENTS.md's "Preview Images"
+# section - change that section together with the tag scheme below.
+
+on:
+  pull_request:
+    types: [labeled, synchronize, reopened, closed]
+
+env:
+  REGISTRY: ghcr.io
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Publish ${{ matrix.component }} preview image
+    # Same-repository branches only: a fork's code must never be built into an
+    # image that gets deployed publicly. An unrelated label being added must not
+    # rebuild either.
+    if: >-
+      github.event.action != 'closed'
+      && github.event.pull_request.head.repo.full_name == github.repository
+      && contains(github.event.pull_request.labels.*.name, 'preview')
+      && (github.event.action != 'labeled' || github.event.label.name == 'preview')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Job-level, not workflow-level: an unrelated label skips this job, and a
+    # skipped job must not cancel a build already in flight. `cleanup` shares
+    # the group, so closing the PR cancels a build that would only be deleted.
+    concurrency:
+      group: preview-images-${{ github.event.pull_request.number }}-${{ matrix.component }}
+      cancel-in-progress: true
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - component: backend
+            context: backend
+            file: backend/src/Api/Dockerfile
+            version-arg: APP_VERSION
+          - component: frontend
+            context: frontend
+            file: frontend/Dockerfile
+            version-arg: VITE_APP_VERSION
+    env:
+      IMAGE: ${{ github.repository }}-${{ matrix.component }}-preview
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # `sha-<full head sha>` is what a deployer pins to: it only exists once this
+      # exact commit's image finished pushing, so its presence is the "image is
+      # ready" signal. `pr-<number>` moves with every push and is for humans.
+      - name: Build and push
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.file }}
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE }}:sha-${{ env.HEAD_SHA }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE }}:pr-${{ env.PR_NUMBER }}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ env.HEAD_SHA }}
+          cache-from: |
+            type=gha,scope=${{ matrix.component }}-preview-image
+            type=gha,scope=${{ matrix.component }}-image
+          cache-to: type=gha,mode=max,scope=${{ matrix.component }}-preview-image
+          build-args: |
+            ${{ matrix.version-arg }}=0.0.0-pr.${{ env.PR_NUMBER }}
+
+      - name: Summary
+        run: |
+          echo "Pushed \`${REGISTRY}/${IMAGE}:sha-${HEAD_SHA}\` (also \`pr-${PR_NUMBER}\`)." >> "$GITHUB_STEP_SUMMARY"
+
+  cleanup:
+    name: Delete ${{ matrix.component }} preview images
+    # Runs for every closed same-repository PR, labelled or not: the label may
+    # have been removed before closing, and the images it left behind still
+    # need to go. Nothing to delete is not an error.
+    if: >-
+      github.event.action == 'closed'
+      && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    concurrency:
+      group: preview-images-${{ github.event.pull_request.number }}-${{ matrix.component }}
+      cancel-in-progress: true
+    permissions:
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        component: [backend, frontend]
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PACKAGE: ${{ github.event.repository.name }}-${{ matrix.component }}-preview
+      OWNER: ${{ github.repository_owner }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+    steps:
+      # A version belongs to this PR when one of its tags is `pr-<number>`. Older
+      # pushes of the same PR lost that tag to the newer image, so they are
+      # matched by their `sha-` tag against the PR's commits instead.
+      - name: Delete this pull request's image versions
+        run: |
+          set -euo pipefail
+          base="/users/${OWNER}/packages/container/${PACKAGE}/versions"
+          if ! versions=$(gh api --paginate "${base}" 2>/dev/null); then
+            echo "No ${PACKAGE} package yet - nothing to delete."
+            exit 0
+          fi
+          shas=$(gh api --paginate "/repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}/commits" --jq '.[].sha')
+          wanted=$(printf 'pr-%s\n' "${PR_NUMBER}"; printf 'sha-%s\n' ${shas})
+          ids=$(jq -r --arg wanted "${wanted}" '
+            ($wanted | split("\n")) as $w
+            | .[] | select(any(.metadata.container.tags[]; IN($w[]))) | .id
+          ' <<< "${versions}")
+          if [ -z "${ids}" ]; then
+            echo "No ${PACKAGE} versions for PR #${PR_NUMBER}."
+            exit 0
+          fi
+          for id in ${ids}; do
+            gh api -X DELETE "${base}/${id}"
+            echo "Deleted ${PACKAGE} version ${id}."
+          done
