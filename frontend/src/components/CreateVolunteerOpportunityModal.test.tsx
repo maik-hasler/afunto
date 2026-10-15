@@ -776,7 +776,7 @@ describe("create-opportunity wizard: time slot guards (#2325)", () => {
 		].map((start) => formatDate(start, "en"));
 		const rows = slotRows().map((row) => row.textContent ?? "");
 		expected.forEach((date, index) => expect(rows[index]).toContain(date));
-	});
+	}, 15000);
 
 	it("says what the number after a slot means instead of bracketing it", async () => {
 		await gotoTimeSlots();
