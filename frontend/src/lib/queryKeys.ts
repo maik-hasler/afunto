@@ -37,6 +37,12 @@ export const queryKeys = {
 		streaks: () => [...queryKeys.profile.all, "streaks"] as const,
 	},
 
+	engagements: {
+		all: ["engagements"] as const,
+		mineUpcoming: () =>
+			[...queryKeys.engagements.all, "mine", "upcoming"] as const,
+	},
+
 	dashboard: {
 		all: ["dashboard"] as const,
 		layout: () => [...queryKeys.dashboard.all, "layout"] as const,

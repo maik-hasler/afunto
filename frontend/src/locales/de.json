@@ -235,6 +235,12 @@
       "fewSpotsLeft_other": "Nur noch {{count}} Plätze!",
       "noSpotsLeft": "Dieser Einsatz ist aktuell ausgebucht.",
       "unlimitedSpots": "Unbegrenzt viele Plätze",
+      "viewerEngagement": {
+        "signedUp": "Eingetragen",
+        "signUpPending": "Eintragung ausstehend",
+        "interestConfirmed": "Interesse bestätigt",
+        "interestPending": "Interesse bekundet"
+      },
       "byInterest": "Interessenbekundung",
       "noOpenSpots": "Keine offenen Plätze",
       "noSpotsYet": "Noch keine Plätze",

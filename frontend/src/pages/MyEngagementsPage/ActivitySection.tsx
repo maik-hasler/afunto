@@ -7,6 +7,7 @@ import type { EngagementSummary, MyInvitationDto } from "../../client";
 import { useApiClient } from "../../hooks/useApiClient";
 import { useInvalidateMyOrganizations } from "../../hooks/useMyOrganizations";
 import { useLoadMore } from "../../hooks/useLoadMore";
+import { useInvalidateMyEngagementStates } from "../../hooks/useMyEngagementStates";
 import { getApiErrorMessage } from "../../lib/apiError";
 import { refreshAccessTokenAfterRoleGrant } from "../../lib/authRefresh";
 import {
@@ -65,6 +66,7 @@ function isInterestEngagement(e: EngagementSummary): boolean {
 
 export default function ActivitySection() {
 	const api = useApiClient();
+	const invalidateMyEngagementStates = useInvalidateMyEngagementStates();
 	const invalidateMyOrganizations = useInvalidateMyOrganizations();
 	const auth = useAuth();
 	const { t, i18n } = useTranslation();
@@ -181,6 +183,7 @@ export default function ActivitySection() {
 					e.id === confirmWithdrawId ? { ...e, status: updated.status } : e,
 				),
 			);
+			void invalidateMyEngagementStates();
 			dispatchToast(
 				"success",
 				t(

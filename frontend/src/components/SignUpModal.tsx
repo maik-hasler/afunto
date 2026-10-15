@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import type { TimeSlotDetail } from "../client";
 import { useApiClient } from "../hooks/useApiClient";
+import { useInvalidateMyEngagementStates } from "../hooks/useMyEngagementStates";
 import {
 	computeSpotsLeft,
 	formatDateTimeRange,
@@ -45,6 +46,7 @@ export default function SignUpModal({
 	onSuccess,
 }: Props) {
 	const api = useApiClient();
+	const invalidateMyEngagementStates = useInvalidateMyEngagementStates();
 	const { t, i18n } = useTranslation();
 
 	function isAlreadySignedUp(timeSlotId: string): boolean {
@@ -105,6 +107,7 @@ export default function SignUpModal({
 					message: !isScheduledSlots ? message : null,
 				},
 			});
+			void invalidateMyEngagementStates();
 			onSuccess();
 			onClose();
 		} catch (err) {

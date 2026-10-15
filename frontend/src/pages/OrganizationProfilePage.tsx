@@ -13,6 +13,7 @@ import DetailLoadFailure from "../components/DetailLoadFailure";
 import EmptyState from "../components/EmptyState";
 import Button from "../components/Button";
 import { useApiClient } from "../hooks/useApiClient";
+import { useMyEngagementStates } from "../hooks/useMyEngagementStates";
 import { usePageDescription } from "../hooks/usePageDescription";
 import { usePageTitle } from "../hooks/usePageTitle";
 import { reportIntentSigninArgs } from "../lib/reportIntent";
@@ -35,6 +36,7 @@ export default function OrganizationProfilePage() {
 	const auth = useAuth();
 	const location = useLocation();
 	const { t, i18n } = useTranslation();
+	const engagementStates = useMyEngagementStates();
 
 	const [profile, setProfile] =
 		useState<PublicOrganizationProfileResponse | null>(null);
@@ -192,7 +194,12 @@ export default function OrganizationProfilePage() {
 				) : (
 					<ul className="grid gap-4 sm:grid-cols-2">
 						{profile.openOpportunities.map((opp) => (
-							<OpportunityCard key={opp.id} item={opp} headingLevel={3} />
+							<OpportunityCard
+								key={opp.id}
+								item={opp}
+								headingLevel={3}
+								viewerEngagementStatus={engagementStates.get(opp.id)}
+							/>
 						))}
 					</ul>
 				)}
