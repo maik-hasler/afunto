@@ -3,7 +3,7 @@ import type { TFunction } from "i18next";
 import {
 	IMAGE_UPLOAD_ACCEPT,
 	IMAGE_UPLOAD_TYPES,
-	MAX_IMAGE_UPLOAD_BYTES,
+	MAX_IMAGE_SOURCE_BYTES,
 	formatFileSize,
 	getImageUploadHint,
 	truncateFileName,
@@ -30,7 +30,7 @@ describe("formatFileSize", () => {
 	});
 
 	it("drops a trailing zero fraction", () => {
-		expect(formatFileSize(MAX_IMAGE_UPLOAD_BYTES, "de")).toBe("2 MB");
+		expect(formatFileSize(MAX_IMAGE_SOURCE_BYTES, "de")).toBe("20 MB");
 	});
 
 	it("falls back to whole kilobytes below a megabyte", () => {
@@ -67,7 +67,7 @@ describe("truncateFileName", () => {
 describe("getImageUploadHint", () => {
 	it("interpolates the ceiling instead of hardcoding it in the string", () => {
 		expect(getImageUploadHint(fakeT(), "de")).toBe(
-			'imageUpload.hint:{"max":"2 MB"}',
+			'imageUpload.hint:{"max":"20 MB"}',
 		);
 	});
 });
@@ -81,7 +81,12 @@ describe("validateImageUpload", () => {
 	});
 
 	it("accepts a file exactly at the size ceiling", () => {
-		const file = fakeFile("logo.png", "image/png", MAX_IMAGE_UPLOAD_BYTES);
+		const file = fakeFile("logo.png", "image/png", MAX_IMAGE_SOURCE_BYTES);
+		expect(validateImageUpload(file, fakeT(), "de")).toBeNull();
+	});
+
+	it("accepts a typical phone photo above the 2 MB backend limit (#2404)", () => {
+		const file = fakeFile("IMG_1234.jpg", "image/jpeg", 8 * 1024 * 1024);
 		expect(validateImageUpload(file, fakeT(), "de")).toBeNull();
 	});
 
@@ -100,14 +105,14 @@ describe("validateImageUpload", () => {
 	});
 
 	it("names the file, its size and the ceiling in the too-large message", () => {
-		const file = fakeFile("huge.png", "image/png", 4.2 * 1024 * 1024);
+		const file = fakeFile("huge.png", "image/png", 24.5 * 1024 * 1024);
 		expect(validateImageUpload(file, fakeT(), "de")).toBe(
-			'imageUpload.tooLarge:{"fileName":"huge.png","size":"4,2 MB","max":"2 MB"}',
+			'imageUpload.tooLarge:{"fileName":"huge.png","size":"24,5 MB","max":"20 MB"}',
 		);
 	});
 
 	it("reports the wrong type first when a file breaks both rules", () => {
-		const file = fakeFile("movie.mp4", "video/mp4", 8 * 1024 * 1024);
+		const file = fakeFile("movie.mp4", "video/mp4", 30 * 1024 * 1024);
 		expect(validateImageUpload(file, fakeT(), "de")).toBe(
 			'imageUpload.wrongType:{"fileName":"movie.mp4"}',
 		);
@@ -126,7 +131,7 @@ describe("validateImageUpload", () => {
 		const rejections = [
 			validateImageUpload(fakeFile("notes.txt", "text/plain", 1024), t, "de"),
 			validateImageUpload(
-				fakeFile("huge.png", "image/png", 3 * 1024 * 1024),
+				fakeFile("huge.png", "image/png", 30 * 1024 * 1024),
 				t,
 				"de",
 			),
