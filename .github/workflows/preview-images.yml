@@ -181,9 +181,9 @@ jobs:
             exit 1
           fi
           if [ "${ACTION}" = up ]; then
-            gh workflow run "${DEPLOYER_WORKFLOW}" -R "${DEPLOYER_REPO}" -f action=up -f pr="${PR_NUMBER}" -f sha="${HEAD_SHA}"
+            gh workflow run "${DEPLOYER_WORKFLOW}" -R "${DEPLOYER_REPO}" --ref main -f action=up -f pr="${PR_NUMBER}" -f sha="${HEAD_SHA}"
           else
-            gh workflow run "${DEPLOYER_WORKFLOW}" -R "${DEPLOYER_REPO}" -f action=down -f pr="${PR_NUMBER}"
+            gh workflow run "${DEPLOYER_WORKFLOW}" -R "${DEPLOYER_REPO}" --ref main -f action=down -f pr="${PR_NUMBER}"
           fi
 
   report-build-failure:
@@ -239,7 +239,7 @@ jobs:
             echo "::error::PREVIEW_DISPATCH_TOKEN is not set - the deployer's daily check removes the preview instead."
             exit 1
           fi
-          gh workflow run "${DEPLOYER_WORKFLOW}" -R "${DEPLOYER_REPO}" -f action=down -f pr="${PR_NUMBER}"
+          gh workflow run "${DEPLOYER_WORKFLOW}" -R "${DEPLOYER_REPO}" --ref main -f action=down -f pr="${PR_NUMBER}"
 
   cleanup:
     name: Delete ${{ matrix.component }} preview images
