@@ -144,7 +144,10 @@ jobs:
           cache-from: |
             type=gha,scope=${{ matrix.component }}-preview-image
             type=gha,scope=${{ matrix.component }}-image
-          cache-to: type=gha,mode=max,scope=${{ matrix.component }}-preview-image
+          # ignore-error: a cache that cannot be written (seen as "failed to
+          # reserve cache" on comment-triggered runs) must not fail an image that
+          # already pushed.
+          cache-to: type=gha,mode=max,scope=${{ matrix.component }}-preview-image,ignore-error=true
           build-args: |
             ${{ matrix.version-arg }}=0.0.0-pr.${{ env.PR_NUMBER }}
 
