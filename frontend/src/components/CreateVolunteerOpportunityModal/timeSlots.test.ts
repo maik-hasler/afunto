@@ -3,6 +3,7 @@ import {
 	byStartDateTime,
 	capacityToInput,
 	findOverlappingSlotIds,
+	hasUnaddedSlotInput,
 	isCompleteDateTime,
 	MAX_PARTICIPANTS_LIMIT,
 	overlapsAnySlot,
@@ -20,6 +21,29 @@ describe("isCompleteDateTime (#2373 follow-up)", () => {
 
 	it("rejects a date picked without a time yet", () => {
 		expect(isCompleteDateTime("2026-09-18")).toBe(false);
+	});
+});
+
+describe("hasUnaddedSlotInput (#2388)", () => {
+	it("is false for an untouched add form", () => {
+		expect(hasUnaddedSlotInput({ startDateTime: "", endDateTime: "" })).toBe(
+			false,
+		);
+	});
+
+	it("is true once only a start date is picked", () => {
+		expect(
+			hasUnaddedSlotInput({ startDateTime: "2026-09-18", endDateTime: "" }),
+		).toBe(true);
+	});
+
+	it("is true once only an end is set", () => {
+		expect(
+			hasUnaddedSlotInput({
+				startDateTime: "",
+				endDateTime: "2026-09-18T12:00",
+			}),
+		).toBe(true);
 	});
 });
 

@@ -1284,3 +1284,38 @@ describe("opportunity detail page location (#2330)", () => {
 		expect(screen.getAllByText(/^Express interest by/)).toHaveLength(1);
 	});
 });
+
+describe("opportunity detail page viewer's own slot (#2079)", () => {
+	it.each([
+		["Confirmed", "Signed up"],
+		["Pending", "Sign-up pending"],
+	])(
+		"labels the %s slot the viewer holds, and only that one",
+		async (status, label) => {
+			api.getVolunteerOpportunityDetails.mockResolvedValue({
+				...scheduledSlots,
+				currentUserEngagements: [
+					{
+						id: "44444444-4444-4444-4444-444444444444",
+						status,
+						isCheckedIn: false,
+						timeSlotId: scheduledSlots.timeSlots[0].id,
+						remainingReactivations: 2,
+					},
+				],
+			});
+
+			renderAs(VOLUNTEER_AUTH);
+
+			const chips = await screen.findAllByTestId(
+				"opportunity-time-slot-viewer-engagement",
+			);
+			expect(chips).toHaveLength(1);
+			expect(chips[0]).toHaveTextContent(label);
+			// The held slot is the one row that is no longer a button.
+			expect(screen.getAllByTestId("opportunity-time-slot-row")).toHaveLength(
+				1,
+			);
+		},
+	);
+});

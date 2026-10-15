@@ -79,7 +79,15 @@ describe("CreateVolunteerOpportunityModal a11y", () => {
 		}
 	}
 
+	async function openSlotEditor() {
+		await userEvent.click(
+			screen.getByRole("button", { name: "Add time slot" }),
+		);
+		await screen.findByTestId("time-slot-editor");
+	}
+
 	async function addSlot(start: string, end: string) {
+		await openSlotEditor();
 		await pickDateTime("slot-start", start);
 		await pickDateTime("slot-end", end);
 		await userEvent.click(screen.getByRole("button", { name: "Add" }));
@@ -94,6 +102,7 @@ describe("CreateVolunteerOpportunityModal a11y", () => {
 			vi.setSystemTime(new Date("2026-09-10T06:00:00Z"));
 			open();
 			await gotoDetails();
+			await openSlotEditor();
 
 			await userEvent.click(screen.getByTestId("slot-start-trigger"));
 			const grid = await screen.findByRole("grid");
@@ -107,7 +116,7 @@ describe("CreateVolunteerOpportunityModal a11y", () => {
 		}
 	});
 
-	it("has no violations while the list and the add form flag an overlap (#2325)", async () => {
+	it("has no violations while the list and the slot editor flag an overlap (#2325)", async () => {
 		// Fixed clock-face fixture times stand in for "in the future" - pin the
 		// wall clock behind them, same as the past-dated-day test above, or
 		// DatePicker's future-only day guard (#2325) refuses every pick below.
@@ -119,17 +128,23 @@ describe("CreateVolunteerOpportunityModal a11y", () => {
 			await addSlot("2026-09-10T10:00", "2026-09-10T12:00");
 			await addSlot("2026-09-10T11:00", "2026-09-10T13:00");
 
-			// A third overlapping range left in the boxes, so the pre-add hint and
-			// the two flagged rows are on screen at the same time.
+			// The list and the slot editor (#2388) are never on screen together,
+			// so each gets its own scan.
+			await waitFor(() =>
+				expect(screen.getAllByText("Overlaps another time slot")).toHaveLength(
+					2,
+				),
+			);
+			await expectNoA11yViolations();
+
+			await openSlotEditor();
 			await pickDateTime("slot-start", "2026-09-10T11:30");
 			await pickDateTime("slot-end", "2026-09-10T12:30");
-
 			expect(
 				await screen.findByText(
 					"This overlaps a time slot already on the list - a volunteer could sign up for both.",
 				),
 			).toBeInTheDocument();
-			expect(screen.getAllByText("Overlaps another time slot")).toHaveLength(2);
 			await expectNoA11yViolations();
 		} finally {
 			vi.useRealTimers();

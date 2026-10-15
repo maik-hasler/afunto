@@ -28,8 +28,12 @@ import { Stepper } from "./shared";
 import BasicsStep from "./BasicsStep";
 import LocationStep from "./LocationStep";
 import FormatStep from "./FormatStep";
-import DetailsStep from "./DetailsStep";
-import type { SeriesEditScope } from "./DetailsStep";
+import DetailsStep, {
+	ADD_SLOT_BUTTON_ID,
+	editSlotButtonId,
+} from "./DetailsStep";
+import type { SeriesEditScope, TimeSlotRow } from "./DetailsStep";
+import SlotEditor from "./SlotEditor";
 import DeleteSeriesSlotDialog from "./DeleteSeriesSlotDialog";
 import { CloseIcon } from "../icons";
 import {
@@ -42,11 +46,12 @@ import type { OpportunityFormValues } from "./schema";
 import {
 	byStartDateTime,
 	capacityToInput,
+	hasUnaddedSlotInput,
 	isCompleteDateTime,
 	MAX_PARTICIPANTS_LIMIT,
 	resolveCapacity,
 } from "./timeSlots";
-import type { CapacityInput, NewSlotField } from "./timeSlots";
+import type { CapacityInput, SlotField } from "./timeSlots";
 
 const BLOCKED_JUMP_MESSAGE_ID = "create-opportunity-step-blocked";
 
@@ -289,18 +294,16 @@ export default function CreateVolunteerOpportunityModal({
 		maxParticipants: "1",
 	});
 	const [slotError, setSlotError] = useState<string | null>(null);
-	// Which of the add form's inputs the current message is about, so it points
-	// at the ones that produced it rather than floating under the row (#2320).
-	// A past start is the start box's alone, a bad capacity the spot box's;
-	// only "ends before it starts" implicates the pair (#2325). Scoped to that
-	// form on purpose: an open edit row has its own inputs, and the shared
-	// message renders down here either way.
-	const [invalidNewSlotFields, setInvalidNewSlotFields] = useState<
-		ReadonlySet<NewSlotField>
+	// Which of the slot editor's inputs the current message is about, so it
+	// points at the ones that produced it rather than floating under the form
+	// (#2320). A past start is the start box's alone, a bad capacity the spot
+	// box's; only "ends before it starts" implicates the pair (#2325).
+	const [invalidSlotFields, setInvalidSlotFields] = useState<
+		ReadonlySet<SlotField>
 	>(new Set());
 
-	function clearInvalidNewSlotFields() {
-		setInvalidNewSlotFields(new Set());
+	function clearInvalidSlotFields() {
+		setInvalidSlotFields(new Set());
 	}
 	const [removingSlotId, setRemovingSlotId] = useState<string | null>(null);
 	const [pendingSlotDelete, setPendingSlotDelete] = useState<{
@@ -316,6 +319,11 @@ export default function CreateVolunteerOpportunityModal({
 	const [slotChangesApplied, setSlotChangesApplied] = useState(false);
 	const [addingSlot, setAddingSlot] = useState(false);
 	const [editingSlot, setEditingSlot] = useState<EditingSlot | null>(null);
+	// Adding or editing a slot happens in a view of its own that replaces the
+	// step (#2388); this is the "adding" half, `editingSlot` the other.
+	const [addSlotOpen, setAddSlotOpen] = useState(false);
+	const slotEditorOpen = addSlotOpen || editingSlot !== null;
+	const slotEditorReturnFocusRef = useRef<string | null>(null);
 	const [updatingSlotId, setUpdatingSlotId] = useState<string | null>(null);
 	const [pendingSlotEdit, setPendingSlotEdit] = useState<
 		(ValidatedSlotEdit & { bookedCount: number }) | null
@@ -421,6 +429,7 @@ export default function CreateVolunteerOpportunityModal({
 		const hasUnsavedChanges =
 			isDirty ||
 			pendingSlots.length > 0 ||
+			hasUnaddedSlotInput(newSlot) ||
 			bannerFile !== null ||
 			bannerRemoved;
 		if (hasUnsavedChanges) setShowDiscardConfirm(true);
@@ -532,13 +541,14 @@ export default function CreateVolunteerOpportunityModal({
 	}
 
 	async function handleAddSlot() {
-		if (
-			!isCompleteDateTime(newSlot.startDateTime) ||
-			!isCompleteDateTime(newSlot.endDateTime)
-		)
+		const missing = incompleteDateTimeFields(newSlot);
+		if (missing.size > 0) {
+			setSlotError(t("timeSlots.dateTimeIncomplete"));
+			setInvalidSlotFields(missing);
 			return;
+		}
 		setSlotError(null);
-		clearInvalidNewSlotFields();
+		clearInvalidSlotFields();
 		const start = zonedDatetimeLocalToUtc(
 			newSlot.startDateTime,
 			CANONICAL_TIME_ZONE,
@@ -554,18 +564,18 @@ export default function CreateVolunteerOpportunityModal({
 		// of the first two; a generic "could not add" said nothing (#2320).
 		if (start <= new Date()) {
 			setSlotError(t("apiError.TimeSlot.StartMustBeFuture"));
-			setInvalidNewSlotFields(new Set(["start"]));
+			setInvalidSlotFields(new Set(["start"]));
 			return;
 		}
 		if (end <= start) {
 			setSlotError(t("apiError.TimeSlot.EndMustBeAfterStart"));
-			setInvalidNewSlotFields(new Set(["start", "end"]));
+			setInvalidSlotFields(new Set(["start", "end"]));
 			return;
 		}
 		const maxParticipants = resolveCapacity(newSlot.maxParticipants);
 		if (maxParticipants === undefined) {
 			setSlotError(capacityErrorMessage);
-			setInvalidNewSlotFields(new Set(["max"]));
+			setInvalidSlotFields(new Set(["max"]));
 			return;
 		}
 
@@ -603,6 +613,8 @@ export default function CreateVolunteerOpportunityModal({
 					endDateTime: "",
 					maxParticipants: "1",
 				});
+				setError(null);
+				leaveSlotEditor(ADD_SLOT_BUTTON_ID);
 			} catch {
 				setSlotError(t("timeSlots.addError"));
 			} finally {
@@ -633,7 +645,52 @@ export default function CreateVolunteerOpportunityModal({
 			);
 			setPendingSlots((prev) => [...prev, ...newSlots]);
 			setNewSlot({ startDateTime: "", endDateTime: "", maxParticipants: "1" });
+			setError(null);
+			leaveSlotEditor(ADD_SLOT_BUTTON_ID);
 		}
+	}
+
+	function openAddSlot() {
+		setNewSlot({ startDateTime: "", endDateTime: "", maxParticipants: "1" });
+		setSlotError(null);
+		clearInvalidSlotFields();
+		setAddSlotOpen(true);
+	}
+
+	/** Leaves the slot editor and puts focus back where it was opened from. */
+	function leaveSlotEditor(returnFocusId: string) {
+		slotEditorReturnFocusRef.current = returnFocusId;
+		setAddSlotOpen(false);
+		setEditingSlot(null);
+	}
+
+	function cancelSlotEditor() {
+		const returnFocusId = editingSlot
+			? editSlotButtonId(editingSlot.id)
+			: ADD_SLOT_BUTTON_ID;
+		setNewSlot({ startDateTime: "", endDateTime: "", maxParticipants: "1" });
+		setSlotError(null);
+		clearInvalidSlotFields();
+		leaveSlotEditor(returnFocusId);
+	}
+
+	useEffect(() => {
+		if (slotEditorOpen) return;
+		const id = slotEditorReturnFocusRef.current;
+		if (!id) return;
+		slotEditorReturnFocusRef.current = null;
+		document.getElementById(id)?.focus();
+	}, [slotEditorOpen]);
+
+	/** Names the date-time boxes still missing a date or a time, if any. */
+	function incompleteDateTimeFields(draft: {
+		startDateTime: string;
+		endDateTime: string;
+	}): Set<SlotField> {
+		const missing = new Set<SlotField>();
+		if (!isCompleteDateTime(draft.startDateTime)) missing.add("start");
+		if (!isCompleteDateTime(draft.endDateTime)) missing.add("end");
+		return missing;
 	}
 
 	function handleRemovePendingSlot(id: string) {
@@ -653,7 +710,7 @@ export default function CreateVolunteerOpportunityModal({
 		if (!initialOpportunity) return;
 		setRemovingSlotId(timeSlotId);
 		setSlotError(null);
-		clearInvalidNewSlotFields();
+		clearInvalidSlotFields();
 		setSlotDeleteError(null);
 		try {
 			await api.deleteTimeSlot({
@@ -709,7 +766,7 @@ export default function CreateVolunteerOpportunityModal({
 		maxParticipants: number | null;
 	}) {
 		setSlotError(null);
-		clearInvalidNewSlotFields();
+		clearInvalidSlotFields();
 		setEditingSlot({
 			id: slot.id,
 			startDateTime: toDatetimeLocalValue(slot.startDateTime),
@@ -723,7 +780,7 @@ export default function CreateVolunteerOpportunityModal({
 		if (!initialOpportunity) return;
 		setUpdatingSlotId(edit.id);
 		setSlotError(null);
-		clearInvalidNewSlotFields();
+		clearInvalidSlotFields();
 		try {
 			const result = await api.updateTimeSlot({
 				path: { opportunityId: initialOpportunity.id, timeSlotId: edit.id },
@@ -773,7 +830,7 @@ export default function CreateVolunteerOpportunityModal({
 				}
 			}
 			setSlotChangesApplied(true);
-			setEditingSlot(null);
+			leaveSlotEditor(editSlotButtonId(edit.id));
 		} catch {
 			setSlotError(t("timeSlots.editError"));
 		} finally {
@@ -787,20 +844,22 @@ export default function CreateVolunteerOpportunityModal({
 		const maxParticipants = resolveCapacity(editingSlot.maxParticipants);
 		if (maxParticipants === undefined) {
 			setSlotError(capacityErrorMessage);
+			setInvalidSlotFields(new Set(["max"]));
 			return;
 		}
 		const edit: ValidatedSlotEdit = { ...editingSlot, maxParticipants };
 		if (edit.scope !== "Only") {
 			setSlotError(null);
-			clearInvalidNewSlotFields();
+			clearInvalidSlotFields();
 			void applySlotEdit(edit);
 			return;
 		}
-		if (
-			!isCompleteDateTime(edit.startDateTime) ||
-			!isCompleteDateTime(edit.endDateTime)
-		)
+		const missing = incompleteDateTimeFields(edit);
+		if (missing.size > 0) {
+			setSlotError(t("timeSlots.dateTimeIncomplete"));
+			setInvalidSlotFields(missing);
 			return;
+		}
 		const start = zonedDatetimeLocalToUtc(
 			edit.startDateTime,
 			CANONICAL_TIME_ZONE,
@@ -808,10 +867,11 @@ export default function CreateVolunteerOpportunityModal({
 		const end = zonedDatetimeLocalToUtc(edit.endDateTime, CANONICAL_TIME_ZONE);
 		if (end <= start) {
 			setSlotError(t("apiError.TimeSlot.EndMustBeAfterStart"));
+			setInvalidSlotFields(new Set(["start", "end"]));
 			return;
 		}
 		setSlotError(null);
-		clearInvalidNewSlotFields();
+		clearInvalidSlotFields();
 		if (bookedCount > 0) {
 			setPendingSlotEdit({ ...edit, bookedCount });
 		} else {
@@ -1106,7 +1166,7 @@ export default function CreateVolunteerOpportunityModal({
 		}
 	}
 
-	const allTimeSlots = (
+	const allTimeSlots: TimeSlotRow[] = (
 		isEditMode
 			? existingSlots.map((s) => ({
 					id: s.id,
@@ -1135,10 +1195,14 @@ export default function CreateVolunteerOpportunityModal({
 				}))
 	).sort(byStartDateTime);
 
+	const editedSlotRow = editingSlot
+		? allTimeSlots.find((s) => s.id === editingSlot.id)
+		: undefined;
+
 	return (
 		<>
 			<Modal
-				onClose={requestClose}
+				onClose={slotEditorOpen ? cancelSlotEditor : requestClose}
 				labelledBy="create-opportunity-dialog-title"
 				maxWidth="max-w-xl"
 				className="flex min-w-0 flex-col overflow-hidden rounded-card bg-white shadow-modal"
@@ -1169,208 +1233,242 @@ export default function CreateVolunteerOpportunityModal({
 					</button>
 				</div>
 
-				<div className="border-b border-gray-100 px-6 pt-3 pb-3">
-					<Stepper
-						current={step}
-						errorSteps={errorSteps}
-						onStepClick={(n) => void handleStepClick(n)}
-						steps={stepTitles}
-						stepLabel={(n, label) =>
-							`${t("createOpportunity.stepOf", { current: n, total: TOTAL_STEPS })}: ${label}`
+				{slotEditorOpen ? (
+					<SlotEditor
+						mode={editingSlot ? "edit" : "add"}
+						draft={editingSlot ?? newSlot}
+						onDraftChange={(draft) =>
+							editingSlot
+								? setEditingSlot({ ...editingSlot, ...draft })
+								: setNewSlot(draft)
 						}
-						blocked={
-							blockedJump && blockedJumpMessage
+						otherSlots={allTimeSlots.filter((s) => s.id !== editingSlot?.id)}
+						recurrence={
+							!editingSlot && occurrence === "Recurring"
 								? {
-										step: blockedJump.target,
-										messageId: BLOCKED_JUMP_MESSAGE_ID,
+										frequency: recurrenceFrequency,
+										onFrequencyChange: setRecurrenceFrequency,
+										count: recurrenceCount,
+										onCountChange: setRecurrenceCount,
 									}
 								: undefined
 						}
+						seriesScope={
+							editingSlot && editedSlotRow?.seriesId
+								? {
+										value: editingSlot.scope,
+										onChange: (scope) =>
+											setEditingSlot({ ...editingSlot, scope }),
+									}
+								: undefined
+						}
+						bookedCount={editedSlotRow?.bookedCount ?? 0}
+						slotChangesAreImmediate={isEditMode}
+						error={slotError}
+						invalidFields={invalidSlotFields}
+						busy={editingSlot ? updatingSlotId === editingSlot.id : addingSlot}
+						onCancel={cancelSlotEditor}
+						onSubmit={() =>
+							editingSlot
+								? handleRequestSaveEditSlot(editedSlotRow?.bookedCount ?? 0)
+								: void handleAddSlot()
+						}
 					/>
-					{blockedJump && blockedJumpMessage && (
-						<ErrorBanner
-							key={blockedJump.attempt}
-							id={BLOCKED_JUMP_MESSAGE_ID}
-							message={blockedJumpMessage}
-							className="mt-3"
-						/>
-					)}
-				</div>
-
-				<div aria-live="polite" className="sr-only">
-					{t("createOpportunity.stepOf", { current: step, total: TOTAL_STEPS })}
-					: {stepTitles[step - 1]}
-				</div>
-
-				<div
-					ref={bodyRef}
-					className="max-h-[min(70vh,640px)] overflow-y-auto px-6 py-5"
-				>
-					<h3 className="sr-only">{stepTitles[step - 1]}</h3>
-					<p className="mb-4 text-sm leading-relaxed text-gray-500">
-						{stepSubtitles[step - 1]}
-					</p>
-
-					{(step === 1 || (step === 2 && !isRemote)) && (
-						<RequiredFieldsLegend className="-mt-2 mb-4" />
-					)}
-
-					{step === 1 && (
-						<BasicsStep
-							register={registerWithRevalidate}
-							watch={watch}
-							titleDeError={errors.titleDe?.message}
-							titleEnError={errors.titleEn?.message}
-							descriptionDeError={errors.descriptionDe?.message}
-							descriptionEnError={errors.descriptionEn?.message}
-							revalidationAttempt={focusAttempt}
-							bannerPreview={bannerPreview}
-							bannerError={bannerError}
-							onBannerChange={handleBannerChange}
-							onBannerRemove={removeBanner}
-						/>
-					)}
-
-					{step === 2 && (
-						<LocationStep
-							register={registerWithRevalidate}
-							watch={watch}
-							onRemoteToggle={handleRemoteToggle}
-							errors={{
-								street: errors.street?.message,
-								houseNumber: errors.houseNumber?.message,
-								zipCode: errors.zipCode?.message,
-								city: errors.city?.message,
-							}}
-							organizationId={organizationId}
-							orgAddress={orgAddress}
-							isEditMode={isEditMode}
-							onApplyOrgAddress={applyOrgAddress}
-						/>
-					)}
-
-					{step === 3 && (
-						<FormatStep
-							register={registerWithRevalidate}
-							watch={watch}
-							setCheckInPin={setCheckInPin}
-							checkInPinError={errors.checkInPin?.message}
-						/>
-					)}
-
-					{step === 4 && (
-						<DetailsStep
-							control={control}
-							isScheduledSlots={isScheduledSlots}
-							occurrence={occurrence}
-							allTimeSlots={allTimeSlots}
-							removingSlotId={removingSlotId}
-							onRemoveExistingSlot={handleRequestRemoveExistingSlot}
-							onRequestRemoveSeriesSlot={handleRequestRemoveSeriesSlot}
-							onRemovePendingSlot={handleRemovePendingSlot}
-							editingSlot={editingSlot}
-							onStartEditSlot={handleStartEditSlot}
-							onEditingSlotChange={setEditingSlot}
-							onCancelEditSlot={() => setEditingSlot(null)}
-							onSaveEditSlot={handleRequestSaveEditSlot}
-							updatingSlotId={updatingSlotId}
-							newSlot={newSlot}
-							onNewSlotChange={setNewSlot}
-							slotError={slotError}
-							invalidNewSlotFields={invalidNewSlotFields}
-							slotChangesAreImmediate={isEditMode}
-							addingSlot={addingSlot}
-							onAddSlot={() => void handleAddSlot()}
-							recurrenceFrequency={recurrenceFrequency}
-							onRecurrenceFrequencyChange={setRecurrenceFrequency}
-							recurrenceCount={recurrenceCount}
-							onRecurrenceCountChange={setRecurrenceCount}
-							error={error}
-							errorToken={errorToken}
-						/>
-					)}
-				</div>
-
-				<div className="border-t border-gray-100 bg-gray-50">
-					{canSaveDraft && draftTitleMissing && (
-						<p
-							id="save-draft-hint"
-							className="px-4 pt-3 text-xs text-gray-500 sm:px-6"
-						>
-							{t(
-								step === 1
-									? "createOpportunity.saveDraftRequiresTitleHere"
-									: "createOpportunity.saveDraftRequiresTitle",
-							)}
-						</p>
-					)}
-					<div className="flex flex-col-reverse gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-						<Button
-							type="button"
-							variant="secondary"
-							data-testid="modal-cancel"
-							onClick={() =>
-								step > 1 ? setStep((s) => s - 1) : requestClose()
-							}
-						>
-							{step === 1
-								? t("createOpportunity.cancel")
-								: t("createOpportunity.back")}
-						</Button>
-
-						<div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center">
-							{canSaveDraft && (
-								<Button
-									type="button"
-									variant="outline"
-									data-testid="modal-save-draft"
-									disabled={submitting !== null || draftTitleMissing}
-									aria-describedby={
-										draftTitleMissing ? "save-draft-hint" : undefined
-									}
-									title={
-										draftTitleMissing
-											? t(
-													step === 1
-														? "createOpportunity.saveDraftRequiresTitleHere"
-														: "createOpportunity.saveDraftRequiresTitle",
-												)
-											: undefined
-									}
-									onClick={() => void submit(true)}
-								>
-									{submitting === "draft"
-										? t("createOpportunity.savingDraft")
-										: t("createOpportunity.saveDraft")}
-								</Button>
-							)}
-							{step < TOTAL_STEPS ? (
-								<Button
-									type="button"
-									data-testid="modal-next"
-									onClick={() => void handleNext()}
-								>
-									{t("createOpportunity.next")}
-								</Button>
-							) : (
-								<Button
-									type="button"
-									disabled={submitting !== null}
-									data-testid="modal-submit"
-									onClick={() => void submit(false)}
-								>
-									{submitting === "publish"
-										? isEditMode
-											? t("createOpportunity.saving")
-											: t("createOpportunity.creating")
-										: isEditMode
-											? t("createOpportunity.save")
-											: t("createOpportunity.publish")}
-								</Button>
+				) : (
+					<>
+						<div className="border-b border-gray-100 px-6 pt-3 pb-3">
+							<Stepper
+								current={step}
+								errorSteps={errorSteps}
+								onStepClick={(n) => void handleStepClick(n)}
+								steps={stepTitles}
+								stepLabel={(n, label) =>
+									`${t("createOpportunity.stepOf", { current: n, total: TOTAL_STEPS })}: ${label}`
+								}
+								blocked={
+									blockedJump && blockedJumpMessage
+										? {
+												step: blockedJump.target,
+												messageId: BLOCKED_JUMP_MESSAGE_ID,
+											}
+										: undefined
+								}
+							/>
+							{blockedJump && blockedJumpMessage && (
+								<ErrorBanner
+									key={blockedJump.attempt}
+									id={BLOCKED_JUMP_MESSAGE_ID}
+									message={blockedJumpMessage}
+									className="mt-3"
+								/>
 							)}
 						</div>
-					</div>
-				</div>
+
+						<div aria-live="polite" className="sr-only">
+							{t("createOpportunity.stepOf", {
+								current: step,
+								total: TOTAL_STEPS,
+							})}
+							: {stepTitles[step - 1]}
+						</div>
+
+						<div
+							ref={bodyRef}
+							className="max-h-[min(70vh,640px)] overflow-y-auto px-6 py-5"
+						>
+							<h3 className="sr-only">{stepTitles[step - 1]}</h3>
+							<p className="mb-4 text-sm leading-relaxed text-gray-500">
+								{stepSubtitles[step - 1]}
+							</p>
+
+							{(step === 1 || (step === 2 && !isRemote)) && (
+								<RequiredFieldsLegend className="-mt-2 mb-4" />
+							)}
+
+							{step === 1 && (
+								<BasicsStep
+									register={registerWithRevalidate}
+									watch={watch}
+									titleDeError={errors.titleDe?.message}
+									titleEnError={errors.titleEn?.message}
+									descriptionDeError={errors.descriptionDe?.message}
+									descriptionEnError={errors.descriptionEn?.message}
+									revalidationAttempt={focusAttempt}
+									bannerPreview={bannerPreview}
+									bannerError={bannerError}
+									onBannerChange={handleBannerChange}
+									onBannerRemove={removeBanner}
+								/>
+							)}
+
+							{step === 2 && (
+								<LocationStep
+									register={registerWithRevalidate}
+									watch={watch}
+									onRemoteToggle={handleRemoteToggle}
+									errors={{
+										street: errors.street?.message,
+										houseNumber: errors.houseNumber?.message,
+										zipCode: errors.zipCode?.message,
+										city: errors.city?.message,
+									}}
+									organizationId={organizationId}
+									orgAddress={orgAddress}
+									isEditMode={isEditMode}
+									onApplyOrgAddress={applyOrgAddress}
+								/>
+							)}
+
+							{step === 3 && (
+								<FormatStep
+									register={registerWithRevalidate}
+									watch={watch}
+									setCheckInPin={setCheckInPin}
+									checkInPinError={errors.checkInPin?.message}
+								/>
+							)}
+
+							{step === 4 && (
+								<DetailsStep
+									control={control}
+									isScheduledSlots={isScheduledSlots}
+									allTimeSlots={allTimeSlots}
+									removingSlotId={removingSlotId}
+									onRemoveExistingSlot={handleRequestRemoveExistingSlot}
+									onRequestRemoveSeriesSlot={handleRequestRemoveSeriesSlot}
+									onRemovePendingSlot={handleRemovePendingSlot}
+									onStartEditSlot={handleStartEditSlot}
+									onOpenAddSlot={openAddSlot}
+									slotError={slotError}
+									slotChangesAreImmediate={isEditMode}
+									error={error}
+									errorToken={errorToken}
+								/>
+							)}
+						</div>
+
+						<div className="border-t border-gray-100 bg-gray-50">
+							{canSaveDraft && draftTitleMissing && (
+								<p
+									id="save-draft-hint"
+									className="px-4 pt-3 text-xs text-gray-500 sm:px-6"
+								>
+									{t(
+										step === 1
+											? "createOpportunity.saveDraftRequiresTitleHere"
+											: "createOpportunity.saveDraftRequiresTitle",
+									)}
+								</p>
+							)}
+							<div className="flex flex-col-reverse gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+								<Button
+									type="button"
+									variant="secondary"
+									data-testid="modal-cancel"
+									onClick={() =>
+										step > 1 ? setStep((s) => s - 1) : requestClose()
+									}
+								>
+									{step === 1
+										? t("createOpportunity.cancel")
+										: t("createOpportunity.back")}
+								</Button>
+
+								<div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center">
+									{canSaveDraft && (
+										<Button
+											type="button"
+											variant="outline"
+											data-testid="modal-save-draft"
+											disabled={submitting !== null || draftTitleMissing}
+											aria-describedby={
+												draftTitleMissing ? "save-draft-hint" : undefined
+											}
+											title={
+												draftTitleMissing
+													? t(
+															step === 1
+																? "createOpportunity.saveDraftRequiresTitleHere"
+																: "createOpportunity.saveDraftRequiresTitle",
+														)
+													: undefined
+											}
+											onClick={() => void submit(true)}
+										>
+											{submitting === "draft"
+												? t("createOpportunity.savingDraft")
+												: t("createOpportunity.saveDraft")}
+										</Button>
+									)}
+									{step < TOTAL_STEPS ? (
+										<Button
+											type="button"
+											data-testid="modal-next"
+											onClick={() => void handleNext()}
+										>
+											{t("createOpportunity.next")}
+										</Button>
+									) : (
+										<Button
+											type="button"
+											disabled={submitting !== null}
+											data-testid="modal-submit"
+											onClick={() => void submit(false)}
+										>
+											{submitting === "publish"
+												? isEditMode
+													? t("createOpportunity.saving")
+													: t("createOpportunity.creating")
+												: isEditMode
+													? t("createOpportunity.save")
+													: t("createOpportunity.publish")}
+										</Button>
+									)}
+								</div>
+							</div>
+						</div>
+					</>
+				)}
 			</Modal>
 
 			{showDiscardConfirm && (

@@ -17,6 +17,7 @@ const { api } = vi.hoisted(() => ({
 		getVolunteerOpportunityDetails: vi.fn(),
 		getOpportunityCheckInPin: vi.fn(),
 		deleteTimeSlot: vi.fn(),
+		updateTimeSlot: vi.fn(),
 	},
 }));
 
@@ -452,6 +453,9 @@ describe("create-opportunity wizard: a time slot that ends before it starts (#23
 			expect(screen.getByTestId("wizard-step-4")).toBeInTheDocument(),
 		);
 
+		await userEvent.click(
+			screen.getByRole("button", { name: "Add time slot" }),
+		);
 		await pickDateTime("slot-start", "2027-06-01T12:00");
 		await pickDateTime("slot-end", "2027-06-01T09:00");
 		await userEvent.click(screen.getByRole("button", { name: "Add" }));
@@ -656,6 +660,56 @@ describe("edit wizard: time slot changes are not staged (#2315)", () => {
 			),
 		).toBeInTheDocument();
 	});
+	// #2388: editing uses the same view as adding, so a phone gets the full
+	// width for it instead of an inline form squeezed into the list row.
+	it("edits a slot in the slot editor and returns focus to its row", async () => {
+		api.updateTimeSlot.mockResolvedValue({ skippedTimeSlotIds: [] });
+		openEditWizard();
+		await userEvent.click(await screen.findByTestId("wizard-stepper-4"));
+
+		await userEvent.click(await screen.findByRole("button", { name: "Edit" }));
+
+		expect(
+			await screen.findByRole("heading", { name: "Edit time slot" }),
+		).toHaveFocus();
+		expect(screen.queryByTestId("time-slot-list")).toBeNull();
+		fireEvent.change(document.querySelector("#slot-max") as HTMLElement, {
+			target: { value: "6" },
+		});
+		await userEvent.click(screen.getByTestId("slot-editor-submit"));
+
+		await waitFor(() =>
+			expect(api.updateTimeSlot).toHaveBeenCalledWith(
+				expect.objectContaining({
+					path: { opportunityId: "existing-opp-id", timeSlotId: "slot-1" },
+					body: expect.objectContaining({ maxParticipants: 6, scope: "Only" }),
+				}),
+			),
+		);
+		await waitFor(() =>
+			expect(screen.queryByTestId("time-slot-editor")).toBeNull(),
+		);
+		expect(screen.getByTestId("time-slot-list")).toHaveTextContent("6 spots");
+		expect(screen.getByRole("button", { name: "Edit" })).toHaveFocus();
+	});
+
+	it("keeps the slot as it was when the edit is cancelled", async () => {
+		openEditWizard();
+		await userEvent.click(await screen.findByTestId("wizard-stepper-4"));
+		await userEvent.click(await screen.findByRole("button", { name: "Edit" }));
+		await screen.findByTestId("time-slot-editor");
+
+		await userEvent.click(
+			screen.getByRole("button", { name: "Back to time slots" }),
+		);
+
+		await waitFor(() =>
+			expect(screen.queryByTestId("time-slot-editor")).toBeNull(),
+		);
+		expect(api.updateTimeSlot).not.toHaveBeenCalled();
+		expect(screen.getByTestId("time-slot-list")).toHaveTextContent("4 spots");
+		expect(screen.getByRole("button", { name: "Edit" })).toHaveFocus();
+	});
 });
 
 describe("create-opportunity wizard: time slot guards (#2325)", () => {
@@ -690,7 +744,24 @@ describe("create-opportunity wizard: time slot guards (#2325)", () => {
 		await screen.findByTestId("wizard-step-4");
 	}
 
+	const slotEditor = () => screen.queryByTestId("time-slot-editor");
+
+	async function openSlotEditor() {
+		await userEvent.click(
+			screen.getByRole("button", { name: "Add time slot" }),
+		);
+		await screen.findByTestId("time-slot-editor");
+	}
+
+	async function backToList() {
+		await userEvent.click(
+			screen.getByRole("button", { name: "Back to time slots" }),
+		);
+		await waitFor(() => expect(slotEditor()).toBeNull());
+	}
+
 	async function addSlot(start: string, end: string, max?: string) {
+		await openSlotEditor();
 		await pickDateTime("slot-start", start);
 		await pickDateTime("slot-end", end);
 		if (max !== undefined)
@@ -706,17 +777,18 @@ describe("create-opportunity wizard: time slot guards (#2325)", () => {
 	// forward through the DOM.
 	it("describes the Start/End fields with the date-then-time hint", async () => {
 		await gotoTimeSlots();
+		await openSlotEditor();
 
 		const hint = screen.getByText(
 			"Choose a date first, then set the time - both are required before this slot can be added.",
 		);
-		expect(hint).toHaveAttribute("id", "add-slot-datetime-hint");
+		expect(hint).toHaveAttribute("id", "slot-datetime-hint");
 		expect(slotStart().getAttribute("aria-describedby")?.split(" ")).toEqual(
-			expect.arrayContaining(["add-slot-datetime-hint"]),
+			expect.arrayContaining(["slot-datetime-hint"]),
 		);
 		const slotEnd = document.querySelector("#slot-end") as HTMLElement;
 		expect(slotEnd.getAttribute("aria-describedby")?.split(" ")).toEqual(
-			expect.arrayContaining(["add-slot-datetime-hint"]),
+			expect.arrayContaining(["slot-datetime-hint"]),
 		);
 	});
 
@@ -730,6 +802,7 @@ describe("create-opportunity wizard: time slot guards (#2325)", () => {
 	// scenario the UI no longer allows.
 	it("disables days before today so a past-dated slot cannot be entered", async () => {
 		await gotoTimeSlots();
+		await openSlotEditor();
 
 		await userEvent.click(screen.getByTestId("slot-start-trigger"));
 		const grid = await screen.findByRole("grid");
@@ -741,7 +814,6 @@ describe("create-opportunity wizard: time slot guards (#2325)", () => {
 
 		await userEvent.click(yesterday);
 		expect(slotStart()).toHaveAttribute("aria-expanded", "true");
-		expect(screen.getByText("No time slots added yet.")).toBeInTheDocument();
 		expect(api.createVolunteerOpportunity).not.toHaveBeenCalled();
 		expect(api.createTimeSlot).not.toHaveBeenCalled();
 	});
@@ -754,6 +826,7 @@ describe("create-opportunity wizard: time slot guards (#2325)", () => {
 		expect(
 			await screen.findByText("End date must be after start date."),
 		).toBeInTheDocument();
+		await backToList();
 		expect(screen.getByText("No time slots added yet.")).toBeInTheDocument();
 	});
 
@@ -790,9 +863,12 @@ describe("create-opportunity wizard: time slot guards (#2325)", () => {
 
 	it("labels an unlimited slot rather than showing a bare word in brackets", async () => {
 		await gotoTimeSlots();
+		await openSlotEditor();
 		await userEvent.click(screen.getByLabelText("Unlimited"));
 
-		await addSlot("2026-10-05T10:00", "2026-10-05T12:00");
+		await pickDateTime("slot-start", "2026-10-05T10:00");
+		await pickDateTime("slot-end", "2026-10-05T12:00");
+		await userEvent.click(screen.getByRole("button", { name: "Add" }));
 
 		const row = await waitFor(() => slotRows()[0]);
 		expect(row).toHaveTextContent("Unlimited spots");
@@ -810,18 +886,20 @@ describe("create-opportunity wizard: time slot guards (#2325)", () => {
 		expect(slotMax()).toHaveAttribute("aria-describedby", "time-slot-error");
 		expect(slotStart()).not.toHaveAttribute("aria-invalid");
 		expect(slotMax()).toHaveValue(0);
+		await backToList();
 		expect(screen.getByText("No time slots added yet.")).toBeInTheDocument();
 	});
 
 	it("refuses a spot limit past the cap, and bounds the box itself", async () => {
 		await gotoTimeSlots();
-		expect(slotMax()).toHaveAttribute("max", "10000");
 
 		await addSlot("2026-10-05T10:00", "2026-10-05T12:00", "999999999");
 
+		expect(slotMax()).toHaveAttribute("max", "10000");
 		expect(
 			await screen.findByText("Enter a number of spots between 1 and 10,000."),
 		).toBeInTheDocument();
+		await backToList();
 		expect(screen.getByText("No time slots added yet.")).toBeInTheDocument();
 	});
 
@@ -829,6 +907,7 @@ describe("create-opportunity wizard: time slot guards (#2325)", () => {
 		await gotoTimeSlots();
 		await addSlot("2026-09-10T10:00", "2026-09-10T12:00");
 
+		await openSlotEditor();
 		await pickDateTime("slot-start", "2026-09-10T11:00");
 		await pickDateTime("slot-end", "2026-09-10T13:00");
 
@@ -866,12 +945,90 @@ describe("create-opportunity wizard: time slot guards (#2325)", () => {
 		await gotoTimeSlots();
 		await addSlot("2026-09-10T10:00", "2026-09-10T12:00");
 
+		await openSlotEditor();
 		await pickDateTime("slot-start", "2026-09-10T12:00");
 		await pickDateTime("slot-end", "2026-09-10T14:00");
 		await userEvent.click(screen.getByRole("button", { name: "Add" }));
 
 		await waitFor(() => expect(slotRows()).toHaveLength(2));
 		expect(screen.queryByText("Overlaps another time slot")).toBeNull();
+	});
+
+	// #2388: slots used to be typed into a form under the list and only joined
+	// it on a separate "Add" click - organizers pressed Publish instead and
+	// lost the slot. The slot editor is now a view of its own that replaces
+	// the step, so there is no in-between state left to lose.
+	it("opens the slot editor in place of the list and the wizard footer (#2388)", async () => {
+		await gotoTimeSlots();
+		expect(slotEditor()).toBeNull();
+
+		await openSlotEditor();
+
+		expect(
+			screen.getByRole("heading", { name: "Add time slot" }),
+		).toHaveFocus();
+		expect(screen.queryByTestId("wizard-step-4")).toBeNull();
+		expect(screen.queryByTestId("modal-submit")).toBeNull();
+		expect(screen.queryByTestId("modal-save-draft")).toBeNull();
+	});
+
+	it("puts the slot on the list and returns to it once added (#2388)", async () => {
+		await gotoTimeSlots();
+
+		await addSlot("2026-09-10T10:00", "2026-09-10T12:00");
+
+		await waitFor(() => expect(slotEditor()).toBeNull());
+		expect(slotRows()).toHaveLength(1);
+		expect(screen.getByRole("button", { name: "Add time slot" })).toHaveFocus();
+		expect(screen.getByTestId("modal-submit")).toBeInTheDocument();
+	});
+
+	it("drops the entry and returns focus when the editor is left (#2388)", async () => {
+		await gotoTimeSlots();
+		await openSlotEditor();
+		await pickDateTime("slot-start", "2026-09-10T10:00");
+
+		await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+
+		await waitFor(() => expect(slotEditor()).toBeNull());
+		expect(screen.getByText("No time slots added yet.")).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: "Add time slot" })).toHaveFocus();
+
+		await openSlotEditor();
+		expect(slotStart()).not.toHaveTextContent("2026");
+	});
+
+	it("leaves only the editor, not the wizard, on Escape (#2388)", async () => {
+		await gotoTimeSlots();
+		await openSlotEditor();
+
+		await userEvent.keyboard("{Escape}");
+
+		await waitFor(() => expect(slotEditor()).toBeNull());
+		expect(screen.getByTestId("wizard-step-4")).toBeInTheDocument();
+		expect(
+			screen.queryByRole("dialog", { name: "Discard unsaved changes?" }),
+		).toBeNull();
+	});
+
+	it("says which part is missing when start or end has no time yet (#2388)", async () => {
+		await gotoTimeSlots();
+		await openSlotEditor();
+		await pickDateTime("slot-start", "2026-09-10T10:00");
+
+		await userEvent.click(screen.getByRole("button", { name: "Add" }));
+
+		expect(
+			await screen.findByText(
+				"Choose a date and a time for both start and end.",
+			),
+		).toBeInTheDocument();
+		expect(document.querySelector("#slot-end")).toHaveAttribute(
+			"aria-invalid",
+			"true",
+		);
+		expect(slotStart()).not.toHaveAttribute("aria-invalid", "true");
+		expect(slotEditor()).toBeInTheDocument();
 	});
 });
 
