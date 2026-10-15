@@ -94,25 +94,74 @@ describe("create-opportunity wizard: focus on the first invalid field (#2077)", 
 	});
 });
 
-describe("create-opportunity wizard: language tab error indicator (#2234)", () => {
-	it("exposes the error on the German tab through its accessible name, not colour alone", async () => {
+describe("create-opportunity wizard: translations section (#2387)", () => {
+	const toggle = () => screen.getByTestId("opportunity-translation-toggle-en");
+	const titleEn = () =>
+		document.querySelector("#opportunity-title-en") as HTMLElement;
+	const descriptionEn = () =>
+		document.querySelector("#opportunity-description-en") as HTMLElement;
+
+	async function fillGerman() {
+		await userEvent.type(title(), "Strandreinigung");
+		await userEvent.type(description(), "Wir sammeln Muell am Strand.");
+	}
+
+	it("shows the German fields without a language toggle, the translation collapsed", () => {
 		openWizard();
-		await userEvent.click(screen.getByTestId("modal-next"));
 
-		await waitFor(() => expect(titleError()).not.toBeNull());
-
-		const deTab = screen.getByTestId("opportunity-content-language-de");
-		expect(deTab).toHaveAccessibleName(/Contains errors/);
+		expect(title()).toBeVisible();
+		expect(description()).toBeVisible();
+		expect(
+			screen.queryByRole("button", { name: "English" }),
+		).not.toBeInTheDocument();
+		expect(toggle()).toHaveAttribute("aria-expanded", "false");
+		expect(toggle()).toHaveAccessibleName(/Not translated/);
+		expect(titleEn()).not.toBeVisible();
 	});
 
-	it("carries no error indicator on the English tab, which has none", async () => {
+	it("reveals the English fields on demand and reports them as translated once filled", async () => {
 		openWizard();
+		await userEvent.click(toggle());
+
+		expect(toggle()).toHaveAttribute("aria-expanded", "true");
+		await userEvent.type(titleEn(), "Beach cleanup");
+
+		expect(toggle()).toHaveAccessibleName(/Translated/);
+		expect(toggle()).not.toHaveAccessibleName(/Not translated/);
+	});
+
+	it("refuses an English title without an English description, and focuses the gap", async () => {
+		openWizard();
+		await fillGerman();
+		await userEvent.click(toggle());
+		await userEvent.type(titleEn(), "Beach cleanup");
+		await userEvent.click(toggle());
+		expect(titleEn()).not.toBeVisible();
+
 		await userEvent.click(screen.getByTestId("modal-next"));
 
-		await waitFor(() => expect(titleError()).not.toBeNull());
+		await waitFor(() =>
+			expect(
+				document.querySelector("#opportunity-description-en-error"),
+			).toHaveTextContent(
+				"Fill in both the English title and description, or leave both blank.",
+			),
+		);
+		expect(toggle()).toHaveAttribute("aria-expanded", "true");
+		expect(toggle()).toHaveAccessibleName(/Contains errors/);
+		expect(descriptionEn()).toHaveFocus();
+		expect(screen.getByTestId("wizard-step-1")).toBeInTheDocument();
+	});
 
-		const enTab = screen.getByTestId("opportunity-content-language-en");
-		expect(enTab).not.toHaveAccessibleName(/Contains errors/);
+	it("lets a German-only opportunity through", async () => {
+		openWizard();
+		await fillGerman();
+
+		await userEvent.click(screen.getByTestId("modal-next"));
+
+		await waitFor(() =>
+			expect(screen.queryByTestId("wizard-step-1")).toBeNull(),
+		);
 	});
 });
 

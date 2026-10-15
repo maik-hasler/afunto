@@ -62,6 +62,25 @@ describe("CreateVolunteerOpportunityModal a11y", () => {
 		await expectNoA11yViolations();
 	});
 
+	it("has no violations with the translation section open and rejecting a half translation", async () => {
+		open();
+		await userEvent.click(
+			screen.getByTestId("opportunity-translation-toggle-en"),
+		);
+		await userEvent.type(
+			screen.getByRole("textbox", { name: "Title (English)" }),
+			"Beach cleanup",
+		);
+		await userEvent.click(screen.getByRole("button", { name: "Next" }));
+
+		await waitFor(() =>
+			expect(
+				document.querySelector("#opportunity-description-en-error"),
+			).not.toBeNull(),
+		);
+		await expectNoA11yViolations();
+	});
+
 	async function gotoDetails() {
 		await userEvent.type(
 			screen.getAllByRole("textbox", { name: /title/i })[0],

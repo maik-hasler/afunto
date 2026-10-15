@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import type { UseFormRegister, UseFormWatch } from "react-hook-form";
 import { FloatingField } from "./shared";
 import type { OpportunityFormValues } from "./schema";
-import { ExclamationTriangleIcon, PhotoIcon } from "../icons";
+import { ChevronDownIcon, ExclamationTriangleIcon, PhotoIcon } from "../icons";
 import { IMAGE_UPLOAD_ACCEPT, getImageUploadHint } from "../../lib/imageUpload";
 
 interface Props {
@@ -14,16 +14,11 @@ interface Props {
 	titleEnError?: string;
 	descriptionDeError?: string;
 	descriptionEnError?: string;
-
-	revalidationAttempt: number;
 	bannerPreview: string | null;
 	bannerError: string | null;
 	onBannerChange: (e: ChangeEvent<HTMLInputElement>) => void;
 	onBannerRemove: () => void;
 }
-
-const CONTENT_LANGUAGES = ["de", "en"] as const;
-type ContentLanguage = (typeof CONTENT_LANGUAGES)[number];
 
 export default function BasicsStep({
 	register,
@@ -32,109 +27,136 @@ export default function BasicsStep({
 	titleEnError,
 	descriptionDeError,
 	descriptionEnError,
-	revalidationAttempt,
 	bannerPreview,
 	bannerError,
 	onBannerChange,
 	onBannerRemove,
 }: Props) {
 	const { t, i18n } = useTranslation();
-	const [activeLanguage, setActiveLanguage] = useState<ContentLanguage>("de");
 	const titleDe = watch("titleDe");
 	const titleEn = watch("titleEn");
 	const descriptionDe = watch("descriptionDe");
 	const descriptionEn = watch("descriptionEn");
-	const hasError = {
-		de: Boolean(titleDeError || descriptionDeError),
-		en: Boolean(titleEnError || descriptionEnError),
-	};
-
-	useEffect(() => {
-		if (titleDeError || descriptionDeError) setActiveLanguage("de");
-	}, [titleDeError, descriptionDeError, revalidationAttempt]);
+	const hasEnglishText = Boolean(titleEn.trim() || descriptionEn.trim());
+	const hasEnglishError = Boolean(titleEnError || descriptionEnError);
+	// Seeded from the form values rather than `false`: the step remounts on
+	// every return to it, and an organizer editing an opportunity that already
+	// carries a translation should land on it, not on a collapsed toggle.
+	const [englishOpen, setEnglishOpen] = useState(hasEnglishText);
+	// Forced open while a field inside has an error, and derived in render
+	// rather than set from an effect: the wizard focuses the first invalid
+	// field in the same commit the errors arrive in, and a field still
+	// display:none at that point cannot take focus.
+	const englishExpanded = englishOpen || hasEnglishError;
+	const englishStatus = hasEnglishError
+		? t("createOpportunity.translationHasError")
+		: hasEnglishText
+			? t("createOpportunity.translationStatusDone")
+			: t("createOpportunity.translationStatusEmpty");
+	const englishName = t("createOpportunity.translationLanguage.en");
 
 	return (
 		<div className="space-y-4" data-testid="wizard-step-1">
-			<div
-				role="group"
-				aria-label={t("createOpportunity.contentLanguageGroup")}
-				className="inline-flex rounded-lg border border-gray-200 p-0.5"
-			>
-				{CONTENT_LANGUAGES.map((lang) => (
-					<button
-						key={lang}
-						type="button"
-						aria-current={activeLanguage === lang ? "true" : undefined}
-						data-testid={`opportunity-content-language-${lang}`}
+			<FloatingField
+				id="opportunity-title"
+				label={t("createOpportunity.fieldTitle")}
+				registration={register("titleDe")}
+				required
+				error={titleDeError}
+				maxLength={150}
+				showCount
+				displayValue={titleDe}
+			/>
+			<FloatingField
+				id="opportunity-description"
+				label={t("createOpportunity.fieldDescription")}
+				registration={register("descriptionDe")}
+				required
+				error={descriptionDeError}
+				maxLength={2000}
+				multiline
+				showCount
+				displayValue={descriptionDe}
+			/>
 
-						data-skip-initial-focus
-						onClick={() => setActiveLanguage(lang)}
-						className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-							activeLanguage === lang
-								? "bg-brand-50 text-brand-700"
-								: "text-gray-600 hover:bg-gray-50"
+			{/*
+			 * Translations are a section of their own, below the source text,
+			 * rather than a DE/EN toggle above it: the toggle carried the site
+			 * language switcher's own labels and was taken for it (#2387), and
+			 * it presented an optional translation as an equal of the required
+			 * German text.
+			 */}
+			<section
+				aria-labelledby="opportunity-translations-heading"
+				className="rounded-xl border border-gray-200"
+			>
+				<div className="px-4 pt-3">
+					<h3
+						id="opportunity-translations-heading"
+						className="text-sm font-semibold text-gray-800"
+					>
+						{t("createOpportunity.translationsHeading")}
+					</h3>
+					<p className="mt-0.5 text-xs text-gray-500">
+						{t("createOpportunity.translationsHint")}
+					</p>
+				</div>
+				<button
+					type="button"
+					aria-expanded={englishExpanded}
+					aria-controls="opportunity-translation-en"
+					data-testid="opportunity-translation-toggle-en"
+					onClick={() => setEnglishOpen(!englishExpanded)}
+					className="mt-2 flex w-full items-center justify-between gap-3 border-t border-gray-200 px-4 py-2.5 text-left text-sm font-medium text-gray-800 hover:bg-gray-50"
+				>
+					<span>{englishName}</span>
+					<span
+						className={`flex items-center gap-1 text-xs ${
+							hasEnglishError
+								? "text-red-600"
+								: hasEnglishText
+									? "text-brand-700"
+									: "text-gray-500"
 						}`}
 					>
-						{t(`language.${lang}`)}
-						{hasError[lang] && (
-							<span className="inline-flex items-center">
-								<ExclamationTriangleIcon className="h-3 w-3 text-red-600" />
-								<span className="sr-only">
-									{t("createOpportunity.contentLanguageHasError")}
-								</span>
-							</span>
-						)}
-					</button>
-				))}
-			</div>
-
-			<div className={activeLanguage === "de" ? "space-y-4" : "hidden"}>
-				<FloatingField
-					id="opportunity-title"
-					label={t("createOpportunity.fieldTitle")}
-					registration={register("titleDe")}
-					required
-					error={titleDeError}
-					maxLength={150}
-					showCount
-					displayValue={titleDe}
-				/>
-				<FloatingField
-					id="opportunity-description"
-					label={t("createOpportunity.fieldDescription")}
-					registration={register("descriptionDe")}
-					required
-					error={descriptionDeError}
-					maxLength={2000}
-					multiline
-					showCount
-					displayValue={descriptionDe}
-				/>
-			</div>
-			<div className={activeLanguage === "en" ? "space-y-4" : "hidden"}>
-				<p className="text-xs text-gray-500">
-					{t("createOpportunity.contentLanguageEnglishHint")}
-				</p>
-				<FloatingField
-					id="opportunity-title-en"
-					label={t("createOpportunity.fieldTitle")}
-					registration={register("titleEn")}
-					error={titleEnError}
-					maxLength={150}
-					showCount
-					displayValue={titleEn}
-				/>
-				<FloatingField
-					id="opportunity-description-en"
-					label={t("createOpportunity.fieldDescription")}
-					registration={register("descriptionEn")}
-					error={descriptionEnError}
-					maxLength={2000}
-					multiline
-					showCount
-					displayValue={descriptionEn}
-				/>
-			</div>
+						{hasEnglishError && <ExclamationTriangleIcon className="h-3 w-3" />}
+						{englishStatus}
+						<ChevronDownIcon
+							className="h-4 w-4 text-gray-500"
+							open={englishExpanded}
+						/>
+					</span>
+				</button>
+				<div
+					id="opportunity-translation-en"
+					hidden={!englishExpanded}
+					className="space-y-4 px-4 pt-1 pb-4"
+				>
+					<FloatingField
+						id="opportunity-title-en"
+						label={t("createOpportunity.fieldTitleTranslated", {
+							language: englishName,
+						})}
+						registration={register("titleEn")}
+						error={titleEnError}
+						maxLength={150}
+						showCount
+						displayValue={titleEn}
+					/>
+					<FloatingField
+						id="opportunity-description-en"
+						label={t("createOpportunity.fieldDescriptionTranslated", {
+							language: englishName,
+						})}
+						registration={register("descriptionEn")}
+						error={descriptionEnError}
+						maxLength={2000}
+						multiline
+						showCount
+						displayValue={descriptionEn}
+					/>
+				</div>
+			</section>
 
 			<div>
 				<p className="mb-1.5 text-sm font-semibold text-gray-800">

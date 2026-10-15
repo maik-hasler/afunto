@@ -1333,7 +1333,6 @@ export default function CreateVolunteerOpportunityModal({
 									titleEnError={errors.titleEn?.message}
 									descriptionDeError={errors.descriptionDe?.message}
 									descriptionEnError={errors.descriptionEn?.message}
-									revalidationAttempt={focusAttempt}
 									bannerPreview={bannerPreview}
 									bannerError={bannerError}
 									onBannerChange={handleBannerChange}
