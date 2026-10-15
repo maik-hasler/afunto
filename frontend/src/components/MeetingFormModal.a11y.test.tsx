@@ -10,7 +10,7 @@ function renderForm() {
 		<MeetingFormModal
 			title="Propose a meeting"
 			intro="Vera gets a notification."
-			initialLocation="Clubhouse"
+			initial={{ format: "InPerson", location: "Clubhouse" }}
 			onSubmit={() => Promise.resolve()}
 			onClose={() => {}}
 		/>,
@@ -21,6 +21,18 @@ function renderForm() {
 describe("MeetingFormModal a11y", () => {
 	it("has no violations when empty", async () => {
 		renderForm();
+		await expectNoA11yViolations();
+	});
+
+	it("has no violations with the online link field showing its error", async () => {
+		renderForm();
+		const user = userEvent.setup();
+		await user.click(screen.getByRole("radio", { name: "Online" }));
+		await user.type(screen.getByLabelText(/Video call link/), "http://x.org");
+		// Make the times valid so the link is what gets refused.
+		await user.type(screen.getByLabelText(/^From/), "1000");
+		await user.click(screen.getByRole("button", { name: "Send proposal" }));
+		await screen.findByRole("alert");
 		await expectNoA11yViolations();
 	});
 

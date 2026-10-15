@@ -40,11 +40,15 @@ internal sealed class ProposeMeetingEndpoint
 	{
 		var userId = Guid.TryParse(user.FindFirstValue("sub"), out var uid) ? UserId.Create(uid).GetValueOrThrow() : throw new ResultFailureException(Error.Validation("User.InvalidId", "Invalid user."));
 
+		if (!Enum.TryParse<MeetingFormat>(request.Format, ignoreCase: true, out var format) || !Enum.IsDefined(format))
+			throw new ResultFailureException(Error.Validation("Meeting.InvalidFormat", "A meeting takes place either in person or online."));
+
 		var command = new ProposeMeetingCommand(
 			VolunteerOpportunityId.Create(opportunityId).GetValueOrThrow(),
 			(request.EngagementIds ?? []).Select(id => EngagementId.Create(id).GetValueOrThrow()).ToList(),
 			request.StartsAt,
 			request.EndsAt,
+			format,
 			request.Location,
 			request.Note,
 			userId,

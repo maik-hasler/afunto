@@ -13387,6 +13387,10 @@ namespace IntegrationTests
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public System.DateTimeOffset EndsAt { get; set; } = default!;
 
+        [System.Text.Json.Serialization.JsonPropertyName("format")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Format { get; set; } = default!;
+
         [System.Text.Json.Serialization.JsonPropertyName("location")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public string Location { get; set; } = default!;
@@ -14462,6 +14466,10 @@ namespace IntegrationTests
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public System.DateTimeOffset EndsAt { get; set; } = default!;
 
+        [System.Text.Json.Serialization.JsonPropertyName("format")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Format { get; set; } = default!;
+
         [System.Text.Json.Serialization.JsonPropertyName("location")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public string Location { get; set; } = default!;
@@ -14495,6 +14503,10 @@ namespace IntegrationTests
         [System.Text.Json.Serialization.JsonPropertyName("endsAt")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public System.DateTimeOffset EndsAt { get; set; } = default!;
+
+        [System.Text.Json.Serialization.JsonPropertyName("format")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Format { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("location")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]

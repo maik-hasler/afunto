@@ -17,6 +17,7 @@ public sealed record ProposeMeetingCommand(
 	IReadOnlyList<EngagementId> EngagementIds,
 	DateTimeOffset StartsAt,
 	DateTimeOffset EndsAt,
+	MeetingFormat Format,
 	string? Location,
 	string? Note,
 	UserId RequestingUserId,

@@ -253,6 +253,8 @@ namespace Infrastructure.Persistence.Migrations
 						{
 							t.HasCheckConstraint("CK_engagement_feedback_rating_range", "feedback_rating IS NULL OR feedback_rating BETWEEN 1 AND 5");
 
+							t.HasCheckConstraint("ck_engagement_meeting_format_valid", "meeting_format IS NULL OR meeting_format IN ('InPerson', 'Online')");
+
 							t.HasCheckConstraint("ck_engagement_meeting_proposed_by_valid", "meeting_proposed_by IS NULL OR meeting_proposed_by IN ('Organization', 'Volunteer')");
 
 							t.HasCheckConstraint("ck_engagement_meeting_response_valid", "meeting_response IS NULL OR meeting_response IN ('Pending', 'Accepted', 'Declined')");
@@ -1070,6 +1072,11 @@ namespace Infrastructure.Persistence.Migrations
 							b1.Property<DateTimeOffset>("EndsAt")
 								.HasColumnType("timestamp with time zone")
 								.HasColumnName("meeting_ends_at");
+
+							b1.Property<string>("Format")
+								.IsRequired()
+								.HasColumnType("text")
+								.HasColumnName("meeting_format");
 
 							b1.Property<Guid>("Id")
 								.HasColumnType("uuid")

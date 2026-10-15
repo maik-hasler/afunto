@@ -1811,7 +1811,7 @@
         "TooFarAhead": "A meeting can be proposed at most one year ahead.",
         "EndBeforeStart": "The end has to be after the start.",
         "TooLong": "A meeting can last at most 12 hours.",
-        "LocationRequired": "Enter a place or an online link.",
+        "LocationRequired": "Enter an address or meeting point.",
         "LocationTooLong": "The place must not exceed 300 characters.",
         "NoteTooLong": "The note must not exceed 500 characters.",
         "ProposalLimitReached": "Too many meetings have been proposed for this expression of interest. Please contact each other directly.",
@@ -1819,7 +1819,10 @@
         "AlreadyAnswered": "This proposal has already been answered.",
         "NotProposer": "Only the side that proposed the meeting can cancel it. Decline it instead.",
         "Superseded": "This proposal has been replaced in the meantime. Reload the page to see the current one.",
-        "AlreadyOver": "This meeting is already over."
+        "AlreadyOver": "This meeting is already over.",
+        "LinkRequired": "Enter the link to the video call.",
+        "InvalidLink": "Enter a complete link starting with https://.",
+        "InvalidFormat": "Choose whether you meet in person or online."
       },
       "MeetingId": {
         "Empty": "This request was incomplete. Reload the page and try again."
@@ -1872,10 +1875,20 @@
       "cancelled": "The meeting was cancelled.",
       "actionError": "That did not work. Please try again.",
       "form": {
-        "startLabel": "Starts",
-        "endLabel": "Ends",
-        "locationLabel": "Place or online link",
-        "locationHint": "An address, or an https:// link to a video call.",
+        "whenLegend": "When",
+        "dayLabel": "Day",
+        "startTimeLabel": "From",
+        "endTimeLabel": "To",
+        "formatLegend": "How do you meet?",
+        "format": {
+          "InPerson": "In person",
+          "Online": "Online"
+        },
+        "addressLabel": "Address or meeting point",
+        "addressPlaceholder": "e.g. Club house, Hauptstraße 5, room 2",
+        "linkLabel": "Video call link",
+        "linkHint": "From Jitsi, Zoom, Teams or similar. It has to start with https://.",
+        "linkInvalid": "Enter a complete link starting with https://.",
         "noteLabel": "Note",
         "notePlaceholder": "What should the other side know beforehand?",
         "cancel": "Cancel",
@@ -1883,9 +1896,9 @@
         "submitting": "Sending…",
         "submitError": "The proposal could not be sent.",
         "timesError": {
-          "incomplete": "Choose a date and time for the start and the end.",
+          "incomplete": "Choose a day and a start and end time.",
           "startInPast": "The meeting has to start in the future.",
-          "endBeforeStart": "The end has to be after the start.",
+          "endBeforeStart": "The end has to be after the start, on the same day.",
           "tooLong": "A meeting can last at most 12 hours."
         }
       }

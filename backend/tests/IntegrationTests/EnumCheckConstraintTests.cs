@@ -140,7 +140,7 @@ public class EnumCheckConstraintTests(IntegrationTestFixture fixture)
 		var now = DateTimeOffset.UtcNow;
 		var engagement = Engagement.CreateIndividualContact(VolunteerOpportunityId.New(), UserId.New(), "Message").GetValueOrThrow();
 		var meetingId = MeetingId.New();
-		engagement.ProposeMeeting(meetingId, MeetingParty.Organization, now.AddDays(2), now.AddDays(2).AddHours(1), "Online", "Note", now)
+		engagement.ProposeMeeting(meetingId, MeetingParty.Organization, now.AddDays(2), now.AddDays(2).AddHours(1), MeetingFormat.Online, "https://meet.example.org/abc", "Note", now)
 			.IsSuccess.Should().BeTrue();
 
 		await using (var writeContext = fixture.CreateApplicationDbContext())
@@ -164,6 +164,8 @@ public class EnumCheckConstraintTests(IntegrationTestFixture fixture)
 			reloaded.Meeting!.Id.Should().Be(meetingId);
 			reloaded.Meeting.ProposedBy.Should().Be(MeetingParty.Organization);
 			reloaded.Meeting.Response.Should().Be(MeetingResponse.Accepted);
+			reloaded.Meeting.Format.Should().Be(MeetingFormat.Online);
+			reloaded.Meeting.Location.Should().Be("https://meet.example.org/abc");
 			reloaded.Meeting.Note.Should().Be("Note");
 			reloaded.MeetingProposalCount.Should().Be(1);
 
@@ -182,7 +184,7 @@ public class EnumCheckConstraintTests(IntegrationTestFixture fixture)
 	{
 		var now = DateTimeOffset.UtcNow;
 		var engagement = Engagement.CreateIndividualContact(VolunteerOpportunityId.New(), UserId.New(), "Message").GetValueOrThrow();
-		engagement.ProposeMeeting(MeetingId.New(), MeetingParty.Volunteer, now.AddDays(2), now.AddDays(2).AddHours(1), "Online", null, now);
+		engagement.ProposeMeeting(MeetingId.New(), MeetingParty.Volunteer, now.AddDays(2), now.AddDays(2).AddHours(1), MeetingFormat.InPerson, "Vereinsheim", null, now);
 
 		await using var writeContext = fixture.CreateApplicationDbContext();
 		await writeContext.Engagements.AddAsync(engagement, cancellationToken);
@@ -192,6 +194,8 @@ public class EnumCheckConstraintTests(IntegrationTestFixture fixture)
 			"engagement", "meeting_response", engagement.Id.Value, "ck_engagement_meeting_response_valid", cancellationToken);
 		await AssertRejectsInvalidValueAsync(
 			"engagement", "meeting_proposed_by", engagement.Id.Value, "ck_engagement_meeting_proposed_by_valid", cancellationToken);
+		await AssertRejectsInvalidValueAsync(
+			"engagement", "meeting_format", engagement.Id.Value, "ck_engagement_meeting_format_valid", cancellationToken);
 	}
 
 	[Test]

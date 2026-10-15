@@ -11,7 +11,7 @@ import {
 import { quoteMarks } from "../lib/quotes";
 import { inlineLinkClass } from "../lib/linkClasses";
 import Chip, { type ChipTone } from "./Chip";
-import { CalendarIcon, MapPinIcon, UsersIcon } from "./icons";
+import { CalendarIcon, GlobeIcon, MapPinIcon, UsersIcon } from "./icons";
 
 const STATE_TONES: Record<MeetingState, ChipTone> = {
 	awaitingYou: "warning",
@@ -38,7 +38,10 @@ export default function MeetingDetails({ meeting, viewer, children }: Props) {
 	const { t, i18n } = useTranslation();
 	const quotes = quoteMarks(i18n.language);
 	const state = meetingState(meeting, viewer);
-	const link = meetingLink(meeting.location);
+	const isOnline = meeting.format === "Online";
+	// Only an online meeting is ever linked; an address stays text even if it
+	// happens to look like a URL.
+	const link = isOnline ? meetingLink(meeting.location) : null;
 	const stateLabel =
 		state === "awaitingOther"
 			? viewer === "Volunteer"
@@ -69,7 +72,14 @@ export default function MeetingDetails({ meeting, viewer, children }: Props) {
 				</Chip>
 			</div>
 			<p className="mt-1 flex items-start gap-1.5 break-words">
-				<MapPinIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+				{isOnline ? (
+					<GlobeIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+				) : (
+					<MapPinIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+				)}
+				<span className="sr-only">
+					{t(`meetings.form.format.${isOnline ? "Online" : "InPerson"}`)}:{" "}
+				</span>
 				{link ? (
 					<a
 						href={link}

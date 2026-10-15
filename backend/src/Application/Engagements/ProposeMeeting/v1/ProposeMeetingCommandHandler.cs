@@ -73,6 +73,7 @@ internal sealed class ProposeMeetingCommandHandler(
 				MeetingParty.Organization,
 				request.StartsAt,
 				request.EndsAt,
+				request.Format,
 				request.Location,
 				request.Note,
 				now).ThrowIfFailure();

@@ -30,7 +30,7 @@ These are the terms the domain model in <<section-concepts>> is built from. They
 |An organizer's offer to a user to join an organization with an intended role. Expires after 14 days if not accepted or declined.
 
 |Meeting
-|An appointment the organizer and a volunteer arrange after an `IndividualContact` expression of interest (German UI: "Treffen"): start, end, a place or an online link, and an optional note. Either side may propose one; the other side accepts or declines it, and a new proposal replaces the old one rather than editing it. An organizer can propose one meeting to several interested volunteers at once (a group meeting). A meeting is not a confirmation of the engagement and earns no achievement.
+|An appointment the organizer and a volunteer arrange after an `IndividualContact` expression of interest (German UI: "Treffen"): one day with a start and end time, whether it takes place in person (with an address or meeting point) or online (with an https link), and an optional note. Either side may propose one; the other side accepts or declines it, and a new proposal replaces the old one rather than editing it. An organizer can propose one meeting to several interested volunteers at once (a group meeting). A meeting is not a confirmation of the engagement and earns no achievement.
 
 |Membership
 |The link between a user and an organization, carrying the member's role (`Member` or `Organizer`). This local record - not the JWT role - decides at request time whether a user may modify a given organization.

@@ -80,6 +80,10 @@ internal sealed class EngagementConfiguration
 
 			meeting.Property(m => m.EndsAt).IsRequired();
 
+			meeting.Property(m => m.Format)
+				.HasConversion<string>()
+				.IsRequired();
+
 			meeting.Property(m => m.Location)
 				.HasMaxLength(Meeting.MaxLocationLength)
 				.IsRequired();
@@ -102,6 +106,10 @@ internal sealed class EngagementConfiguration
 		builder.ToTable(t => t.HasCheckConstraint(
 			"ck_engagement_meeting_proposed_by_valid",
 			"meeting_proposed_by IS NULL OR meeting_proposed_by IN ('Organization', 'Volunteer')"));
+
+		builder.ToTable(t => t.HasCheckConstraint(
+			"ck_engagement_meeting_format_valid",
+			"meeting_format IS NULL OR meeting_format IN ('InPerson', 'Online')"));
 
 		builder.ToTable(t => t.HasCheckConstraint(
 			"ck_engagement_meeting_response_valid",

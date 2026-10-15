@@ -70,7 +70,7 @@ public class MeetingCommandHandlerTests
 	}
 
 	private ProposeMeetingCommand Proposal(VolunteerOpportunity opportunity, params Engagement[] engagements) =>
-		new(opportunity.Id, engagements.Select(e => e.Id).ToList(), Start, End, "Vereinsheim", null, _organizerId);
+		new(opportunity.Id, engagements.Select(e => e.Id).ToList(), Start, End, MeetingFormat.InPerson, "Vereinsheim", null, _organizerId);
 
 	[Test]
 	public async Task ProposeMeeting_ShouldGiveEveryParticipantTheSameMeeting_AndNotifyEach(CancellationToken cancellationToken)
@@ -222,7 +222,7 @@ public class MeetingCommandHandlerTests
 		var sut = new ProposeMeetingAsVolunteerCommandHandler(_dbContext, _timeProvider);
 
 		var meetingId = await sut.Handle(
-			new ProposeMeetingAsVolunteerCommand(engagement.Id, Start, End, "Online", null, volunteerId.Value),
+			new ProposeMeetingAsVolunteerCommand(engagement.Id, Start, End, MeetingFormat.Online, "https://meet.example.org/abc", null, volunteerId.Value),
 			cancellationToken);
 
 		engagement.Meeting!.Id.Should().Be(meetingId);
@@ -240,7 +240,7 @@ public class MeetingCommandHandlerTests
 		var sut = new ProposeMeetingAsVolunteerCommandHandler(_dbContext, _timeProvider);
 
 		var act = async () => await sut.Handle(
-			new ProposeMeetingAsVolunteerCommand(engagement.Id, Start, End, "Online", null, Guid.NewGuid()),
+			new ProposeMeetingAsVolunteerCommand(engagement.Id, Start, End, MeetingFormat.Online, "https://meet.example.org/abc", null, Guid.NewGuid()),
 			cancellationToken);
 
 		(await act.Should().ThrowAsync<ResultFailureException>())
@@ -274,7 +274,7 @@ public class MeetingCommandHandlerTests
 		var engagement = Interest(opportunity, volunteerId);
 		ActiveEngagements(opportunity, engagement);
 		var meetingId = await new ProposeMeetingAsVolunteerCommandHandler(_dbContext, _timeProvider)
-			.Handle(new ProposeMeetingAsVolunteerCommand(engagement.Id, Start, End, "Online", null, volunteerId.Value), cancellationToken);
+			.Handle(new ProposeMeetingAsVolunteerCommand(engagement.Id, Start, End, MeetingFormat.Online, "https://meet.example.org/abc", null, volunteerId.Value), cancellationToken);
 		var sut = new RespondToMeetingAsOrganizerCommandHandler(_dbContext, _timeProvider);
 
 		await sut.Handle(new RespondToMeetingAsOrganizerCommand(opportunity.Id, meetingId, Accept: false, _organizerId), cancellationToken);

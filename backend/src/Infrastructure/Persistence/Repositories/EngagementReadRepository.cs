@@ -450,6 +450,7 @@ internal sealed class EngagementReadRepository(
 				meeting.Id.Value,
 				meeting.StartsAt,
 				meeting.EndsAt,
+				meeting.Format.ToString(),
 				meeting.Location,
 				meeting.Note,
 				meeting.ProposedBy.ToString(),

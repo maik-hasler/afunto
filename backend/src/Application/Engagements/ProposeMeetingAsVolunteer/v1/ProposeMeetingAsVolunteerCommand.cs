@@ -12,6 +12,7 @@ public sealed record ProposeMeetingAsVolunteerCommand(
 	EngagementId EngagementId,
 	DateTimeOffset StartsAt,
 	DateTimeOffset EndsAt,
+	MeetingFormat Format,
 	string? Location,
 	string? Note,
 	Guid VolunteerId)

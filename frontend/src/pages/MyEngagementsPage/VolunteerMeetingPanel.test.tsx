@@ -37,6 +37,7 @@ function interest(
 			id: MEETING_ID,
 			startsAt: new Date(`${NEXT_YEAR}-03-10T17:00:00Z`),
 			endsAt: new Date(`${NEXT_YEAR}-03-10T18:00:00Z`),
+			format: "InPerson",
 			location: "Clubhouse",
 			note: null,
 			proposedBy: "Organization",

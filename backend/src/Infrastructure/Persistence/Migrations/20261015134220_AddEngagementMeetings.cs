@@ -21,6 +21,12 @@ namespace Infrastructure.Persistence.Migrations
 				type: "timestamp with time zone",
 				nullable: true);
 
+			migrationBuilder.AddColumn<string>(
+				name: "meeting_format",
+				table: "engagement",
+				type: "text",
+				nullable: true);
+
 			migrationBuilder.AddColumn<Guid>(
 				name: "meeting_id",
 				table: "engagement",
@@ -77,6 +83,11 @@ namespace Infrastructure.Persistence.Migrations
 				column: "meeting_id");
 
 			migrationBuilder.AddCheckConstraint(
+				name: "ck_engagement_meeting_format_valid",
+				table: "engagement",
+				sql: "meeting_format IS NULL OR meeting_format IN ('InPerson', 'Online')");
+
+			migrationBuilder.AddCheckConstraint(
 				name: "ck_engagement_meeting_proposed_by_valid",
 				table: "engagement",
 				sql: "meeting_proposed_by IS NULL OR meeting_proposed_by IN ('Organization', 'Volunteer')");
@@ -99,6 +110,10 @@ namespace Infrastructure.Persistence.Migrations
 				table: "engagement");
 
 			migrationBuilder.DropCheckConstraint(
+				name: "ck_engagement_meeting_format_valid",
+				table: "engagement");
+
+			migrationBuilder.DropCheckConstraint(
 				name: "ck_engagement_meeting_proposed_by_valid",
 				table: "engagement");
 
@@ -108,6 +123,10 @@ namespace Infrastructure.Persistence.Migrations
 
 			migrationBuilder.DropColumn(
 				name: "meeting_ends_at",
+				table: "engagement");
+
+			migrationBuilder.DropColumn(
+				name: "meeting_format",
 				table: "engagement");
 
 			migrationBuilder.DropColumn(

@@ -36,7 +36,7 @@ import { useSetOrgBreadcrumbExtra } from "../contexts/OrgBreadcrumbContext";
 import { dispatchToast } from "../lib/toastBus";
 import { getApiErrorMessage, isApiNotFoundError } from "../lib/apiError";
 import { ENGAGEMENT_STATUS_COLORS } from "../lib/engagementStatus";
-import { meetingState } from "../lib/meetings";
+import { meetingState, toMeetingDraft } from "../lib/meetings";
 import {
 	checkboxClass,
 	inputClass,
@@ -1249,19 +1249,10 @@ export default function EngagementManagementPage() {
 										count: meetingForm.engagementIds.length,
 									})
 					}
-					initialStartsAt={
+					initial={
 						meetingForm.kind === "move"
-							? meetingForm.meeting.startsAt
+							? toMeetingDraft(meetingForm.meeting)
 							: undefined
-					}
-					initialEndsAt={
-						meetingForm.kind === "move" ? meetingForm.meeting.endsAt : undefined
-					}
-					initialLocation={
-						meetingForm.kind === "move" ? meetingForm.meeting.location : ""
-					}
-					initialNote={
-						meetingForm.kind === "move" ? meetingForm.meeting.note : null
 					}
 					onSubmit={handleMeetingSubmit}
 					onClose={() => setMeetingForm(null)}

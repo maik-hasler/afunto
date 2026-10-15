@@ -30,6 +30,7 @@ internal sealed class ProposeMeetingAsVolunteerCommandHandler(
 			MeetingParty.Volunteer,
 			request.StartsAt,
 			request.EndsAt,
+			request.Format,
 			request.Location,
 			request.Note,
 			timeProvider.GetUtcNow()).ThrowIfFailure();

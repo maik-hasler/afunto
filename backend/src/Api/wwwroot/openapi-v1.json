@@ -8972,6 +8972,7 @@
           "id",
           "startsAt",
           "endsAt",
+          "format",
           "location",
           "note",
           "proposedBy",
@@ -8991,6 +8992,9 @@
           "endsAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "format": {
+            "type": "string"
           },
           "location": {
             "type": "string"
@@ -10270,6 +10274,7 @@
         "required": [
           "startsAt",
           "endsAt",
+          "format",
           "location",
           "note"
         ],
@@ -10282,6 +10287,9 @@
           "endsAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "format": {
+            "type": "string"
           },
           "location": {
             "type": "string"
@@ -10299,6 +10307,7 @@
           "engagementIds",
           "startsAt",
           "endsAt",
+          "format",
           "location",
           "note"
         ],
@@ -10318,6 +10327,9 @@
           "endsAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "format": {
+            "type": "string"
           },
           "location": {
             "type": "string"

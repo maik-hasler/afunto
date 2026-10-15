@@ -269,6 +269,7 @@ export type EngagementMeetingSummary = {
     id: string;
     startsAt: Date;
     endsAt: Date;
+    format: string;
     location: string;
     note: null | string;
     proposedBy: string;
@@ -529,6 +530,7 @@ export type ProblemDetails = {
 export type ProposeMeetingAsVolunteerRequest = {
     startsAt: Date;
     endsAt: Date;
+    format: string;
     location: string;
     note: null | string;
 };
@@ -537,6 +539,7 @@ export type ProposeMeetingRequest = {
     engagementIds: Array<string>;
     startsAt: Date;
     endsAt: Date;
+    format: string;
     location: string;
     note: null | string;
     replacesMeetingId?: null | string;

@@ -337,6 +337,7 @@ public sealed class Engagement
 		MeetingParty proposedBy,
 		DateTimeOffset startsAt,
 		DateTimeOffset endsAt,
+		MeetingFormat format,
 		string? location,
 		string? note,
 		DateTimeOffset now)
@@ -353,7 +354,7 @@ public sealed class Engagement
 		if (MeetingProposalCount >= MaxMeetingProposals)
 			return Result.Failure(Error.Conflict("Meeting.ProposalLimitReached", "Too many meetings have been proposed for this engagement. Please contact each other directly."));
 
-		var meeting = Meeting.Propose(meetingId, proposedBy, startsAt, endsAt, location, note, now);
+		var meeting = Meeting.Propose(meetingId, proposedBy, startsAt, endsAt, format, location, note, now);
 		if (meeting.IsFailure)
 			return meeting;
 

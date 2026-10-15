@@ -1811,7 +1811,7 @@
         "TooFarAhead": "Ein Treffen lässt sich höchstens ein Jahr im Voraus vorschlagen.",
         "EndBeforeStart": "Das Ende muss nach dem Beginn liegen.",
         "TooLong": "Ein Treffen dauert höchstens 12 Stunden.",
-        "LocationRequired": "Gib einen Ort oder einen Online-Link an.",
+        "LocationRequired": "Gib eine Adresse oder einen Treffpunkt an.",
         "LocationTooLong": "Der Ort darf höchstens 300 Zeichen lang sein.",
         "NoteTooLong": "Die Notiz darf höchstens 500 Zeichen lang sein.",
         "ProposalLimitReached": "Zu dieser Interessenbekundung wurden zu viele Treffen vorgeschlagen. Bitte meldet euch direkt beieinander.",
@@ -1819,7 +1819,10 @@
         "AlreadyAnswered": "Auf diesen Vorschlag wurde schon geantwortet.",
         "NotProposer": "Absagen kann nur, wer das Treffen vorgeschlagen hat. Lehne es stattdessen ab.",
         "Superseded": "Dieser Vorschlag wurde inzwischen ersetzt. Lade die Seite neu, um den aktuellen zu sehen.",
-        "AlreadyOver": "Dieses Treffen ist schon vorbei."
+        "AlreadyOver": "Dieses Treffen ist schon vorbei.",
+        "LinkRequired": "Gib den Link zum Videoanruf an.",
+        "InvalidLink": "Gib einen vollständigen Link an, der mit https:// beginnt.",
+        "InvalidFormat": "Wähle, ob ihr euch vor Ort oder online trefft."
       },
       "MeetingId": {
         "Empty": "Diese Anfrage war unvollständig. Lade die Seite neu und versuche es erneut."
@@ -1872,10 +1875,20 @@
       "cancelled": "Das Treffen wurde abgesagt.",
       "actionError": "Das hat nicht geklappt. Bitte versuch es noch einmal.",
       "form": {
-        "startLabel": "Beginn",
-        "endLabel": "Ende",
-        "locationLabel": "Ort oder Online-Link",
-        "locationHint": "Eine Adresse oder ein https://-Link zu einem Videoanruf.",
+        "whenLegend": "Wann",
+        "dayLabel": "Tag",
+        "startTimeLabel": "Von",
+        "endTimeLabel": "Bis",
+        "formatLegend": "Wie trefft ihr euch?",
+        "format": {
+          "InPerson": "Vor Ort",
+          "Online": "Online"
+        },
+        "addressLabel": "Adresse oder Treffpunkt",
+        "addressPlaceholder": "z. B. Vereinsheim, Hauptstraße 5, Raum 2",
+        "linkLabel": "Link zum Videoanruf",
+        "linkHint": "Von Jitsi, Zoom, Teams oder Ähnlichem. Er muss mit https:// beginnen.",
+        "linkInvalid": "Gib einen vollständigen Link an, der mit https:// beginnt.",
         "noteLabel": "Notiz",
         "notePlaceholder": "Was sollte die andere Seite vorher wissen?",
         "cancel": "Abbrechen",
@@ -1883,9 +1896,9 @@
         "submitting": "Wird gesendet…",
         "submitError": "Der Vorschlag konnte nicht gesendet werden.",
         "timesError": {
-          "incomplete": "Wähle Datum und Uhrzeit für Beginn und Ende.",
+          "incomplete": "Wähle einen Tag sowie Beginn und Ende.",
           "startInPast": "Das Treffen muss in der Zukunft beginnen.",
-          "endBeforeStart": "Das Ende muss nach dem Beginn liegen.",
+          "endBeforeStart": "Das Ende muss am selben Tag nach dem Beginn liegen.",
           "tooLong": "Ein Treffen dauert höchstens 12 Stunden."
         }
       }

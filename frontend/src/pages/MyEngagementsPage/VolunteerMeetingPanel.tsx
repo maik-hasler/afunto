@@ -9,7 +9,7 @@ import MeetingFormModal, {
 } from "../../components/MeetingFormModal";
 import { useApiClient } from "../../hooks/useApiClient";
 import { getApiErrorMessage } from "../../lib/apiError";
-import { meetingState } from "../../lib/meetings";
+import { meetingState, toMeetingDraft } from "../../lib/meetings";
 import { dispatchToast } from "../../lib/toastBus";
 
 interface Props {
@@ -43,6 +43,13 @@ export default function VolunteerMeetingPanel({
 	const state = meeting ? meetingState(meeting, "Volunteer") : null;
 	const isOwnProposal = meeting?.proposedBy === "Volunteer";
 	const isGroup = (meeting?.participantCount ?? 0) > 1;
+	// Another time usually means the same place: keep how and where, ask for
+	// the time afresh.
+	const counterDefaults = meeting
+		? (({ format, location }) => ({ format, location }))(
+				toMeetingDraft(meeting),
+			)
+		: undefined;
 
 	async function handleSubmit(values: MeetingFormValues) {
 		await api.proposeMeetingAsVolunteer({
@@ -175,6 +182,7 @@ export default function VolunteerMeetingPanel({
 							? t("meetings.counterIntroGroup")
 							: t("meetings.proposeIntroToOrganization")
 					}
+					initial={counterDefaults}
 					onSubmit={handleSubmit}
 					onClose={() => setFormOpen(false)}
 				/>

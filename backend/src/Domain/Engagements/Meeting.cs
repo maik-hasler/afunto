@@ -25,6 +25,9 @@ public sealed record Meeting : IValueObject
 
 	public DateTimeOffset EndsAt { get; }
 
+	public MeetingFormat Format { get; }
+
+	/// <summary>The address or meeting point, or the https link for an online meeting.</summary>
 	public string Location { get; }
 
 	public string? Note { get; }
@@ -37,6 +40,7 @@ public sealed record Meeting : IValueObject
 		MeetingId id,
 		DateTimeOffset startsAt,
 		DateTimeOffset endsAt,
+		MeetingFormat format,
 		string location,
 		string? note,
 		MeetingParty proposedBy,
@@ -45,6 +49,7 @@ public sealed record Meeting : IValueObject
 		Id = id;
 		StartsAt = startsAt;
 		EndsAt = endsAt;
+		Format = format;
 		Location = location;
 		Note = note;
 		ProposedBy = proposedBy;
@@ -56,6 +61,7 @@ public sealed record Meeting : IValueObject
 		MeetingParty proposedBy,
 		DateTimeOffset startsAt,
 		DateTimeOffset endsAt,
+		MeetingFormat format,
 		string? location,
 		string? note,
 		DateTimeOffset now)
@@ -72,22 +78,38 @@ public sealed record Meeting : IValueObject
 		if (endsAt - startsAt > MaxDuration)
 			return Result.Failure<Meeting>(Error.Validation("Meeting.TooLong", "A meeting can last at most 12 hours."));
 
+		if (!Enum.IsDefined(format))
+			return Result.Failure<Meeting>(Error.Validation("Meeting.InvalidFormat", "A meeting takes place either in person or online."));
+
 		var trimmedLocation = location?.Trim();
 		if (string.IsNullOrEmpty(trimmedLocation))
-			return Result.Failure<Meeting>(Error.Validation("Meeting.LocationRequired", "A meeting needs a place or an online link."));
+			return Result.Failure<Meeting>(format == MeetingFormat.Online
+				? Error.Validation("Meeting.LinkRequired", "An online meeting needs a link.")
+				: Error.Validation("Meeting.LocationRequired", "A meeting in person needs a place."));
 
 		if (trimmedLocation.Length > MaxLocationLength)
 			return Result.Failure<Meeting>(Error.Validation("Meeting.LocationTooLong", $"The place must not exceed {MaxLocationLength} characters."));
+
+		// Only https is accepted: anyone can create an organization, and the other side
+		// gets this as a link one click away.
+		if (format == MeetingFormat.Online && !IsHttpsLink(trimmedLocation))
+			return Result.Failure<Meeting>(Error.Validation("Meeting.InvalidLink", "An online meeting needs a link starting with https://."));
 
 		var trimmedNote = string.IsNullOrWhiteSpace(note) ? null : note.Trim();
 		if (trimmedNote is not null && trimmedNote.Length > MaxNoteLength)
 			return Result.Failure<Meeting>(Error.Validation("Meeting.NoteTooLong", $"The note must not exceed {MaxNoteLength} characters."));
 
-		return new Meeting(id, startsAt, endsAt, trimmedLocation, trimmedNote, proposedBy, MeetingResponse.Pending);
+		return new Meeting(id, startsAt, endsAt, format, trimmedLocation, trimmedNote, proposedBy, MeetingResponse.Pending);
 	}
+
+	private static bool IsHttpsLink(string value) =>
+		!value.Any(char.IsWhiteSpace)
+		&& Uri.TryCreate(value, UriKind.Absolute, out var uri)
+		&& uri.Scheme == Uri.UriSchemeHttps
+		&& !string.IsNullOrEmpty(uri.Host);
 
 	public bool IsOver(DateTimeOffset now) => EndsAt <= now;
 
 	internal Meeting WithResponse(MeetingResponse response) =>
-		new(Id, StartsAt, EndsAt, Location, Note, ProposedBy, response);
+		new(Id, StartsAt, EndsAt, Format, Location, Note, ProposedBy, response);
 }

@@ -18,7 +18,7 @@ public class MeetingTests
 	{
 		var meetingId = MeetingId.New();
 		var startsAt = start ?? Start;
-		engagement.ProposeMeeting(meetingId, MeetingParty.Organization, startsAt, startsAt.AddHours(1), "Vereinsheim, Hauptstraße 1", null, Now)
+		engagement.ProposeMeeting(meetingId, MeetingParty.Organization, startsAt, startsAt.AddHours(1), MeetingFormat.InPerson, "Vereinsheim, Hauptstraße 1", null, Now)
 			.IsSuccess.Should().BeTrue();
 		return meetingId;
 	}
@@ -29,13 +29,14 @@ public class MeetingTests
 		var engagement = InterestEngagement();
 		var meetingId = MeetingId.New();
 
-		var result = engagement.ProposeMeeting(meetingId, MeetingParty.Organization, Start, End, "  https://meet.example.org/abc  ", "  Kurzes Kennenlernen  ", Now);
+		var result = engagement.ProposeMeeting(meetingId, MeetingParty.Organization, Start, End, MeetingFormat.Online, "  https://meet.example.org/abc  ", "  Kurzes Kennenlernen  ", Now);
 
 		result.IsSuccess.Should().BeTrue();
 		engagement.Meeting.Should().NotBeNull();
 		engagement.Meeting!.Id.Should().Be(meetingId);
 		engagement.Meeting.ProposedBy.Should().Be(MeetingParty.Organization);
 		engagement.Meeting.Response.Should().Be(MeetingResponse.Pending);
+		engagement.Meeting.Format.Should().Be(MeetingFormat.Online);
 		engagement.Meeting.Location.Should().Be("https://meet.example.org/abc");
 		engagement.Meeting.Note.Should().Be("Kurzes Kennenlernen");
 		engagement.MeetingProposalCount.Should().Be(1);
@@ -46,7 +47,7 @@ public class MeetingTests
 	{
 		var engagement = InterestEngagement();
 
-		engagement.ProposeMeeting(MeetingId.New(), MeetingParty.Volunteer, Start, End, "Online", "   ", Now);
+		engagement.ProposeMeeting(MeetingId.New(), MeetingParty.Volunteer, Start, End, MeetingFormat.InPerson, "Vereinsheim", "   ", Now);
 
 		engagement.Meeting!.Note.Should().BeNull();
 	}
@@ -58,7 +59,7 @@ public class MeetingTests
 		var first = ProposeByOrganization(engagement);
 		var second = MeetingId.New();
 
-		var result = engagement.ProposeMeeting(second, MeetingParty.Volunteer, Start.AddDays(1), End.AddDays(1), "Online", null, Now);
+		var result = engagement.ProposeMeeting(second, MeetingParty.Volunteer, Start.AddDays(1), End.AddDays(1), MeetingFormat.InPerson, "Vereinsheim", null, Now);
 
 		result.IsSuccess.Should().BeTrue();
 		engagement.Meeting!.Id.Should().Be(second).And.NotBe(first);
@@ -71,7 +72,7 @@ public class MeetingTests
 	{
 		var engagement = Engagement.CreateSlotSignUp(VolunteerOpportunityId.New(), UserId.New(), TimeSlotId.New());
 
-		var result = engagement.ProposeMeeting(MeetingId.New(), MeetingParty.Organization, Start, End, "Online", null, Now);
+		var result = engagement.ProposeMeeting(MeetingId.New(), MeetingParty.Organization, Start, End, MeetingFormat.InPerson, "Vereinsheim", null, Now);
 
 		result.Error.Code.Should().Be("Meeting.RequiresIndividualContact");
 	}
@@ -82,7 +83,7 @@ public class MeetingTests
 		var engagement = InterestEngagement();
 		engagement.Withdraw();
 
-		var result = engagement.ProposeMeeting(MeetingId.New(), MeetingParty.Organization, Start, End, "Online", null, Now);
+		var result = engagement.ProposeMeeting(MeetingId.New(), MeetingParty.Organization, Start, End, MeetingFormat.InPerson, "Vereinsheim", null, Now);
 
 		result.Error.Code.Should().Be("Engagement.AlreadyTerminated");
 	}
@@ -93,7 +94,7 @@ public class MeetingTests
 		var engagement = InterestEngagement();
 		engagement.Anonymize();
 
-		var result = engagement.ProposeMeeting(MeetingId.New(), MeetingParty.Organization, Start, End, "Online", null, Now);
+		var result = engagement.ProposeMeeting(MeetingId.New(), MeetingParty.Organization, Start, End, MeetingFormat.InPerson, "Vereinsheim", null, Now);
 
 		result.Error.Code.Should().Be("Engagement.Anonymized");
 	}
@@ -110,7 +111,7 @@ public class MeetingTests
 		var engagement = InterestEngagement();
 		var startsAt = Now.AddHours(startOffsetHours);
 
-		var result = engagement.ProposeMeeting(MeetingId.New(), MeetingParty.Organization, startsAt, startsAt.AddHours(durationHours), "Online", null, Now);
+		var result = engagement.ProposeMeeting(MeetingId.New(), MeetingParty.Organization, startsAt, startsAt.AddHours(durationHours), MeetingFormat.InPerson, "Vereinsheim", null, Now);
 
 		result.Error.Code.Should().Be(expectedCode);
 		engagement.Meeting.Should().BeNull();
@@ -118,15 +119,53 @@ public class MeetingTests
 	}
 
 	[Test]
-	[Arguments(null, "Meeting.LocationRequired")]
-	[Arguments("   ", "Meeting.LocationRequired")]
-	public void ProposeMeeting_ShouldRequireLocation(string? location, string expectedCode)
+	[Arguments(MeetingFormat.InPerson, null, "Meeting.LocationRequired")]
+	[Arguments(MeetingFormat.InPerson, "   ", "Meeting.LocationRequired")]
+	[Arguments(MeetingFormat.Online, null, "Meeting.LinkRequired")]
+	[Arguments(MeetingFormat.Online, "   ", "Meeting.LinkRequired")]
+	public void ProposeMeeting_ShouldRequireLocation(MeetingFormat format, string? location, string expectedCode)
 	{
 		var engagement = InterestEngagement();
 
-		var result = engagement.ProposeMeeting(MeetingId.New(), MeetingParty.Organization, Start, End, location, null, Now);
+		var result = engagement.ProposeMeeting(MeetingId.New(), MeetingParty.Organization, Start, End, format, location, null, Now);
 
 		result.Error.Code.Should().Be(expectedCode);
+	}
+
+	[Test]
+	[Arguments("http://meet.example.org/abc")]
+	[Arguments("javascript:alert(1)")]
+	[Arguments("meet.example.org/abc")]
+	[Arguments("https://meet.example.org/a b")]
+	[Arguments("Link folgt")]
+	public void ProposeMeeting_ShouldReject_OnlineMeetingWithoutHttpsLink(string link)
+	{
+		var engagement = InterestEngagement();
+
+		var result = engagement.ProposeMeeting(MeetingId.New(), MeetingParty.Organization, Start, End, MeetingFormat.Online, link, null, Now);
+
+		result.Error.Code.Should().Be("Meeting.InvalidLink");
+	}
+
+	[Test]
+	public void ProposeMeeting_ShouldAcceptAnyText_ForMeetingInPerson()
+	{
+		var engagement = InterestEngagement();
+
+		var result = engagement.ProposeMeeting(MeetingId.New(), MeetingParty.Organization, Start, End, MeetingFormat.InPerson, "Eingang Nord, Raum 2", null, Now);
+
+		result.IsSuccess.Should().BeTrue();
+		engagement.Meeting!.Format.Should().Be(MeetingFormat.InPerson);
+	}
+
+	[Test]
+	public void ProposeMeeting_ShouldReject_UndefinedFormat()
+	{
+		var engagement = InterestEngagement();
+
+		var result = engagement.ProposeMeeting(MeetingId.New(), MeetingParty.Organization, Start, End, (MeetingFormat)42, "Vereinsheim", null, Now);
+
+		result.Error.Code.Should().Be("Meeting.InvalidFormat");
 	}
 
 	[Test]
@@ -134,9 +173,9 @@ public class MeetingTests
 	{
 		var engagement = InterestEngagement();
 
-		engagement.ProposeMeeting(MeetingId.New(), MeetingParty.Organization, Start, End, new string('a', Meeting.MaxLocationLength + 1), null, Now)
+		engagement.ProposeMeeting(MeetingId.New(), MeetingParty.Organization, Start, End, MeetingFormat.InPerson, new string('a', Meeting.MaxLocationLength + 1), null, Now)
 			.Error.Code.Should().Be("Meeting.LocationTooLong");
-		engagement.ProposeMeeting(MeetingId.New(), MeetingParty.Organization, Start, End, "Online", new string('a', Meeting.MaxNoteLength + 1), Now)
+		engagement.ProposeMeeting(MeetingId.New(), MeetingParty.Organization, Start, End, MeetingFormat.InPerson, "Vereinsheim", new string('a', Meeting.MaxNoteLength + 1), Now)
 			.Error.Code.Should().Be("Meeting.NoteTooLong");
 	}
 
@@ -147,7 +186,7 @@ public class MeetingTests
 		for (var i = 0; i < Engagement.MaxMeetingProposals; i++)
 			ProposeByOrganization(engagement);
 
-		var result = engagement.ProposeMeeting(MeetingId.New(), MeetingParty.Volunteer, Start, End, "Online", null, Now);
+		var result = engagement.ProposeMeeting(MeetingId.New(), MeetingParty.Volunteer, Start, End, MeetingFormat.InPerson, "Vereinsheim", null, Now);
 
 		result.Error.Code.Should().Be("Meeting.ProposalLimitReached");
 	}
