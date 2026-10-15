@@ -425,7 +425,10 @@
       "capacityInvalid": "Gib eine Platzzahl zwischen 1 und {{max}} ein.",
       "overlapWarning": "Überschneidet sich mit einem anderen Zeitfenster",
       "overlapHint": "Dies überschneidet sich mit einem Zeitfenster in der Liste – Freiwillige könnten sich für beide eintragen.",
-      "pastSlotsBeforePublish": "Einige Zeitfenster liegen inzwischen in der Vergangenheit. Korrigiere oder entferne sie vor dem Veröffentlichen."
+      "pastSlotsBeforePublish": "Einige Zeitfenster liegen inzwischen in der Vergangenheit. Korrigiere oder entferne sie vor dem Veröffentlichen.",
+      "editTitle": "Zeitslot bearbeiten",
+      "backToList": "Zurück zu den Zeitslots",
+      "dateTimeIncomplete": "Wähle für Beginn und Ende jeweils Datum und Uhrzeit."
     },
     "signUp": {
       "titleWaitlist": "Für Zeitslot eintragen",
