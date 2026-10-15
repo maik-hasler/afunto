@@ -10,7 +10,8 @@ namespace Application.Users.SetUserEnabled.v1;
 
 internal sealed class SetUserEnabledCommandHandler(
 	IKeycloakUserService keycloakUserService,
-	IApplicationDbContext dbContext)
+	IApplicationDbContext dbContext,
+	TimeProvider timeProvider)
 	: ICommandHandler<SetUserEnabledCommand, bool>
 {
 	public async ValueTask<bool> Handle(
@@ -28,6 +29,10 @@ internal sealed class SetUserEnabledCommandHandler(
 				"You cannot block your own account."));
 
 		await keycloakUserService.SetUserEnabledAsync(request.TargetUserId, request.Enabled, cancellationToken);
+
+		var targetUser = await dbContext.GetOrCreateUserAsync(
+			UserId.Create(request.TargetUserId).GetValueOrThrow(), cancellationToken);
+		targetUser.RecordPermissionsChanged(timeProvider.GetUtcNow());
 
 		var actingUserId = UserId.Create(request.ActingUserId).GetValueOrThrow();
 		var auditLog = AuditLog.Create(

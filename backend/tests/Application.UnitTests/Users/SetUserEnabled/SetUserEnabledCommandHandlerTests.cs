@@ -4,6 +4,7 @@ using Application.Common.Persistence;
 using Application.Users.SetUserEnabled.v1;
 using AwesomeAssertions;
 using Domain.AuditLogs;
+using Domain.Users;
 using NSubstitute;
 
 namespace Application.UnitTests.Users.SetUserEnabled;
@@ -15,11 +16,14 @@ public class SetUserEnabledCommandHandlerTests
 	private readonly IAggregateRepository<AuditLog, AuditLogId> _auditLogRepo =
 		Substitute.For<IAggregateRepository<AuditLog, AuditLogId>>();
 	private readonly SetUserEnabledCommandHandler _sut;
+	private static readonly DateTimeOffset Now = new(2026, 10, 15, 14, 0, 0, TimeSpan.Zero);
 
 	public SetUserEnabledCommandHandlerTests()
 	{
 		_dbContext.AuditLogs.Returns(_auditLogRepo);
-		_sut = new SetUserEnabledCommandHandler(_keycloakService, _dbContext);
+		_dbContext.GetOrCreateUserAsync(Arg.Any<UserId>(), Arg.Any<CancellationToken>())
+			.Returns(call => User.Create(call.Arg<UserId>()));
+		_sut = new SetUserEnabledCommandHandler(_keycloakService, _dbContext, new FakeTimeProvider(Now));
 	}
 
 	[Test]
@@ -103,5 +107,60 @@ public class SetUserEnabledCommandHandlerTests
 			.WithMessage("*service account*");
 		await _keycloakService.DidNotReceive().SetUserEnabledAsync(
 			Arg.Any<Guid>(), Arg.Any<bool>(), Arg.Any<CancellationToken>());
+	}
+
+	[Test]
+	public async Task Handle_ShouldRecordPermissionsChangedOnTarget_WhenBlockingAnotherUser(
+		CancellationToken cancellationToken)
+	{
+		// Arrange
+		var targetUserId = Guid.NewGuid();
+		var targetUser = User.Create(UserId.Create(targetUserId).Value);
+		_dbContext.GetOrCreateUserAsync(targetUser.Id, cancellationToken).Returns(targetUser);
+		var command = new SetUserEnabledCommand(targetUserId, Guid.NewGuid(), Enabled: false);
+
+		// Act
+		await _sut.Handle(command, cancellationToken);
+
+		// Assert
+		targetUser.PermissionsChangedOn.Should().Be(Now);
+	}
+
+	[Test]
+	public async Task Handle_ShouldNotRecordPermissionsChanged_WhenActorDisablesTheirOwnAccount(
+		CancellationToken cancellationToken)
+	{
+		// Arrange
+		var actingUserId = Guid.NewGuid();
+		var command = new SetUserEnabledCommand(actingUserId, actingUserId, Enabled: false);
+
+		// Act
+		Func<Task> act = async () => await _sut.Handle(command, cancellationToken);
+
+		// Assert
+		await act.Should().ThrowAsync<ResultFailureException>();
+		await _dbContext.DidNotReceive().GetOrCreateUserAsync(Arg.Any<UserId>(), Arg.Any<CancellationToken>());
+	}
+
+	[Test]
+	public async Task Handle_ShouldNotRecordPermissionsChanged_WhenTargetIsAServiceAccount(
+		CancellationToken cancellationToken)
+	{
+		// Arrange
+		var targetUserId = Guid.NewGuid();
+		_keycloakService.IsServiceAccountAsync(targetUserId, cancellationToken).Returns(true);
+		var command = new SetUserEnabledCommand(targetUserId, Guid.NewGuid(), Enabled: false);
+
+		// Act
+		Func<Task> act = async () => await _sut.Handle(command, cancellationToken);
+
+		// Assert
+		await act.Should().ThrowAsync<ResultFailureException>();
+		await _dbContext.DidNotReceive().GetOrCreateUserAsync(Arg.Any<UserId>(), Arg.Any<CancellationToken>());
+	}
+
+	private sealed class FakeTimeProvider(DateTimeOffset utcNow) : TimeProvider
+	{
+		public override DateTimeOffset GetUtcNow() => utcNow;
 	}
 }

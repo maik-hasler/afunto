@@ -127,6 +127,8 @@ Because dispatch now happens in a fresh scope after commit (not inline inside th
 | `AfuntoDefaultUserPolicy` | `user` |
 | `AfuntoOrganisatorPolicy` | `organisator` |
 
+A token issued before someone changed the user's permissions is rejected with 401 before any policy runs (`Api/Common/Authentication/PermissionsChangedTokenValidator.cs`, #2395/#2403/#2407). A handler that changes *another* user's roles or enabled state must call `User.RecordPermissionsChanged` on the target - otherwise the change waits for the token to expire.
+
 ## Organization domain model
 
 `Organization` aggregate fields: `Id`, `Name`, `Description?`, `ContactEmail?`, `ContactPhone?`, `Website?`, `Address?` (`Domain.Common.Address`), `CreatedOn`, `ModifiedOn`.

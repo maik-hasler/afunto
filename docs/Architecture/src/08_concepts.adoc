@@ -81,6 +81,10 @@ The `organisator` role in the JWT only proves the user organizes *some* organiza
 
 Membership rows are written when a user is added to an organization, and once at startup by an idempotent backfill that pulls existing organizer members from Keycloak for any organization that predates the table and has no membership rows yet. The backfill runs after migrations on every startup path, so starting against pre-existing data does not lock out its existing organizers.
 
+*Permission changes take effect on the next request:*
+
+Roles in an access token are fixed at issue time, so a token would otherwise keep a revoked role, or lack a granted one, until it expires. Granting or revoking `admin`, blocking or unblocking an account, and promoting or demoting a member within an organization each stamp the target's local `user.permissions_changed_on`. The JWT bearer handler's `OnTokenValidated` event (`PermissionsChangedTokenValidator`) compares that stamp with the token's `iat` and answers `401` for any token issued in or before the second of the change. The frontend's API client reacts to that `401` by renewing the token silently and resending the request once; the new token carries the current roles, and a blocked user gets none, so their session ends. Removing a member from an organization needs no stamp, since the membership guard above already reads the local table on every request. Changes made directly in the Keycloak admin console bypass the stamp and still wait for token expiry.
+
 *Token handling in the frontend:*
 
 Access and refresh tokens are stored in `localStorage` via the OIDC client's `WebStorageStateStore`, so the session survives a page reload. The refresh token is used to obtain new access tokens silently when the access token expires.

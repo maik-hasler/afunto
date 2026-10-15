@@ -31,6 +31,13 @@ public sealed class User
 
 	public DateTimeOffset? ModifiedOn { get; private set; }
 
+	/// <summary>
+	/// When someone else last changed what this user may do (a role, a block).
+	/// Access tokens issued up to this moment carry the old permissions, so the
+	/// API rejects them and the client fetches a fresh one (#2395, #2403, #2407).
+	/// </summary>
+	public DateTimeOffset? PermissionsChangedOn { get; private set; }
+
 #pragma warning disable CS8618
 	private User() : base(default) { }
 #pragma warning restore CS8618
@@ -67,6 +74,11 @@ public sealed class User
 	public void SetPreferredContact(PreferredContact? preferredContact)
 	{
 		PreferredContact = preferredContact;
+	}
+
+	public void RecordPermissionsChanged(DateTimeOffset changedOn)
+	{
+		PermissionsChangedOn = changedOn;
 	}
 
 	public void MarkAccountDeleted()

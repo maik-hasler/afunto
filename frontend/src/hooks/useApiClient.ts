@@ -1,5 +1,5 @@
 import { useAuth } from "react-oidc-context";
-import { setAccessToken } from "../lib/accessToken";
+import { setAccessToken, setAccessTokenRefresher } from "../lib/accessToken";
 import { api, type ApiClient } from "../client";
 
 /**
@@ -18,7 +18,10 @@ import { api, type ApiClient } from "../client";
  * refetch trigger - depend on whatever actually changed.
  */
 export function useApiClient(): ApiClient {
-	const { user } = useAuth();
+	const { user, signinSilent } = useAuth();
 	setAccessToken(user?.access_token);
+	setAccessTokenRefresher(
+		user ? async () => (await signinSilent())?.access_token : undefined,
+	);
 	return api;
 }

@@ -24,3 +24,40 @@ export function setAccessToken(token: string | undefined): void {
 export function getAccessToken(): string | undefined {
 	return accessToken;
 }
+
+let refresher: (() => Promise<string | undefined>) | undefined;
+let refreshInFlight: Promise<string | undefined> | undefined;
+
+/**
+ * How to get a new token without leaving the page - `hooks/useApiClient.ts`
+ * installs `signinSilent()` here, for the same reason it is the token's writer.
+ */
+export function setAccessTokenRefresher(
+	refresh: (() => Promise<string | undefined>) | undefined,
+): void {
+	refresher = refresh;
+}
+
+/**
+ * Fetches a fresh token silently, or resolves `undefined` when that fails.
+ *
+ * The API answers 401 to a token issued before the user's permissions changed
+ * (a role granted or taken away, #2395/#2407), and a fresh token carries the
+ * current roles. Parallel requests that all hit that 401 share one attempt
+ * rather than each starting its own round trip to Keycloak.
+ */
+export function refreshAccessToken(): Promise<string | undefined> {
+	if (!refresher) return Promise.resolve(undefined);
+
+	refreshInFlight ??= refresher()
+		.then((token) => {
+			if (token) setAccessToken(token);
+			return token;
+		})
+		.catch(() => undefined)
+		.finally(() => {
+			refreshInFlight = undefined;
+		});
+
+	return refreshInFlight;
+}

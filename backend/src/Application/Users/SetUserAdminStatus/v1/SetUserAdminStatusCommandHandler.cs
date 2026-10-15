@@ -10,7 +10,8 @@ namespace Application.Users.SetUserAdminStatus.v1;
 
 internal sealed class SetUserAdminStatusCommandHandler(
 	IKeycloakUserService keycloakUserService,
-	IApplicationDbContext dbContext)
+	IApplicationDbContext dbContext,
+	TimeProvider timeProvider)
 	: ICommandHandler<SetUserAdminStatusCommand, bool>
 {
 	public async ValueTask<bool> Handle(
@@ -31,6 +32,10 @@ internal sealed class SetUserAdminStatusCommandHandler(
 			await keycloakUserService.AssignAdminRoleAsync(request.TargetUserId, cancellationToken);
 		else
 			await keycloakUserService.RemoveAdminRoleAsync(request.TargetUserId, cancellationToken);
+
+		var targetUser = await dbContext.GetOrCreateUserAsync(
+			UserId.Create(request.TargetUserId).GetValueOrThrow(), cancellationToken);
+		targetUser.RecordPermissionsChanged(timeProvider.GetUtcNow());
 
 		var actingUserId = UserId.Create(request.ActingUserId).GetValueOrThrow();
 		var auditLog = AuditLog.Create(

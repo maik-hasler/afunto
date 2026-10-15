@@ -10,7 +10,8 @@ namespace Application.Organizations.ChangeMemberRole.v1;
 
 internal sealed class ChangeMemberRoleCommandHandler(
 	IApplicationDbContext dbContext,
-	IKeycloakOrganizationService keycloakOrganizationService)
+	IKeycloakOrganizationService keycloakOrganizationService,
+	TimeProvider timeProvider)
 	: ICommandHandler<ChangeMemberRoleCommand, bool>
 {
 	public async ValueTask<bool> Handle(
@@ -43,7 +44,9 @@ internal sealed class ChangeMemberRoleCommandHandler(
 
 		membership.ChangeRole(request.Role).ThrowIfFailure();
 
-		if (request.Role == OrganizationMemberRole.Organizer && !wasOrganizer)
+		var promoting = request.Role == OrganizationMemberRole.Organizer && !wasOrganizer;
+
+		if (promoting)
 		{
 			await keycloakOrganizationService.AssignOrganizerRoleAsync(
 				request.TargetUserId.Value, cancellationToken);
@@ -57,6 +60,12 @@ internal sealed class ChangeMemberRoleCommandHandler(
 			if (!stillOrganizerElsewhere)
 				await keycloakOrganizationService.RevokeOrganizerRoleAsync(
 					request.TargetUserId.Value, cancellationToken);
+		}
+
+		if (promoting || demoting)
+		{
+			var targetUser = await dbContext.GetOrCreateUserAsync(request.TargetUserId, cancellationToken);
+			targetUser.RecordPermissionsChanged(timeProvider.GetUtcNow());
 		}
 
 		return true;

@@ -20,8 +20,10 @@ vi.mock("../lib/authRecovery", () => ({
 vi.mock("../lib/runtimeConfig", () => ({
 	runtimeConfig: { apiUrl: "https://api.test" },
 }));
+const refreshAccessToken = vi.fn<() => Promise<string | undefined>>();
 vi.mock("../lib/accessToken", () => ({
 	getAccessToken: () => accessToken,
+	refreshAccessToken: () => refreshAccessToken(),
 }));
 vi.mock("../i18n", () => ({
 	// A rest/spread forward (rather than a fixed (key, options) signature)
@@ -240,6 +242,103 @@ describe("the client's fetch", () => {
 		await fetch("https://api.test/v1/organizations");
 
 		expect(notifySessionExpired).toHaveBeenCalledTimes(1);
+	});
+
+	describe("on a 401 to a signed-in request", () => {
+		async function loadFetchAnswering(...responses: Response[]) {
+			const createClientConfig = await loadCreateClientConfig();
+			const underlying = vi.fn();
+			for (const response of responses)
+				underlying.mockResolvedValueOnce(response);
+			vi.stubGlobal("fetch", underlying);
+			const config = createClientConfig({});
+			return { fetch: config.fetch as typeof globalThis.fetch, underlying };
+		}
+
+		// The API rejects a token issued before the user's permissions changed
+		// (#2395, #2403, #2407) - a fresh one carries the current roles.
+		it("retries once with a silently renewed token", async () => {
+			accessToken = "stale-token";
+			refreshAccessToken.mockResolvedValue("fresh-token");
+			const { fetch, underlying } = await loadFetchAnswering(
+				makeResponse(401),
+				makeResponse(200),
+			);
+
+			const response = await fetch("https://api.test/v1/organizations");
+
+			expect(response.status).toBe(200);
+			expect(underlying).toHaveBeenCalledTimes(2);
+			expect(
+				new Headers(
+					(underlying.mock.calls[1][1] as RequestInit).headers as HeadersInit,
+				).get("Authorization"),
+			).toBe("Bearer fresh-token");
+			expect(notifySessionExpired).not.toHaveBeenCalled();
+		});
+
+		it("resends a request body the first attempt already consumed", async () => {
+			accessToken = "stale-token";
+			refreshAccessToken.mockResolvedValue("fresh-token");
+			const { fetch, underlying } = await loadFetchAnswering(
+				makeResponse(401),
+				makeResponse(200),
+			);
+
+			await fetch(
+				new Request("https://api.test/v1/organizations", {
+					method: "POST",
+					body: JSON.stringify({ name: "Verein" }),
+				}),
+			);
+
+			const retried = underlying.mock.calls[1][0] as Request;
+			expect(await retried.text()).toBe(JSON.stringify({ name: "Verein" }));
+		});
+
+		it("ends the session when no new token can be had", async () => {
+			accessToken = "stale-token";
+			refreshAccessToken.mockResolvedValue(undefined);
+			const { fetch, underlying } = await loadFetchAnswering(makeResponse(401));
+
+			await fetch("https://api.test/v1/organizations");
+
+			expect(underlying).toHaveBeenCalledTimes(1);
+			expect(notifySessionExpired).toHaveBeenCalledTimes(1);
+		});
+
+		it("ends the session when the renewed token is rejected too", async () => {
+			accessToken = "stale-token";
+			refreshAccessToken.mockResolvedValue("fresh-token");
+			const { fetch, underlying } = await loadFetchAnswering(
+				makeResponse(401),
+				makeResponse(401),
+			);
+
+			await fetch("https://api.test/v1/organizations");
+
+			expect(underlying).toHaveBeenCalledTimes(2);
+			expect(notifySessionExpired).toHaveBeenCalledTimes(1);
+		});
+
+		it("does not resend when renewal hands back the same token", async () => {
+			accessToken = "stale-token";
+			refreshAccessToken.mockResolvedValue("stale-token");
+			const { fetch, underlying } = await loadFetchAnswering(makeResponse(401));
+
+			await fetch("https://api.test/v1/organizations");
+
+			expect(underlying).toHaveBeenCalledTimes(1);
+			expect(notifySessionExpired).toHaveBeenCalledTimes(1);
+		});
+	});
+
+	it("does not try to renew a token for a signed-out 401", async () => {
+		const { fetch } = await loadFetch(makeResponse(401));
+
+		await fetch("https://api.test/v1/organizations");
+
+		expect(refreshAccessToken).not.toHaveBeenCalled();
 	});
 
 	it("passes a successful response through untouched", async () => {

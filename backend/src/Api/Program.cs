@@ -71,6 +71,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 			ValidIssuers = builder.Configuration
 				.GetSection("Authentication:ValidIssuers").Get<string[]>(),
 		};
+		options.Events = new JwtBearerEvents
+		{
+			OnTokenValidated = PermissionsChangedTokenValidator.ValidateAsync,
+		};
 	});
 
 builder.Services.AddAuthorizationBuilder()

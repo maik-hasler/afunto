@@ -19,13 +19,16 @@ public class ChangeMemberRoleCommandHandlerTests
 	private static readonly OrganizationId OrgId = OrganizationId.New();
 	private static readonly UserId DefaultRequestingUserId = UserId.New();
 	private static readonly UserId TargetUserId = UserId.New();
+	private static readonly DateTimeOffset Now = new(2026, 10, 15, 14, 0, 0, TimeSpan.Zero);
+	private readonly User _targetUser = User.Create(TargetUserId);
 
 	public ChangeMemberRoleCommandHandlerTests()
 	{
 		_dbContext
 			.IsOrganizerAsync(OrgId, DefaultRequestingUserId, Arg.Any<CancellationToken>())
 			.Returns(true);
-		_sut = new ChangeMemberRoleCommandHandler(_dbContext, _keycloakService);
+		_dbContext.GetOrCreateUserAsync(TargetUserId, Arg.Any<CancellationToken>()).Returns(_targetUser);
+		_sut = new ChangeMemberRoleCommandHandler(_dbContext, _keycloakService, new FakeTimeProvider(Now));
 	}
 
 	private void SetMembership(OrganizationMemberRole role)
@@ -49,6 +52,7 @@ public class ChangeMemberRoleCommandHandlerTests
 		result.Should().BeTrue();
 		await _keycloakService.Received(1).AssignOrganizerRoleAsync(TargetUserId.Value, cancellationToken);
 		await _keycloakService.DidNotReceive().RevokeOrganizerRoleAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
+		_targetUser.PermissionsChangedOn.Should().Be(Now);
 	}
 
 	[Test]
@@ -67,6 +71,7 @@ public class ChangeMemberRoleCommandHandlerTests
 		// Assert
 		result.Should().BeTrue();
 		await _keycloakService.Received(1).RevokeOrganizerRoleAsync(TargetUserId.Value, cancellationToken);
+		_targetUser.PermissionsChangedOn.Should().Be(Now);
 	}
 
 	[Test]
@@ -121,6 +126,7 @@ public class ChangeMemberRoleCommandHandlerTests
 		// Assert
 		(await act.Should().ThrowAsync<ResultFailureException>())
 			.Which.Error.Type.Should().Be(ErrorType.Conflict);
+		_targetUser.PermissionsChangedOn.Should().BeNull();
 	}
 
 	[Test]
@@ -156,5 +162,10 @@ public class ChangeMemberRoleCommandHandlerTests
 		(await act.Should().ThrowAsync<ResultFailureException>())
 			.Which.Error.Type.Should().Be(ErrorType.Forbidden);
 		await _dbContext.DidNotReceive().GetMembershipAsync(Arg.Any<OrganizationId>(), Arg.Any<UserId>(), Arg.Any<CancellationToken>());
+	}
+
+	private sealed class FakeTimeProvider(DateTimeOffset utcNow) : TimeProvider
+	{
+		public override DateTimeOffset GetUtcNow() => utcNow;
 	}
 }

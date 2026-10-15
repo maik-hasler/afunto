@@ -65,6 +65,8 @@ internal sealed class UserConfiguration
 
 		builder.Property(u => u.ModifiedOn);
 
+		builder.Property(u => u.PermissionsChangedOn);
+
 		builder.HasQueryFilter(u => !u.IsDeleted);
 
 		builder.Ignore(u => u.Events);

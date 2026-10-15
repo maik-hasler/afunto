@@ -246,6 +246,12 @@ public interface IApplicationDbContext
 		UserId userId,
 		CancellationToken cancellationToken = default);
 
+	// Shadow-deleted users included: a deleted account's old tokens must not
+	// outlive a block or demotion recorded before the deletion.
+	Task<DateTimeOffset?> GetPermissionsChangedOnAsync(
+		UserId userId,
+		CancellationToken cancellationToken = default);
+
 	Task<Engagement?> GetTerminalEngagementAsync(
 		UserId volunteerId,
 		VolunteerOpportunityId opportunityId,

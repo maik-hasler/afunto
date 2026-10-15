@@ -2,7 +2,7 @@ import { dispatchToast } from "../lib/toastBus";
 import { notifySessionExpired } from "../lib/sessionExpiryBus";
 import { clearAuthRecoveryAttempts } from "../lib/authRecovery";
 import { runtimeConfig } from "../lib/runtimeConfig";
-import { getAccessToken } from "../lib/accessToken";
+import { getAccessToken, refreshAccessToken } from "../lib/accessToken";
 import i18next from "../i18n";
 import type { CreateClientConfig } from "./generated/client.gen";
 
@@ -113,6 +113,21 @@ async function withJsonErrorBody(response: Response): Promise<Response> {
 	);
 }
 
+function send(
+	input: RequestInfo | URL,
+	init: RequestInit | undefined,
+	accessToken: string | undefined,
+): Promise<Response> {
+	const headers = new Headers(
+		input instanceof Request ? input.headers : init?.headers,
+	);
+	if (accessToken) headers.set("Authorization", `Bearer ${accessToken}`);
+	headers.set("X-Timezone", Intl.DateTimeFormat().resolvedOptions().timeZone);
+	headers.set("X-Language", i18next.language.split("-")[0]);
+
+	return globalThis.fetch(input, { ...init, headers });
+}
+
 /**
  * Called once by the generated `client.gen.ts` to build the client's config.
  *
@@ -131,16 +146,21 @@ export const createClientConfig: CreateClientConfig = (config) => ({
 	baseUrl: runtimeConfig.apiUrl,
 	throwOnError: true,
 	fetch: async (input: RequestInfo | URL, init?: RequestInit) => {
+		// A Request's body can be read once; the retry below needs its own copy.
+		const retryInput = input instanceof Request ? input.clone() : input;
+
 		const accessToken = getAccessToken();
+		let response = await send(input, init, accessToken);
 
-		const headers = new Headers(
-			input instanceof Request ? input.headers : init?.headers,
-		);
-		if (accessToken) headers.set("Authorization", `Bearer ${accessToken}`);
-		headers.set("X-Timezone", Intl.DateTimeFormat().resolvedOptions().timeZone);
-		headers.set("X-Language", i18next.language.split("-")[0]);
-
-		const response = await globalThis.fetch(input, { ...init, headers });
+		// The API rejects a token issued before the user's permissions changed
+		// (#2395, #2403, #2407). A silently fetched one carries the current
+		// roles, so the request succeeds without the user noticing; only when
+		// that fails too is the session really over.
+		if (response.status === 401 && accessToken) {
+			const renewedToken = await refreshAccessToken();
+			if (renewedToken && renewedToken !== accessToken)
+				response = await send(retryInput, init, renewedToken);
+		}
 
 		await handleErrorResponse(response, Boolean(accessToken));
 
