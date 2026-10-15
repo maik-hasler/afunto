@@ -426,9 +426,9 @@
       "overlapWarning": "Überschneidet sich mit einem anderen Zeitfenster",
       "overlapHint": "Dies überschneidet sich mit einem Zeitfenster in der Liste – Freiwillige könnten sich für beide eintragen.",
       "pastSlotsBeforePublish": "Einige Zeitfenster liegen inzwischen in der Vergangenheit. Korrigiere oder entferne sie vor dem Veröffentlichen.",
-      "unaddedHint": "Noch nicht in der Liste – klicke auf „Hinzufügen“, um diesen Zeitslot zu übernehmen.",
-      "discardNewSlot": "Eingabe verwerfen",
-      "unaddedBeforeSave": "Du hast einen Zeitslot eingegeben, aber noch nicht hinzugefügt. Klicke auf „Hinzufügen“ oder verwirf die Eingabe, bevor du speicherst."
+      "editTitle": "Zeitslot bearbeiten",
+      "backToList": "Zurück zu den Zeitslots",
+      "dateTimeIncomplete": "Wähle für Beginn und Ende jeweils Datum und Uhrzeit."
     },
     "signUp": {
       "titleWaitlist": "Für Zeitslot eintragen",

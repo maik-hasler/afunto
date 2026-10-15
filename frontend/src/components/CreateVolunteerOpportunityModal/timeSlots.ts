@@ -22,9 +22,8 @@ export function isCompleteDateTime(value: string): boolean {
 }
 
 /**
- * Whether the add form holds a start or end the organizer has not put on the
- * list yet. Nothing there reaches the server until "Add" is clicked, so
- * saving past it dropped the slot without a word (#2388).
+ * Whether the slot editor holds a start or end the organizer has not put on
+ * the list yet, so closing the wizard over it asks first (#2388).
  */
 export function hasUnaddedSlotInput(newSlot: {
 	startDateTime: string;
@@ -40,8 +39,8 @@ export function hasUnaddedSlotInput(newSlot: {
  */
 export type CapacityInput = string | null;
 
-/** The add form's inputs a slot message can be about. */
-export type NewSlotField = "start" | "end" | "max";
+/** The slot editor's inputs a slot message can be about. */
+export type SlotField = "start" | "end" | "max";
 
 export interface SlotRange {
 	startDateTime: string;

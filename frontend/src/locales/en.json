@@ -426,9 +426,9 @@
       "overlapWarning": "Overlaps another time slot",
       "overlapHint": "This overlaps a time slot already on the list - a volunteer could sign up for both.",
       "pastSlotsBeforePublish": "Some time slots have moved into the past. Correct or remove them before publishing.",
-      "unaddedHint": "Not on the list yet - click “Add” to keep this time slot.",
-      "discardNewSlot": "Discard entry",
-      "unaddedBeforeSave": "You entered a time slot but have not added it yet. Click “Add”, or discard the entry, before saving."
+      "editTitle": "Edit time slot",
+      "backToList": "Back to time slots",
+      "dateTimeIncomplete": "Choose a date and a time for both start and end."
     },
     "signUp": {
       "titleWaitlist": "Sign up for a slot",

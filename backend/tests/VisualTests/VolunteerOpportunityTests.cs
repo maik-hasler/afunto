@@ -258,10 +258,12 @@ public class VolunteerOpportunityTests(AspireFixture fixture) : VisualTestBase(f
 		var start = DateTimeOffset.UtcNow.AddDays(7);
 		var end = start.AddHours(2);
 		var step4 = Page.GetByTestId("wizard-step-4");
-		await FillDateTimePickerAsync(step4, "slot-start", start);
-		await FillDateTimePickerAsync(step4, "slot-end", end);
-		var addSlotBtn = step4.GetByRole(AriaRole.Button, new() { Name = "Add", Exact = true });
-		await addSlotBtn.ClickAsync();
+		await step4.GetByRole(AriaRole.Button, new() { Name = "Add time slot", Exact = true }).ClickAsync();
+		var slotEditor = Page.GetByTestId("time-slot-editor");
+		await FillDateTimePickerAsync(slotEditor, "slot-start", start);
+		await FillDateTimePickerAsync(slotEditor, "slot-end", end);
+		await slotEditor.GetByRole(AriaRole.Button, new() { Name = "Add", Exact = true }).ClickAsync();
+		await Expect(slotEditor).Not.ToBeVisibleAsync();
 
 		await Expect(step4.GetByText("No time slots added yet.")).Not.ToBeVisibleAsync(
 			new() { Timeout = 5000 });

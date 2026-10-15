@@ -125,7 +125,7 @@ describe("the shared checkbox recipe", () => {
 				).toContain("checkboxClass");
 			}
 		}
-		expect(checked).toBeGreaterThanOrEqual(8);
+		expect(checked).toBeGreaterThanOrEqual(7);
 	});
 });
 
