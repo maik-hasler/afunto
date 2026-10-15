@@ -11,7 +11,8 @@
 ├── keycloak-realm-import.yml   Verifies the committed realm still imports on the Keycloak version the released image is built from, and that its ${VAR} placeholders actually resolve
 ├── codeql.yml                  CodeQL advanced setup (csharp + javascript-typescript), report-only findings in the Security tab - see "CodeQL" below
 ├── publish.yml                 Tag-triggered: build + push backend/frontend/keycloak to GHCR, create a GitHub Release - see "Publish Workflows" below
-├── preview-images.yml          PR labelled `preview`: build + push `-preview` images to GHCR, delete them on close - see "Preview Images" below
+├── preview-images.yml          `/preview` comment on a PR: build + push `-preview` images, dispatch the deploy to mgmt-hetzner; tear down + delete on close - see "Preview Images" below
+├── preview-comment.yml         Manual (workflow_dispatch, sent by mgmt-hetzner): posts a preview's deploy result on its PR
 ├── release-rc.yml              Promotes a release/v* branch into a real tag (used by Claude Code on the web)
 ├── mutation-tests.yml          Manual (workflow_dispatch): Stryker.NET over Domain + Application and StrykerJS over frontend src/lib, report-only
 ├── lint.yml                    Ban em/en dashes + EditorConfig check
@@ -79,7 +80,7 @@ All components share a single unified repo-level tag, published to GHCR - see [V
 
 **Full release:** Tag without `-rc` suffix → images published + `latest` tag updated.
 
-Publishing is where this repository's involvement ends (the same holds for the PR images in "Preview Images" below). Nothing here runs, hosts, or reaches into a running environment, and nothing here holds a credential for one.
+Publishing is where this repository's involvement ends. Nothing here runs, hosts, or reaches into a running environment, and nothing here holds a credential for one. The one crossing is the PR preview dispatch in "Preview Images" below, whose token can start workflows in `mgmt-hetzner` and nothing else.
 
 ### Publish flow (backend/frontend/keycloak)
 1. Run full test suite - three parallel jobs (`backend-fast-tests`/`backend-integration-tests`/`backend-visual-tests`, same split as `dotnet.yml`) that `publish-backend`, `publish-frontend`, and `publish-keycloak` all wait on via `needs:` before building anything, so a test failure blocks every image, not just the backend's. `publish-frontend` additionally `needs:` the `frontend-checks` job, which calls the reusable `frontend-checks.yml` workflow (lint/format/i18n/nginx-header checks + type-check + unit tests + a container smoke test) - see that workflow's own header comment for what `publish-frontend` skipped before #1733; keycloak has no additional test gate beyond the shared backend suite. `publish-backend` additionally `needs:` `backend-image-health-check` (#2204): a job that builds the real backend image, boots Postgres/Keycloak/RustFS containers on a Docker network, runs the image against them with `ASPNETCORE_ENVIRONMENT=Production` and `Database__MigrateOnStartup=true`, and asserts `/health` goes green before any image is allowed to publish - this is the only place the released image itself (not `dotnet run`) is ever booted before it ships, and the only place the backend's Production startup path runs against real backing services
@@ -103,15 +104,18 @@ required check, so it cannot block a merge or a release either way.
 
 ## Preview Images (`preview-images.yml`, ADR-16)
 
-The one image path that is not tag-triggered. It exists so an operator outside this repository can run a short-lived stack per pull request; this file is the contract that operator reads.
+The one image path that is not tag-triggered. It exists so an operator outside this repository (`mgmt-hetzner`) can run a short-lived stack per pull request on request; this section is the contract between the two.
 
-- **Trigger:** `pull_request` `labeled`/`synchronize`/`reopened`, built only when the PR carries the `preview` label and comes from this repository (never a fork). An unrelated label is skipped and does not cancel a running build (job-level `concurrency`).
+- **Trigger:** a comment that is exactly `/preview` or `/preview stop` (trailing whitespace allowed) on a pull request from this repository (never a fork), by an author whose `author_association` is `OWNER`, `MEMBER` or `COLLABORATOR`. The `command` job reacts with 👀 and resolves the PR's head commit at that moment. Anything else, including a plain push, builds and deploys nothing. `issue_comment` runs the workflow as it is on `main`, so changes to it take effect only after merge.
+- **`/preview`:** `publish` builds both images for that commit, then `dispatch` runs `gh workflow run afunto-preview.yaml -R maik-hasler/mgmt-hetzner -f action=up -f pr=<number> -f sha=<full sha>`. A failed build is reported on the PR by `report-build-failure` and dispatches nothing. A second `/preview` cancels a build still running for the same PR (job-level `concurrency`).
+- **`/preview stop`, close, merge:** `dispatch` (on stop) or `teardown` (on close, only if an authorised `/preview` comment exists on the PR, so Renovate's and other PRs cost the deployer nothing) runs the same command with `-f action=down -f pr=<number>`.
+- **Report back:** `mgmt-hetzner` dispatches `preview-comment.yml` with `pr` and `body`; it posts `body` as `github-actions`, which notifies the PR author - a comment with the maintainer's own token would not.
 - **Packages:** `ghcr.io/<owner>/afunto-backend-preview`, `ghcr.io/<owner>/afunto-frontend-preview` - separate from the release packages so their tag lists never mix.
-- **Tags:** `sha-<full head sha>` (immutable, pin to this) and `pr-<number>` (moves with every push).
-- **Ready signal:** a deployer deploys a PR only when **both** packages carry `sha-<the PR's current head sha>`. Missing means still building or failed; keep the running stack and check again later. Never deploy `pr-<number>`, which may point at an older commit while the newer one builds.
-- **Cleanup:** on `closed`, the `cleanup` job deletes every version tagged `pr-<number>` or `sha-<any commit of the PR>`, with the workflow's own `GITHUB_TOKEN`. Removing the label alone stops builds but keeps the images until close.
+- **Tags:** `sha-<full head sha>` (immutable, the deployer pins to it) and `pr-<number>` (moves with every build).
+- **Ready signal:** the deployer acts on `up` only when **both** packages carry `sha-<the dispatched sha>`. Never deploy `pr-<number>`, which may point at an older commit while a newer one builds.
+- **Cleanup:** on `closed`, the `cleanup` job deletes every version tagged `pr-<number>` or `sha-<any commit of the PR>`, with the workflow's own `GITHUB_TOKEN`.
 - **No gate:** no tests, Trivy scan, SBOM or provenance - the PR's own CI gates the merge, and these images never become a release.
-- **One-time setup:** the first run creates both packages as private. Make them public in their package settings, or give the deployer a `read:packages` token.
+- **One-time setup:** (1) the first build creates both packages as private - make them public in their package settings, or give the deployer a `read:packages` token. (2) Repository secret `PREVIEW_DISPATCH_TOKEN`: a fine-grained token with `Actions: Read and write` on `mgmt-hetzner`; without it `dispatch` and `teardown` fail with a pointer here. (3) `mgmt-hetzner` needs the reverse grant (`Actions: Read and write` on this repository) to dispatch `preview-comment.yml`; one token covering both repositories works, see `mgmt-hetzner`'s README, "Previews".
 
 ## Cutting a release from Claude Code on the web
 
@@ -144,7 +148,7 @@ A PAT (not the default `GITHUB_TOKEN`) is mandatory because tags pushed with `GI
 1. Poll the publish workflow's checks for the new tag (via `mcp__github__get_commit` → check_runs, or fetch `https://api.github.com/repos/{owner}/{repo}/commits/{sha}/check-runs`), until `publish-backend`/`publish-frontend`/`publish-keycloak` all report success.
 2. If any publish job fails, diagnose from that job's logs here, then **re-run the failed jobs of that same run** (`rerun_failed_jobs`, or the Actions UI) rather than cutting a fresh `-rc`: the tag already exists and a new rc buys nothing when the failure was transient. Cut a new rc only when the commit itself is broken. Once all three are green the tag's images exist on GHCR and the release is done as far as this repository is concerned.
 
-`RELEASE_TOKEN` is the only repository secret this repo needs. There are no environment secrets and no GitHub Environments - nothing here connects to a running instance of the app.
+`RELEASE_TOKEN` and `PREVIEW_DISPATCH_TOKEN` (see "Preview Images" above) are the only repository secrets this repo needs. There are no environment secrets and no GitHub Environments - nothing here connects to a running instance of the app.
 
 ## Mutation Testing Workflow (manual)
 
