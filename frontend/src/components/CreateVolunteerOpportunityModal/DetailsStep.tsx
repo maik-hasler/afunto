@@ -24,6 +24,7 @@ import {
 import type { OpportunityFormValues } from "./schema";
 import {
 	findOverlappingSlotIds,
+	hasUnaddedSlotInput,
 	isCompleteDateTime,
 	MAX_PARTICIPANTS_LIMIT,
 	overlapsAnySlot,
@@ -105,6 +106,7 @@ interface Props {
 	slotChangesAreImmediate: boolean;
 	addingSlot: boolean;
 	onAddSlot: () => void;
+	onDiscardNewSlot: () => void;
 	recurrenceFrequency: string;
 	onRecurrenceFrequencyChange: (value: string) => void;
 	recurrenceCount: number;
@@ -149,6 +151,7 @@ export default function DetailsStep({
 	slotChangesAreImmediate,
 	addingSlot,
 	onAddSlot,
+	onDiscardNewSlot,
 	recurrenceFrequency,
 	onRecurrenceFrequencyChange,
 	recurrenceCount,
@@ -681,6 +684,22 @@ export default function DetailsStep({
 						{newSlotOverlaps && (
 							<p className="text-xs text-amber-700" role="status">
 								{t("timeSlots.overlapHint")}
+							</p>
+						)}
+						{hasUnaddedSlotInput(newSlot) && (
+							<p
+								className="text-xs font-medium text-amber-700"
+								role="status"
+								data-testid="unadded-slot-hint"
+							>
+								{t("timeSlots.unaddedHint")}{" "}
+								<button
+									type="button"
+									onClick={onDiscardNewSlot}
+									className="font-normal text-gray-600 underline hover:text-gray-800"
+								>
+									{t("timeSlots.discardNewSlot")}
+								</button>
 							</p>
 						)}
 						{slotError && (

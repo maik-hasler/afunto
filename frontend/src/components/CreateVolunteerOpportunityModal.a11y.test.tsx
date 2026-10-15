@@ -130,6 +130,9 @@ describe("CreateVolunteerOpportunityModal a11y", () => {
 				),
 			).toBeInTheDocument();
 			expect(screen.getAllByText("Overlaps another time slot")).toHaveLength(2);
+			// The not-yet-added hint and its discard button (#2388) share the
+			// same state, so this scan covers them too.
+			expect(screen.getByTestId("unadded-slot-hint")).toBeInTheDocument();
 			await expectNoA11yViolations();
 		} finally {
 			vi.useRealTimers();

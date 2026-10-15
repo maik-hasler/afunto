@@ -22,6 +22,18 @@ export function isCompleteDateTime(value: string): boolean {
 }
 
 /**
+ * Whether the add form holds a start or end the organizer has not put on the
+ * list yet. Nothing there reaches the server until "Add" is clicked, so
+ * saving past it dropped the slot without a word (#2388).
+ */
+export function hasUnaddedSlotInput(newSlot: {
+	startDateTime: string;
+	endDateTime: string;
+}): boolean {
+	return newSlot.startDateTime !== "" || newSlot.endDateTime !== "";
+}
+
+/**
  * What the capacity box holds: `null` while "unlimited" is ticked, otherwise
  * the raw text, so a half-typed or out-of-range figure survives long enough to
  * be reported instead of being silently rewritten to 1.

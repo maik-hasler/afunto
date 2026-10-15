@@ -873,6 +873,92 @@ describe("create-opportunity wizard: time slot guards (#2325)", () => {
 		await waitFor(() => expect(slotRows()).toHaveLength(2));
 		expect(screen.queryByText("Overlaps another time slot")).toBeNull();
 	});
+
+	// #2388: a slot typed into the add form is not on the list until "Add" is
+	// clicked. User testing showed organizers expected Publish to take it
+	// along, and it was dropped without a word.
+	const unaddedHint = () => screen.queryByTestId("unadded-slot-hint");
+	const UNADDED_BEFORE_SAVE =
+		"You entered a time slot but have not added it yet. Click “Add”, or discard the entry, before saving.";
+
+	it("says a typed slot is not on the list yet, until it is added (#2388)", async () => {
+		await gotoTimeSlots();
+		expect(unaddedHint()).toBeNull();
+
+		await pickDateTime("slot-start", "2026-09-10T10:00");
+		expect(unaddedHint()).toHaveTextContent(
+			"Not on the list yet - click “Add” to keep this time slot.",
+		);
+
+		await pickDateTime("slot-end", "2026-09-10T12:00");
+		await userEvent.click(screen.getByRole("button", { name: "Add" }));
+
+		await waitFor(() => expect(slotRows()).toHaveLength(1));
+		expect(unaddedHint()).toBeNull();
+	});
+
+	it("lets the typed slot be discarded from the hint (#2388)", async () => {
+		await gotoTimeSlots();
+		await pickDateTime("slot-start", "2026-09-10T10:00");
+
+		await userEvent.click(
+			screen.getByRole("button", { name: "Discard entry" }),
+		);
+
+		expect(unaddedHint()).toBeNull();
+		expect(screen.getByText("No time slots added yet.")).toBeInTheDocument();
+	});
+
+	it("refuses to publish past a slot that was typed but never added (#2388)", async () => {
+		await gotoTimeSlots();
+		await addSlot("2026-09-10T10:00", "2026-09-10T12:00");
+		await waitFor(() => expect(slotRows()).toHaveLength(1));
+		await pickDateTime("slot-start", "2026-09-11T10:00");
+		await pickDateTime("slot-end", "2026-09-11T12:00");
+
+		await userEvent.click(screen.getByTestId("modal-submit"));
+
+		expect(await screen.findByText(UNADDED_BEFORE_SAVE)).toBeInTheDocument();
+		expect(api.createVolunteerOpportunity).not.toHaveBeenCalled();
+	});
+
+	it("names the unadded slot rather than claiming there is none (#2388)", async () => {
+		await gotoTimeSlots();
+		await pickDateTime("slot-start", "2026-09-10T10:00");
+		await pickDateTime("slot-end", "2026-09-10T12:00");
+
+		await userEvent.click(screen.getByTestId("modal-submit"));
+
+		expect(await screen.findByText(UNADDED_BEFORE_SAVE)).toBeInTheDocument();
+		expect(
+			screen.queryByText(
+				"A Scheduled slots opportunity must have at least one time slot before it can be published.",
+			),
+		).toBeNull();
+	});
+
+	it("refuses a draft save past an unadded slot too (#2388)", async () => {
+		await gotoTimeSlots();
+		await pickDateTime("slot-start", "2026-09-10T10:00");
+
+		await userEvent.click(screen.getByTestId("modal-save-draft"));
+
+		expect(await screen.findByText(UNADDED_BEFORE_SAVE)).toBeInTheDocument();
+		expect(api.createVolunteerOpportunity).not.toHaveBeenCalled();
+	});
+
+	it("retires the refusal once the slot is added (#2388)", async () => {
+		await gotoTimeSlots();
+		await pickDateTime("slot-start", "2026-09-10T10:00");
+		await pickDateTime("slot-end", "2026-09-10T12:00");
+		await userEvent.click(screen.getByTestId("modal-submit"));
+		await screen.findByText(UNADDED_BEFORE_SAVE);
+
+		await userEvent.click(screen.getByRole("button", { name: "Add" }));
+
+		await waitFor(() => expect(slotRows()).toHaveLength(1));
+		expect(screen.queryByText(UNADDED_BEFORE_SAVE)).toBeNull();
+	});
 });
 
 describe("edit wizard: replacing the banner (#2325)", () => {

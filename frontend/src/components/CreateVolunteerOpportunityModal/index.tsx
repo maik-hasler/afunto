@@ -42,6 +42,7 @@ import type { OpportunityFormValues } from "./schema";
 import {
 	byStartDateTime,
 	capacityToInput,
+	hasUnaddedSlotInput,
 	isCompleteDateTime,
 	MAX_PARTICIPANTS_LIMIT,
 	resolveCapacity,
@@ -421,6 +422,7 @@ export default function CreateVolunteerOpportunityModal({
 		const hasUnsavedChanges =
 			isDirty ||
 			pendingSlots.length > 0 ||
+			hasUnaddedSlotInput(newSlot) ||
 			bannerFile !== null ||
 			bannerRemoved;
 		if (hasUnsavedChanges) setShowDiscardConfirm(true);
@@ -603,6 +605,7 @@ export default function CreateVolunteerOpportunityModal({
 					endDateTime: "",
 					maxParticipants: "1",
 				});
+				setError(null);
 			} catch {
 				setSlotError(t("timeSlots.addError"));
 			} finally {
@@ -633,7 +636,15 @@ export default function CreateVolunteerOpportunityModal({
 			);
 			setPendingSlots((prev) => [...prev, ...newSlots]);
 			setNewSlot({ startDateTime: "", endDateTime: "", maxParticipants: "1" });
+			setError(null);
 		}
+	}
+
+	function handleDiscardNewSlot() {
+		setNewSlot({ startDateTime: "", endDateTime: "", maxParticipants: "1" });
+		setSlotError(null);
+		clearInvalidNewSlotFields();
+		setError(null);
 	}
 
 	function handleRemovePendingSlot(id: string) {
@@ -835,6 +846,14 @@ export default function CreateVolunteerOpportunityModal({
 
 		const values = getValues();
 		if (values.participationType === "ScheduledSlots") {
+			// A slot typed into the add form but never added is not on the
+			// list, so saving past it would drop it silently (#2388).
+			if (hasUnaddedSlotInput(newSlot)) {
+				setError(t("timeSlots.unaddedBeforeSave"));
+				setErrorToken((tk) => tk + 1);
+				setStep(4);
+				return;
+			}
 			if (!asDraft && pendingSlots.length + existingSlots.length === 0) {
 				setError(t("timeSlots.requiredForPublish"));
 				setErrorToken((tk) => tk + 1);
@@ -1281,6 +1300,7 @@ export default function CreateVolunteerOpportunityModal({
 							slotChangesAreImmediate={isEditMode}
 							addingSlot={addingSlot}
 							onAddSlot={() => void handleAddSlot()}
+							onDiscardNewSlot={handleDiscardNewSlot}
 							recurrenceFrequency={recurrenceFrequency}
 							onRecurrenceFrequencyChange={setRecurrenceFrequency}
 							recurrenceCount={recurrenceCount}
