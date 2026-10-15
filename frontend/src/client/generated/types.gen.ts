@@ -265,6 +265,17 @@ export type DomainEvent = {
     [key: string]: unknown;
 };
 
+export type EngagementMeetingSummary = {
+    id: string;
+    startsAt: Date;
+    endsAt: Date;
+    location: string;
+    note: null | string;
+    proposedBy: string;
+    response: string;
+    participantCount: number;
+};
+
 export type EngagementStatusResponse = {
     id: string;
     status: string;
@@ -298,6 +309,7 @@ export type EngagementSummary = {
     opportunityValidUntil?: null | Date;
     remainingReactivations?: number | null;
     opportunityTitleEn?: null | string;
+    meeting?: null | EngagementMeetingSummary;
 };
 
 export type FeedbackItemDto = {
@@ -315,6 +327,10 @@ export type FlaggedTargetSummary = {
     totalReportCount: number;
     lastReportedOn: Date;
     isDeleted: boolean;
+};
+
+export type MeetingProposedResponse = {
+    meetingId: string;
 };
 
 export type MemberCandidateDto = {
@@ -510,6 +526,22 @@ export type ProblemDetails = {
     instance?: null | string;
 };
 
+export type ProposeMeetingAsVolunteerRequest = {
+    startsAt: Date;
+    endsAt: Date;
+    location: string;
+    note: null | string;
+};
+
+export type ProposeMeetingRequest = {
+    engagementIds: Array<string>;
+    startsAt: Date;
+    endsAt: Date;
+    location: string;
+    note: null | string;
+    replacesMeetingId?: null | string;
+};
+
 export type PublicAddressDto = {
     street: string;
     houseNumber: string;
@@ -593,6 +625,10 @@ export type ReportUserRequest = {
 export type ReportVolunteerOpportunityRequest = {
     reason: string;
     details: null | string;
+};
+
+export type RespondToMeetingRequest = {
+    accept: boolean;
 };
 
 export type SaveDashboardLayoutRequest = {
@@ -3978,6 +4014,196 @@ export type UndoCheckInEngagementResponses = {
 
 export type UndoCheckInEngagementResponse = UndoCheckInEngagementResponses[keyof UndoCheckInEngagementResponses];
 
+export type RespondToMeetingAsVolunteerData = {
+    body: RespondToMeetingRequest;
+    path: {
+        engagementId: string;
+        meetingId: string;
+    };
+    query?: never;
+    url: '/v1/me/engagements/{engagementId}/meetings/{meetingId}/respond';
+};
+
+export type RespondToMeetingAsVolunteerErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Unauthorized
+     */
+    401: ProblemDetails;
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+    /**
+     * Conflict
+     */
+    409: ProblemDetails;
+    /**
+     * Internal Server Error
+     */
+    500: ProblemDetails;
+};
+
+export type RespondToMeetingAsVolunteerError = RespondToMeetingAsVolunteerErrors[keyof RespondToMeetingAsVolunteerErrors];
+
+export type RespondToMeetingAsVolunteerResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type RespondToMeetingAsVolunteerResponse = RespondToMeetingAsVolunteerResponses[keyof RespondToMeetingAsVolunteerResponses];
+
+export type RespondToMeetingAsOrganizerData = {
+    body: RespondToMeetingRequest;
+    path: {
+        opportunityId: string;
+        meetingId: string;
+    };
+    query?: never;
+    url: '/v1/volunteer-opportunities/{opportunityId}/meetings/{meetingId}/respond';
+};
+
+export type RespondToMeetingAsOrganizerErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Unauthorized
+     */
+    401: ProblemDetails;
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+    /**
+     * Conflict
+     */
+    409: ProblemDetails;
+    /**
+     * Internal Server Error
+     */
+    500: ProblemDetails;
+};
+
+export type RespondToMeetingAsOrganizerError = RespondToMeetingAsOrganizerErrors[keyof RespondToMeetingAsOrganizerErrors];
+
+export type RespondToMeetingAsOrganizerResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type RespondToMeetingAsOrganizerResponse = RespondToMeetingAsOrganizerResponses[keyof RespondToMeetingAsOrganizerResponses];
+
+export type ProposeMeetingAsVolunteerData = {
+    body: ProposeMeetingAsVolunteerRequest;
+    path: {
+        engagementId: string;
+    };
+    query?: never;
+    url: '/v1/me/engagements/{engagementId}/meetings';
+};
+
+export type ProposeMeetingAsVolunteerErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Unauthorized
+     */
+    401: ProblemDetails;
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+    /**
+     * Conflict
+     */
+    409: ProblemDetails;
+    /**
+     * Internal Server Error
+     */
+    500: ProblemDetails;
+};
+
+export type ProposeMeetingAsVolunteerError = ProposeMeetingAsVolunteerErrors[keyof ProposeMeetingAsVolunteerErrors];
+
+export type ProposeMeetingAsVolunteerResponses = {
+    /**
+     * OK
+     */
+    200: MeetingProposedResponse;
+};
+
+export type ProposeMeetingAsVolunteerResponse = ProposeMeetingAsVolunteerResponses[keyof ProposeMeetingAsVolunteerResponses];
+
+export type ProposeMeetingData = {
+    body: ProposeMeetingRequest;
+    path: {
+        opportunityId: string;
+    };
+    query?: never;
+    url: '/v1/volunteer-opportunities/{opportunityId}/meetings';
+};
+
+export type ProposeMeetingErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Unauthorized
+     */
+    401: ProblemDetails;
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+    /**
+     * Conflict
+     */
+    409: ProblemDetails;
+    /**
+     * Internal Server Error
+     */
+    500: ProblemDetails;
+};
+
+export type ProposeMeetingError = ProposeMeetingErrors[keyof ProposeMeetingErrors];
+
+export type ProposeMeetingResponses = {
+    /**
+     * OK
+     */
+    200: MeetingProposedResponse;
+};
+
+export type ProposeMeetingResponse = ProposeMeetingResponses[keyof ProposeMeetingResponses];
+
 export type GetMyEngagementsData = {
     body?: never;
     path?: never;
@@ -4279,6 +4505,102 @@ export type CheckInEngagementResponses = {
 };
 
 export type CheckInEngagementResponse = CheckInEngagementResponses[keyof CheckInEngagementResponses];
+
+export type CancelMeetingAsVolunteerData = {
+    body?: never;
+    path: {
+        engagementId: string;
+        meetingId: string;
+    };
+    query?: never;
+    url: '/v1/me/engagements/{engagementId}/meetings/{meetingId}/cancel';
+};
+
+export type CancelMeetingAsVolunteerErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Unauthorized
+     */
+    401: ProblemDetails;
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+    /**
+     * Conflict
+     */
+    409: ProblemDetails;
+    /**
+     * Internal Server Error
+     */
+    500: ProblemDetails;
+};
+
+export type CancelMeetingAsVolunteerError = CancelMeetingAsVolunteerErrors[keyof CancelMeetingAsVolunteerErrors];
+
+export type CancelMeetingAsVolunteerResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type CancelMeetingAsVolunteerResponse = CancelMeetingAsVolunteerResponses[keyof CancelMeetingAsVolunteerResponses];
+
+export type CancelMeetingAsOrganizerData = {
+    body?: never;
+    path: {
+        opportunityId: string;
+        meetingId: string;
+    };
+    query?: never;
+    url: '/v1/volunteer-opportunities/{opportunityId}/meetings/{meetingId}/cancel';
+};
+
+export type CancelMeetingAsOrganizerErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Unauthorized
+     */
+    401: ProblemDetails;
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+    /**
+     * Conflict
+     */
+    409: ProblemDetails;
+    /**
+     * Internal Server Error
+     */
+    500: ProblemDetails;
+};
+
+export type CancelMeetingAsOrganizerError = CancelMeetingAsOrganizerErrors[keyof CancelMeetingAsOrganizerErrors];
+
+export type CancelMeetingAsOrganizerResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type CancelMeetingAsOrganizerResponse = CancelMeetingAsOrganizerResponses[keyof CancelMeetingAsOrganizerResponses];
 
 export type CancelEngagementData = {
     body?: null | CancelEngagementRequest;

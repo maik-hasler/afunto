@@ -34,6 +34,10 @@ public sealed class Engagement
 
 	public DateTimeOffset? FeedbackSubmittedAt { get; private set; }
 
+	public Meeting? Meeting { get; private set; }
+
+	public int MeetingProposalCount { get; private set; }
+
 	public bool IsAnonymized => VolunteerId is null;
 
 	public DateTimeOffset CreatedOn { get; private set; }
@@ -45,6 +49,10 @@ public sealed class Engagement
 	public const int MaxReactivationCount = 5;
 
 	public const int FeedbackEditWindowDays = 14;
+
+	// Both sides propose, decline and propose again; without a cap a dispute over a
+	// date turns into an unbounded stream of notifications for the other side.
+	public const int MaxMeetingProposals = 10;
 
 #pragma warning disable CS8618
 	private Engagement() : base(default) { }
@@ -136,6 +144,7 @@ public sealed class Engagement
 
 		CancellationReason = reason;
 		Status = EngagementStatus.Cancelled;
+		Meeting = null;
 		AddEvent(new EngagementCancelledDomainEvent(Id, VolunteerId!.Value, OpportunityId, reason, opportunityTitle));
 		return Result.Success();
 	}
@@ -152,6 +161,7 @@ public sealed class Engagement
 			return Result.Failure(Error.Conflict("Engagement.CheckedIn", "A checked-in engagement can no longer be withdrawn."));
 
 		Status = EngagementStatus.Withdrawn;
+		Meeting = null;
 		AddEvent(new EngagementWithdrawnDomainEvent(Id, VolunteerId!.Value, OpportunityId));
 		return Result.Success();
 	}
@@ -191,6 +201,7 @@ public sealed class Engagement
 		FeedbackRating = null;
 		FeedbackComment = null;
 		FeedbackSubmittedAt = null;
+		Meeting = null;
 		Status = EngagementStatus.Pending;
 		if (wasWithdrawnByVolunteer)
 			ReactivationCount++;
@@ -321,10 +332,89 @@ public sealed class Engagement
 		return Result.Success();
 	}
 
+	public Result ProposeMeeting(
+		MeetingId meetingId,
+		MeetingParty proposedBy,
+		DateTimeOffset startsAt,
+		DateTimeOffset endsAt,
+		string? location,
+		string? note,
+		DateTimeOffset now)
+	{
+		if (IsAnonymized)
+			return Result.Failure(Error.Conflict("Engagement.Anonymized", "This engagement's volunteer has deleted their account and can no longer be acted on."));
+
+		if (IsTerminated)
+			return Result.Failure(Error.Conflict("Engagement.AlreadyTerminated", "Engagement is already terminated."));
+
+		if (TimeSlotId is not null)
+			return Result.Failure(Error.Validation("Meeting.RequiresIndividualContact", "Meetings can only be arranged for an expression of interest."));
+
+		if (MeetingProposalCount >= MaxMeetingProposals)
+			return Result.Failure(Error.Conflict("Meeting.ProposalLimitReached", "Too many meetings have been proposed for this engagement. Please contact each other directly."));
+
+		var meeting = Meeting.Propose(meetingId, proposedBy, startsAt, endsAt, location, note, now);
+		if (meeting.IsFailure)
+			return meeting;
+
+		// A new proposal replaces the current one, whoever made it: that is what
+		// moving a meeting and answering with another time both mean.
+		Meeting = meeting.Value;
+		MeetingProposalCount++;
+		return Result.Success();
+	}
+
+	public Result RespondToMeeting(MeetingId meetingId, MeetingParty respondent, bool accept, DateTimeOffset now)
+	{
+		var current = EnsureCurrentMeeting(meetingId, now);
+		if (current.IsFailure)
+			return current;
+
+		if (Meeting!.ProposedBy == respondent)
+			return Result.Failure(Error.Conflict("Meeting.OwnProposal", "A meeting proposal is answered by the other side."));
+
+		var response = accept ? MeetingResponse.Accepted : MeetingResponse.Declined;
+		if (Meeting.Response == response || Meeting.Response == MeetingResponse.Declined)
+			return Result.Failure(Error.Conflict("Meeting.AlreadyAnswered", "This meeting proposal has already been answered."));
+
+		Meeting = Meeting.WithResponse(response);
+		return Result.Success();
+	}
+
+	public Result CancelMeeting(MeetingId meetingId, MeetingParty canceller, DateTimeOffset now)
+	{
+		var current = EnsureCurrentMeeting(meetingId, now);
+		if (current.IsFailure)
+			return current;
+
+		if (Meeting!.ProposedBy != canceller)
+			return Result.Failure(Error.Conflict("Meeting.NotProposer", "Only the side that proposed a meeting can cancel it; the other side declines it."));
+
+		Meeting = null;
+		return Result.Success();
+	}
+
+	private Result EnsureCurrentMeeting(MeetingId meetingId, DateTimeOffset now)
+	{
+		if (IsAnonymized)
+			return Result.Failure(Error.Conflict("Engagement.Anonymized", "This engagement's volunteer has deleted their account and can no longer be acted on."));
+
+		// The caller names the proposal they saw. If the other side has replaced it
+		// in the meantime, acting on the new one would answer a time nobody showed them.
+		if (Meeting is null || Meeting.Id != meetingId)
+			return Result.Failure(Error.Conflict("Meeting.Superseded", "This meeting proposal is no longer current."));
+
+		if (Meeting.IsOver(now))
+			return Result.Failure(Error.Conflict("Meeting.AlreadyOver", "This meeting is already over."));
+
+		return Result.Success();
+	}
+
 	public void Anonymize()
 	{
 		VolunteerId = null;
 		Message = null;
+		Meeting = null;
 		FeedbackComment = null;
 		FeedbackRating = null;
 		FeedbackSubmittedAt = null;

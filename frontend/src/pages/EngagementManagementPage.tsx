@@ -3,6 +3,7 @@ import { useParams, useOutletContext, Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import { quoteMarks } from "../lib/quotes";
 import type {
+	EngagementMeetingSummary,
 	EngagementSummary,
 	FeedbackItemDto,
 	TimeSlotDetail,
@@ -11,6 +12,10 @@ import type {
 import { useApiClient } from "../hooks/useApiClient";
 import { useLoadMore } from "../hooks/useLoadMore";
 import ConfirmDialog from "../components/ConfirmDialog";
+import MeetingDetails from "../components/MeetingDetails";
+import MeetingFormModal, {
+	type MeetingFormValues,
+} from "../components/MeetingFormModal";
 import EmptyState from "../components/EmptyState";
 import Skeleton from "../components/Skeleton";
 import Button from "../components/Button";
@@ -31,6 +36,7 @@ import { useSetOrgBreadcrumbExtra } from "../contexts/OrgBreadcrumbContext";
 import { dispatchToast } from "../lib/toastBus";
 import { getApiErrorMessage, isApiNotFoundError } from "../lib/apiError";
 import { ENGAGEMENT_STATUS_COLORS } from "../lib/engagementStatus";
+import { meetingState } from "../lib/meetings";
 import {
 	checkboxClass,
 	inputClass,
@@ -52,6 +58,14 @@ const ENGAGEMENTS_PAGE_SIZE = 10;
 const FEEDBACK_PAGE_SIZE = 10;
 
 const QRScannerModal = lazy(() => import("../components/QRScannerModal"));
+
+/**
+ * What the meeting form is about to send: a new proposal to the listed
+ * people, or a move of an existing one to everyone who still carries it.
+ */
+type MeetingFormTarget =
+	| { kind: "propose"; engagementIds: string[]; name: string | null }
+	| { kind: "move"; meeting: EngagementMeetingSummary };
 
 export default function EngagementManagementPage() {
 	const { opportunityId } = useParams<{ opportunityId: string }>();
@@ -133,6 +147,7 @@ export default function EngagementManagementPage() {
 		hasMore: hasMoreEngagements,
 		loadMore: loadMoreEngagements,
 		retryLoadMore: retryLoadMoreEngagements,
+		reset: reloadEngagements,
 	} = useLoadMore<EngagementSummary>(
 		async (page) => {
 			if (!opportunityId) return { items: [], pageCount: 0 };
@@ -523,6 +538,177 @@ export default function EngagementManagementPage() {
 
 	const cancelTarget = engagements.find((e) => e.id === confirmCancelId);
 
+	// Meetings only make sense where the organizer arranges the rest directly
+	// with each person: an expression of interest (#2413).
+	const meetingsEnabled =
+		isOrganizer && opportunity?.participationType === "IndividualContact";
+	const [meetingForm, setMeetingForm] = useState<MeetingFormTarget | null>(
+		null,
+	);
+	const [meetingCancelTarget, setMeetingCancelTarget] =
+		useState<EngagementMeetingSummary | null>(null);
+	const [meetingCancelling, setMeetingCancelling] = useState(false);
+	const [meetingCancelError, setMeetingCancelError] = useState<string | null>(
+		null,
+	);
+	const [respondingMeetingId, setRespondingMeetingId] = useState<string | null>(
+		null,
+	);
+
+	async function handleMeetingSubmit(values: MeetingFormValues) {
+		if (!opportunityId || !meetingForm) return;
+		await api.proposeMeeting({
+			path: { opportunityId },
+			body: {
+				...values,
+				engagementIds:
+					meetingForm.kind === "propose" ? meetingForm.engagementIds : [],
+				replacesMeetingId:
+					meetingForm.kind === "move" ? meetingForm.meeting.id : null,
+			},
+		});
+		if (meetingForm.kind === "propose") setSelectedIds(new Set());
+		dispatchToast("success", t("meetings.proposed"));
+		reloadEngagements();
+	}
+
+	async function handleMeetingRespond(
+		meeting: EngagementMeetingSummary,
+		accept: boolean,
+	) {
+		if (!opportunityId) return;
+		setRespondingMeetingId(meeting.id);
+		try {
+			await api.respondToMeetingAsOrganizer({
+				path: { opportunityId, meetingId: meeting.id },
+				body: { accept },
+			});
+			dispatchToast(
+				"success",
+				t(accept ? "meetings.accepted" : "meetings.declined"),
+			);
+			reloadEngagements();
+		} catch (err) {
+			dispatchToast(
+				"error",
+				getApiErrorMessage(err, t("meetings.actionError")),
+			);
+		} finally {
+			setRespondingMeetingId(null);
+		}
+	}
+
+	async function handleMeetingCancelConfirm() {
+		if (!opportunityId || !meetingCancelTarget) return;
+		setMeetingCancelling(true);
+		setMeetingCancelError(null);
+		try {
+			await api.cancelMeetingAsOrganizer({
+				path: { opportunityId, meetingId: meetingCancelTarget.id },
+			});
+			setMeetingCancelTarget(null);
+			dispatchToast("success", t("meetings.cancelled"));
+			reloadEngagements();
+		} catch (err) {
+			setMeetingCancelError(getApiErrorMessage(err, t("meetings.actionError")));
+		} finally {
+			setMeetingCancelling(false);
+		}
+	}
+
+	function renderMeeting(e: EngagementSummary) {
+		const isActive = e.status === "Pending" || e.status === "Confirmed";
+		const name = volunteerDisplayName(e);
+		const proposeButton = (
+			<Button
+				type="button"
+				variant="brandOutline"
+				size="sm"
+				onClick={() =>
+					setMeetingForm({ kind: "propose", engagementIds: [e.id], name })
+				}
+				aria-label={t("meetings.proposeNamed", { name })}
+			>
+				{t("meetings.propose")}
+			</Button>
+		);
+
+		if (!e.meeting) {
+			return isActive && e.volunteerId ? (
+				<div className="mt-2">{proposeButton}</div>
+			) : null;
+		}
+
+		const meeting = e.meeting;
+		const state = meetingState(meeting, "Organization");
+		const isOwnProposal = meeting.proposedBy === "Organization";
+		return (
+			<MeetingDetails meeting={meeting} viewer="Organization">
+				{state === "awaitingYou" && (
+					<>
+						<Button
+							type="button"
+							size="sm"
+							onClick={() => handleMeetingRespond(meeting, true)}
+							disabled={respondingMeetingId === meeting.id}
+							aria-label={t("meetings.acceptNamed", { name })}
+						>
+							{t("meetings.accept")}
+						</Button>
+						<Button
+							type="button"
+							variant="dangerOutline"
+							size="sm"
+							onClick={() => handleMeetingRespond(meeting, false)}
+							disabled={respondingMeetingId === meeting.id}
+							aria-label={t("meetings.declineNamed", { name })}
+						>
+							{t("meetings.decline")}
+						</Button>
+					</>
+				)}
+				{isOwnProposal && state !== "over" && (
+					<>
+						<Button
+							type="button"
+							variant="brandOutline"
+							size="sm"
+							onClick={() => setMeetingForm({ kind: "move", meeting })}
+							aria-label={t("meetings.moveNamed", { name })}
+						>
+							{t("meetings.move")}
+						</Button>
+						<Button
+							type="button"
+							variant="dangerOutline"
+							size="sm"
+							onClick={() => {
+								setMeetingCancelError(null);
+								setMeetingCancelTarget(meeting);
+							}}
+							aria-label={t("meetings.cancelNamed", { name })}
+						>
+							{t("meetings.cancel")}
+						</Button>
+					</>
+				)}
+				{!isOwnProposal && state !== "over" && isActive && (
+					<Button
+						type="button"
+						variant="tertiary"
+						size="sm"
+						onClick={() =>
+							setMeetingForm({ kind: "propose", engagementIds: [e.id], name })
+						}
+					>
+						{t("meetings.counter")}
+					</Button>
+				)}
+				{state === "over" && isActive && proposeButton}
+			</MeetingDetails>
+		);
+	}
+
 	if (notFound) {
 		return <NotFoundPage />;
 	}
@@ -716,6 +902,22 @@ export default function EngagementManagementPage() {
 										: t("engagementManagement.confirmSelected")}
 								</Button>
 							)}
+							{meetingsEnabled && (
+								<Button
+									type="button"
+									variant="brandOutline"
+									size="sm"
+									onClick={() =>
+										setMeetingForm({
+											kind: "propose",
+											engagementIds: Array.from(selectedIds),
+											name: null,
+										})
+									}
+								>
+									{t("meetings.proposeSelected", { count: selectedIds.size })}
+								</Button>
+							)}
 							<Button
 								type="button"
 								variant="dangerOutline"
@@ -806,6 +1008,7 @@ export default function EngagementManagementPage() {
 												{quotes.close}
 											</p>
 										)}
+										{meetingsEnabled && renderMeeting(e)}
 										{e.timeSlotId &&
 											(() => {
 												const slot = timeSlotsById.get(e.timeSlotId);
@@ -1028,6 +1231,56 @@ export default function EngagementManagementPage() {
 						{bulkCancelReason.length}/500
 					</p>
 				</ConfirmDialog>
+			)}
+
+			{meetingForm && (
+				<MeetingFormModal
+					title={
+						meetingForm.kind === "move"
+							? t("meetings.moveTitle")
+							: t("meetings.propose")
+					}
+					intro={
+						meetingForm.kind === "move"
+							? t("meetings.moveIntro")
+							: meetingForm.name
+								? t("meetings.proposeIntroOne", { name: meetingForm.name })
+								: t("meetings.proposeIntroGroup", {
+										count: meetingForm.engagementIds.length,
+									})
+					}
+					initialStartsAt={
+						meetingForm.kind === "move"
+							? meetingForm.meeting.startsAt
+							: undefined
+					}
+					initialEndsAt={
+						meetingForm.kind === "move" ? meetingForm.meeting.endsAt : undefined
+					}
+					initialLocation={
+						meetingForm.kind === "move" ? meetingForm.meeting.location : ""
+					}
+					initialNote={
+						meetingForm.kind === "move" ? meetingForm.meeting.note : null
+					}
+					onSubmit={handleMeetingSubmit}
+					onClose={() => setMeetingForm(null)}
+				/>
+			)}
+
+			{meetingCancelTarget && (
+				<ConfirmDialog
+					title={t("meetings.cancelTitle")}
+					message={t("meetings.cancelMessage", {
+						count: meetingCancelTarget.participantCount,
+					})}
+					confirmLabel={t("meetings.cancel")}
+					cancelLabel={t("meetings.keep")}
+					onConfirm={handleMeetingCancelConfirm}
+					onClose={() => setMeetingCancelTarget(null)}
+					loading={meetingCancelling}
+					error={meetingCancelError}
+				/>
 			)}
 
 			{feedbackStats !== null && feedbackStats.feedbackCount > 0 ? (

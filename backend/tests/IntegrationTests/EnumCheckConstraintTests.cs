@@ -134,6 +134,67 @@ public class EnumCheckConstraintTests(IntegrationTestFixture fixture)
 	}
 
 	[Test]
+	public async Task Engagement_ShouldPersistAndReload_MeetingAcrossResponseAndCancel(
+		CancellationToken cancellationToken)
+	{
+		var now = DateTimeOffset.UtcNow;
+		var engagement = Engagement.CreateIndividualContact(VolunteerOpportunityId.New(), UserId.New(), "Message").GetValueOrThrow();
+		var meetingId = MeetingId.New();
+		engagement.ProposeMeeting(meetingId, MeetingParty.Organization, now.AddDays(2), now.AddDays(2).AddHours(1), "Online", "Note", now)
+			.IsSuccess.Should().BeTrue();
+
+		await using (var writeContext = fixture.CreateApplicationDbContext())
+		{
+			await writeContext.Engagements.AddAsync(engagement, cancellationToken);
+			await writeContext.SaveChangesAsync(cancellationToken);
+		}
+
+		// Answering replaces the owned Meeting instance; that has to reach the row as an update.
+		await using (var respondContext = fixture.CreateApplicationDbContext())
+		{
+			var tracked = await respondContext.Engagements.FindAsync(engagement.Id, cancellationToken);
+			tracked!.RespondToMeeting(meetingId, MeetingParty.Volunteer, accept: true, now).IsSuccess.Should().BeTrue();
+			await respondContext.SaveChangesAsync(cancellationToken);
+		}
+
+		await using (var readContext = fixture.CreateApplicationDbContext())
+		{
+			var reloaded = await readContext.Engagements.FindAsync(engagement.Id, cancellationToken);
+			reloaded!.Meeting.Should().NotBeNull();
+			reloaded.Meeting!.Id.Should().Be(meetingId);
+			reloaded.Meeting.ProposedBy.Should().Be(MeetingParty.Organization);
+			reloaded.Meeting.Response.Should().Be(MeetingResponse.Accepted);
+			reloaded.Meeting.Note.Should().Be("Note");
+			reloaded.MeetingProposalCount.Should().Be(1);
+
+			reloaded.CancelMeeting(meetingId, MeetingParty.Organization, now).IsSuccess.Should().BeTrue();
+			await readContext.SaveChangesAsync(cancellationToken);
+		}
+
+		await using var finalContext = fixture.CreateApplicationDbContext();
+		var cancelled = await finalContext.Engagements.FindAsync(engagement.Id, cancellationToken);
+		cancelled!.Meeting.Should().BeNull();
+	}
+
+	[Test]
+	public async Task Engagement_MeetingResponse_ShouldReject_InvalidValue(
+		CancellationToken cancellationToken)
+	{
+		var now = DateTimeOffset.UtcNow;
+		var engagement = Engagement.CreateIndividualContact(VolunteerOpportunityId.New(), UserId.New(), "Message").GetValueOrThrow();
+		engagement.ProposeMeeting(MeetingId.New(), MeetingParty.Volunteer, now.AddDays(2), now.AddDays(2).AddHours(1), "Online", null, now);
+
+		await using var writeContext = fixture.CreateApplicationDbContext();
+		await writeContext.Engagements.AddAsync(engagement, cancellationToken);
+		await writeContext.SaveChangesAsync(cancellationToken);
+
+		await AssertRejectsInvalidValueAsync(
+			"engagement", "meeting_response", engagement.Id.Value, "ck_engagement_meeting_response_valid", cancellationToken);
+		await AssertRejectsInvalidValueAsync(
+			"engagement", "meeting_proposed_by", engagement.Id.Value, "ck_engagement_meeting_proposed_by_valid", cancellationToken);
+	}
+
+	[Test]
 	public async Task Notification_ShouldPersistAndReload_ValidKind(
 		CancellationToken cancellationToken)
 	{

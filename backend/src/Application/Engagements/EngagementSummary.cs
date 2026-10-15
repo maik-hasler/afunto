@@ -33,4 +33,6 @@ public sealed record EngagementSummary(
 	// read model; this carries the optional English one so a client showing
 	// the English UI can render the same title the opportunity's own page
 	// does instead of falling back to German (#2328).
-	string? OpportunityTitleEn = null);
+	string? OpportunityTitleEn = null,
+
+	EngagementMeetingSummary? Meeting = null);

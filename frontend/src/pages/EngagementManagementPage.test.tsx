@@ -421,3 +421,155 @@ describe("EngagementManagementPage public profile link", () => {
 		expect(screen.queryByRole("link", { name: /public profile/i })).toBeNull();
 	});
 });
+
+describe("EngagementManagementPage meetings (#2413)", () => {
+	const interestOpportunity = {
+		...opportunityDetails,
+		participationType: "IndividualContact",
+	};
+	const NEXT_YEAR = new Date().getUTCFullYear() + 1;
+	const groupMeeting = {
+		id: "44444444-4444-4444-4444-444444444444",
+		startsAt: new Date(`${NEXT_YEAR}-03-10T17:00:00Z`),
+		endsAt: new Date(`${NEXT_YEAR}-03-10T18:00:00Z`),
+		location: "Clubhouse",
+		note: null,
+		proposedBy: "Organization",
+		response: "Pending",
+		participantCount: 2,
+	};
+
+	it("offers no meetings for a time-slot opportunity", async () => {
+		mockPage([engagement("aaaaaaaa-0000-0000-0000-000000000001", "Vera")]);
+
+		renderPage();
+
+		await screen.findByText("Vera");
+		expect(
+			screen.queryByRole("button", { name: /Propose a meeting/ }),
+		).not.toBeInTheDocument();
+	});
+
+	it("proposes one group meeting to everyone selected", async () => {
+		api.getVolunteerOpportunityDetails.mockResolvedValue(interestOpportunity);
+		const first = engagement("aaaaaaaa-0000-0000-0000-000000000001", "Vera");
+		const second = engagement("aaaaaaaa-0000-0000-0000-000000000002", "Olaf");
+		mockPage([first, second]);
+		api.proposeMeeting.mockResolvedValue({ meetingId: groupMeeting.id });
+
+		renderPage();
+
+		await screen.findByRole("button", { name: "Propose a meeting with Vera" });
+		await userEvent.click(
+			screen.getByRole("checkbox", { name: /Select all/i }),
+		);
+		await userEvent.click(
+			screen.getByRole("button", {
+				name: "Propose a group meeting with 2 people",
+			}),
+		);
+		const dialog = await screen.findByRole("dialog");
+		expect(
+			within(dialog).getByText(
+				"All 2 people get the same proposal and each answers for themselves.",
+			),
+		).toBeVisible();
+		await userEvent.click(
+			within(dialog).getByRole("button", { name: "Cancel" }),
+		);
+		expect(api.proposeMeeting).not.toHaveBeenCalled();
+	});
+
+	it("moves a group meeting for everyone who still has it", async () => {
+		api.getVolunteerOpportunityDetails.mockResolvedValue(interestOpportunity);
+		mockPage([
+			engagement("aaaaaaaa-0000-0000-0000-000000000001", "Vera", {
+				meeting: groupMeeting,
+			}),
+		]);
+		api.proposeMeeting.mockResolvedValue({ meetingId: "new" });
+
+		renderPage();
+
+		await userEvent.click(
+			await screen.findByRole("button", {
+				name: "Move the meeting with Vera",
+			}),
+		);
+		const dialog = await screen.findByRole("dialog");
+		await userEvent.click(
+			within(dialog).getByRole("button", { name: "Send proposal" }),
+		);
+
+		await waitFor(() =>
+			expect(api.proposeMeeting).toHaveBeenCalledWith({
+				path: { opportunityId: OPPORTUNITY_ID },
+				body: expect.objectContaining({
+					engagementIds: [],
+					replacesMeetingId: groupMeeting.id,
+					startsAt: groupMeeting.startsAt,
+					endsAt: groupMeeting.endsAt,
+					location: "Clubhouse",
+				}),
+			}),
+		);
+	});
+
+	it("answers a volunteer's proposal", async () => {
+		api.getVolunteerOpportunityDetails.mockResolvedValue(interestOpportunity);
+		mockPage([
+			engagement("aaaaaaaa-0000-0000-0000-000000000001", "Vera", {
+				meeting: {
+					...groupMeeting,
+					proposedBy: "Volunteer",
+					participantCount: 1,
+				},
+			}),
+		]);
+
+		renderPage();
+
+		await userEvent.click(
+			await screen.findByRole("button", {
+				name: "Accept the meeting with Vera",
+			}),
+		);
+
+		await waitFor(() =>
+			expect(api.respondToMeetingAsOrganizer).toHaveBeenCalledWith({
+				path: { opportunityId: OPPORTUNITY_ID, meetingId: groupMeeting.id },
+				body: { accept: true },
+			}),
+		);
+	});
+
+	it("cancels a meeting after asking, naming how many will hear about it", async () => {
+		api.getVolunteerOpportunityDetails.mockResolvedValue(interestOpportunity);
+		mockPage([
+			engagement("aaaaaaaa-0000-0000-0000-000000000001", "Vera", {
+				meeting: groupMeeting,
+			}),
+		]);
+
+		renderPage();
+
+		await userEvent.click(
+			await screen.findByRole("button", {
+				name: "Cancel the meeting with Vera",
+			}),
+		);
+		const dialog = await screen.findByRole("dialog");
+		expect(
+			within(dialog).getByText("All 2 people invited will get a notification."),
+		).toBeVisible();
+		await userEvent.click(
+			within(dialog).getByRole("button", { name: "Cancel meeting" }),
+		);
+
+		await waitFor(() =>
+			expect(api.cancelMeetingAsOrganizer).toHaveBeenCalledWith({
+				path: { opportunityId: OPPORTUNITY_ID, meetingId: groupMeeting.id },
+			}),
+		);
+	});
+});
