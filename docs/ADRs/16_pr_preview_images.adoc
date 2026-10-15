@@ -9,7 +9,7 @@ Accepted
 === Context
 Some pull requests change what a person sees, and the maintainer wants to click through such a change in a running, publicly reachable instance before merging it. There is one deployed environment, and a second permanent one is more than the project wants to pay for. ADR-7 stops this repository at publishing release images on a version tag, so a pull request has no image anything could run.
 
-The deployment side lives in the private `mgmt-hetzner` repository: it runs one short-lived stack per labelled pull request (frontend and backend per pull request; a database, a Keycloak realm and a bucket per pull request on a shared preview Postgres, Keycloak and object store kept apart from production), and tears each stack down again once its pull request no longer qualifies. That side needs images to pull, and a reliable way to tell an image for the pull request's current commit from one that is still building.
+The deployment side lives in the private `mgmt-hetzner` repository: it runs one short-lived stack per labelled pull request (frontend, backend and Keycloak per pull request; databases and a bucket per pull request on a shared preview Postgres and object store kept apart from production), and tears each stack down again once its pull request no longer qualifies. That side needs images to pull, and a reliable way to tell an image for the pull request's current commit from one that is still building.
 
 === Decision
 `.github/workflows/preview-images.yml` builds and pushes `afunto-backend-preview` and `afunto-frontend-preview` for every same-repository pull request carrying the `preview` label, on labelling and on every later push, and deletes that pull request's image versions when it closes.
