@@ -60,7 +60,12 @@ module.exports = [
 	{
 		name: "Form schemas (zod)",
 		path: "dist/assets/schemas-*.js",
-		limit: "30 kB",
+		// Lowered from 30 kB when the form schemas moved from `zod` to `zod/mini`
+		// (29.04 -> 17.53 kB on zod 4.4.3): the classic API hangs every method on
+		// the schema prototype, so none of it tree-shakes. Sized for zod 4.6.6
+		// (19.03 kB measured) rather than today's 4.4.3, so the pending bump in
+		// #2482 fits without touching this number again.
+		limit: "20 kB",
 		gzip: true,
 	},
 	{

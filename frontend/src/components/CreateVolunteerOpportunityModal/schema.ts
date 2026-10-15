@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/mini";
 import type { TFunction } from "i18next";
 
 export const TOTAL_STEPS = 4;
@@ -22,73 +22,75 @@ export function buildOpportunityFormSchema(t: TFunction) {
 
 	return z
 		.object({
-			titleDe: z.string().max(150, tooLong(150)),
-			titleEn: z.string().max(150, tooLong(150)),
-			descriptionDe: z.string().max(2000, tooLong(2000)),
-			descriptionEn: z.string().max(2000, tooLong(2000)),
+			titleDe: z.string().check(z.maxLength(150, tooLong(150))),
+			titleEn: z.string().check(z.maxLength(150, tooLong(150))),
+			descriptionDe: z.string().check(z.maxLength(2000, tooLong(2000))),
+			descriptionEn: z.string().check(z.maxLength(2000, tooLong(2000))),
 			isRemote: z.boolean(),
-			street: z.string().max(100, tooLong(100)),
-			houseNumber: z.string().max(10, tooLong(10)),
-			zipCode: z.string().max(5, tooLong(5)),
-			city: z.string().max(100, tooLong(100)),
+			street: z.string().check(z.maxLength(100, tooLong(100))),
+			houseNumber: z.string().check(z.maxLength(10, tooLong(10))),
+			zipCode: z.string().check(z.maxLength(5, tooLong(5))),
+			city: z.string().check(z.maxLength(100, tooLong(100))),
 			occurrence: z.enum(OCCURRENCE_VALUES),
 			participationType: z.enum(PARTICIPATION_TYPE_VALUES),
 			checkInMethod: z.enum(CHECK_IN_METHOD_VALUES),
 			checkInPin: z.string(),
-			category: z.string().optional(),
+			category: z.optional(z.string()),
 			tags: z.array(z.string()),
 			validUntil: z.string(),
 		})
-		.superRefine((data, ctx) => {
-			if (!data.titleDe.trim())
-				ctx.addIssue({
-					code: "custom",
-					path: ["titleDe"],
-					message: titleRequired,
-				});
-			if (!data.descriptionDe.trim())
-				ctx.addIssue({
-					code: "custom",
-					path: ["descriptionDe"],
-					message: descriptionRequired,
-				});
-			if (!data.isRemote) {
-				if (!data.street.trim())
+		.check(
+			z.superRefine((data, ctx) => {
+				if (!data.titleDe.trim())
 					ctx.addIssue({
 						code: "custom",
-						path: ["street"],
-						message: streetRequired,
+						path: ["titleDe"],
+						message: titleRequired,
 					});
-				if (!data.houseNumber.trim())
+				if (!data.descriptionDe.trim())
 					ctx.addIssue({
 						code: "custom",
-						path: ["houseNumber"],
-						message: houseNumberRequired,
+						path: ["descriptionDe"],
+						message: descriptionRequired,
 					});
-				if (!data.zipCode.trim())
+				if (!data.isRemote) {
+					if (!data.street.trim())
+						ctx.addIssue({
+							code: "custom",
+							path: ["street"],
+							message: streetRequired,
+						});
+					if (!data.houseNumber.trim())
+						ctx.addIssue({
+							code: "custom",
+							path: ["houseNumber"],
+							message: houseNumberRequired,
+						});
+					if (!data.zipCode.trim())
+						ctx.addIssue({
+							code: "custom",
+							path: ["zipCode"],
+							message: zipRequired,
+						});
+					if (!data.city.trim())
+						ctx.addIssue({
+							code: "custom",
+							path: ["city"],
+							message: cityRequired,
+						});
+				}
+				if (
+					data.checkInMethod === "PINCode" &&
+					data.checkInPin &&
+					!/^\d{6}$/.test(data.checkInPin)
+				)
 					ctx.addIssue({
 						code: "custom",
-						path: ["zipCode"],
-						message: zipRequired,
+						path: ["checkInPin"],
+						message: invalidPin,
 					});
-				if (!data.city.trim())
-					ctx.addIssue({
-						code: "custom",
-						path: ["city"],
-						message: cityRequired,
-					});
-			}
-			if (
-				data.checkInMethod === "PINCode" &&
-				data.checkInPin &&
-				!/^\d{6}$/.test(data.checkInPin)
-			)
-				ctx.addIssue({
-					code: "custom",
-					path: ["checkInPin"],
-					message: invalidPin,
-				});
-		});
+			}),
+		);
 }
 
 export type OpportunityFormValues = z.infer<
