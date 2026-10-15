@@ -54,7 +54,7 @@ describe("Header after a failed token renewal (#2224)", () => {
 
 		expect(
 			screen.getAllByRole("button", {
-				name: "Session expired - sign in again",
+				name: "Sign in again",
 			})[0],
 		).toBeInTheDocument();
 		expect(screen.queryByRole("button", { name: "Sign in" })).toBeNull();

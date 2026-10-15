@@ -43,7 +43,7 @@
       "signIn": "Sign in",
       "register": "Register",
       "checkingSignIn": "Checking sign-in status…",
-      "sessionExpired": "Session expired - sign in again",
+      "sessionExpired": "Sign in again",
       "openMenu": "Open menu",
       "closeMenu": "Close menu",
       "menu": "Menu"
@@ -1371,7 +1371,6 @@
     },
     "error": {
       "forbidden": "You do not have permission to do this.",
-      "sessionExpired": "Your session has expired. Please sign in again.",
       "rateLimited": "Too many requests. Please wait {{count}} seconds and try again.",
       "rateLimited_one": "Too many requests. Please wait {{count}} second and try again.",
       "rateLimited_other": "Too many requests. Please wait {{count}} seconds and try again.",

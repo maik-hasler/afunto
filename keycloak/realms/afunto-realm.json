@@ -11,6 +11,8 @@
   "registrationEmailAsUsername": false,
   "resetPasswordAllowed": true,
   "rememberMe": true,
+  "ssoSessionIdleTimeout": 28800,
+  "ssoSessionMaxLifespan": 36000,
   "verifyEmail": true,
   "passwordPolicy": "length(8) and digits(1) and lowerCase(1) and upperCase(1)",
   "bruteForceProtected": true,
