@@ -1719,6 +1719,7 @@
         "WeakCheckInPin": "This PIN is too easy to guess - choose a less predictable one.",
         "TitleTooLong": "Title must not exceed 200 characters.",
         "DescriptionTooLong": "Description must not exceed 5000 characters.",
+        "IncompleteTranslation": "Fill in both the English title and description, or leave both blank.",
         "TooManyTags": "An opportunity cannot have more than 20 tags.",
         "TagTooLong": "Each tag must not exceed 50 characters.",
         "ScheduledSlotsMustStartAsDraft": "A Scheduled slots opportunity must be created as a draft and published after adding at least one time slot.",

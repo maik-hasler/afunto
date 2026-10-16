@@ -1719,6 +1719,7 @@
         "WeakCheckInPin": "Diese PIN ist zu leicht zu erraten – wähle eine weniger vorhersehbare PIN.",
         "TitleTooLong": "Der Titel darf 200 Zeichen nicht überschreiten.",
         "DescriptionTooLong": "Die Beschreibung darf 5000 Zeichen nicht überschreiten.",
+        "IncompleteTranslation": "Füll Titel und Beschreibung auf Englisch aus oder lass beide leer.",
         "TooManyTags": "Ein Einsatz kann nicht mehr als 20 Schlagwörter haben.",
         "TagTooLong": "Jedes Schlagwort darf 50 Zeichen nicht überschreiten.",
         "ScheduledSlotsMustStartAsDraft": "Ein Einsatz mit der Teilnahmeart Zeitslots muss zunächst als Entwurf angelegt werden und kann erst nach Hinzufügen mindestens eines Zeitslots veröffentlicht werden.",

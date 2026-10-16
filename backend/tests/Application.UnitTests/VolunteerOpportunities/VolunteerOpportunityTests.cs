@@ -347,7 +347,7 @@ public class VolunteerOpportunityTests
 	}
 
 	[Test]
-	public void Rename_ShouldUpdateBothTitleDeAndTitleEn()
+	public void ChangeText_ShouldUpdateBothTitleDeAndTitleEn()
 	{
 		// Arrange
 		var opportunity = VolunteerOpportunity.Create(
@@ -365,7 +365,7 @@ public class VolunteerOpportunityTests
 			status: OpportunityStatus.Draft).Value;
 
 		// Act
-		var result = opportunity.Rename("Neuer Titel", "New title");
+		var result = opportunity.ChangeText("Neuer Titel", "New title", opportunity.DescriptionDe, opportunity.DescriptionEn);
 
 		// Assert
 		result.IsSuccess.Should().BeTrue();
@@ -374,7 +374,7 @@ public class VolunteerOpportunityTests
 	}
 
 	[Test]
-	public void Rename_ShouldClearTitleEn_WhenRenamedWithoutIt()
+	public void ChangeText_ShouldClearTheTranslation_WhenSavedWithoutIt()
 	{
 		// Arrange
 		var opportunity = VolunteerOpportunity.Create(
@@ -392,14 +392,16 @@ public class VolunteerOpportunityTests
 			status: OpportunityStatus.Draft).Value;
 
 		// Act
-		opportunity.Rename("Neuer Titel", null);
+		var result = opportunity.ChangeText("Neuer Titel", null, "Beschreibung", null);
 
 		// Assert
+		result.IsSuccess.Should().BeTrue();
 		opportunity.TitleEn.Should().BeNull();
+		opportunity.DescriptionEn.Should().BeNull();
 	}
 
 	[Test]
-	public void ChangeDescription_ShouldUpdateBothDescriptionDeAndDescriptionEn()
+	public void ChangeText_ShouldUpdateBothDescriptionDeAndDescriptionEn()
 	{
 		// Arrange
 		var opportunity = VolunteerOpportunity.Create(
@@ -417,12 +419,67 @@ public class VolunteerOpportunityTests
 			status: OpportunityStatus.Draft).Value;
 
 		// Act
-		var result = opportunity.ChangeDescription("Neue Beschreibung", "New description");
+		var result = opportunity.ChangeText(opportunity.TitleDe, opportunity.TitleEn, "Neue Beschreibung", "New description");
 
 		// Assert
 		result.IsSuccess.Should().BeTrue();
 		opportunity.DescriptionDe.Should().Be("Neue Beschreibung");
 		opportunity.DescriptionEn.Should().Be("New description");
+	}
+
+	[Test]
+	[Arguments("Title", null)]
+	[Arguments(null, "Description")]
+	[Arguments("Title", "   ")]
+	public void Create_ShouldFail_WhenTheTranslationIsIncomplete(string? titleEn, string? descriptionEn)
+	{
+		// Act
+		var result = VolunteerOpportunity.Create(
+			TestOrganizationId,
+			"Titel",
+			titleEn,
+			"Beschreibung",
+			descriptionEn,
+			false,
+			TestAddress,
+			Occurrence.OneTime,
+			ParticipationType.ScheduledSlots,
+			CheckInMethod.None,
+			PinGenerator,
+			status: OpportunityStatus.Draft);
+
+		// Assert
+		result.IsFailure.Should().BeTrue();
+		result.Error.Code.Should().Be("VolunteerOpportunity.IncompleteTranslation");
+	}
+
+	[Test]
+	public void ChangeText_ShouldFail_AndKeepTheText_WhenTheTranslationIsIncomplete()
+	{
+		// Arrange
+		var opportunity = VolunteerOpportunity.Create(
+			TestOrganizationId,
+			"Titel",
+			"Title",
+			"Beschreibung",
+			"Description",
+			false,
+			TestAddress,
+			Occurrence.OneTime,
+			ParticipationType.ScheduledSlots,
+			CheckInMethod.None,
+			PinGenerator,
+			status: OpportunityStatus.Draft).Value;
+
+		// Act
+		var result = opportunity.ChangeText("Neuer Titel", "New title", "Neue Beschreibung", null);
+
+		// Assert
+		result.IsFailure.Should().BeTrue();
+		result.Error.Code.Should().Be("VolunteerOpportunity.IncompleteTranslation");
+		opportunity.TitleDe.Should().Be("Titel");
+		opportunity.TitleEn.Should().Be("Title");
+		opportunity.DescriptionEn.Should().Be("Description");
 	}
 
 	[Test]
@@ -992,8 +1049,7 @@ public class VolunteerOpportunityTests
 		var opportunity = CreateDraftScheduledSlotsOpportunity();
 		var newAddress = Address.Create("Neue Straße", "42", "10115", "Hamburg").Value;
 
-		opportunity.Rename("New title", null);
-		opportunity.ChangeDescription("New desc", null);
+		opportunity.ChangeText("New title", null, "New desc", null);
 		opportunity.Relocate(false, newAddress);
 		opportunity.Reschedule(Occurrence.Recurring);
 		opportunity.SwitchParticipationType(ParticipationType.IndividualContact);
@@ -1044,7 +1100,7 @@ public class VolunteerOpportunityTests
 		var opportunity = CreateDraftScheduledSlotsOpportunity();
 		opportunity.AddTimeSlot(FutureSlotStart, FutureSlotStart.AddHours(2), 10, Now);
 
-		opportunity.Rename("New title", null);
+		opportunity.ChangeText("New title", null, opportunity.DescriptionDe, null);
 		opportunity.SwitchParticipationType(ParticipationType.ScheduledSlots);
 
 		opportunity.TimeSlots.Should().HaveCount(1);
@@ -1055,8 +1111,7 @@ public class VolunteerOpportunityTests
 	{
 		var opportunity = CreateDraftScheduledSlotsOpportunity();
 
-		opportunity.Rename("Remote title", null);
-		opportunity.ChangeDescription("Remote desc", null);
+		opportunity.ChangeText("Remote title", null, "Remote desc", null);
 		opportunity.Relocate(true, null);
 
 		opportunity.IsRemote.Should().BeTrue();
@@ -1067,11 +1122,11 @@ public class VolunteerOpportunityTests
 	[Arguments("")]
 	[Arguments("   ")]
 	[Arguments(null)]
-	public void Rename_ShouldAllow_EmptyTitle_WhenDraft(string? title)
+	public void ChangeText_ShouldAllow_EmptyTitle_WhenDraft(string? title)
 	{
 		var opportunity = CreateDraftScheduledSlotsOpportunity();
 
-		var result = opportunity.Rename(title!, null);
+		var result = opportunity.ChangeText(title!, null, opportunity.DescriptionDe, null);
 
 		result.IsSuccess.Should().BeTrue();
 		opportunity.TitleDe.Should().Be(title);
@@ -1081,11 +1136,11 @@ public class VolunteerOpportunityTests
 	[Arguments("")]
 	[Arguments("   ")]
 	[Arguments(null)]
-	public void Rename_ShouldFail_WhenTitleIsEmpty_AndPublished(string? title)
+	public void ChangeText_ShouldFail_WhenTitleIsEmpty_AndPublished(string? title)
 	{
 		var opportunity = CreatePublishedScheduledSlotsOpportunity();
 
-		var result = opportunity.Rename(title!, null);
+		var result = opportunity.ChangeText(title!, null, opportunity.DescriptionDe, null);
 
 		result.IsFailure.Should().BeTrue();
 		result.Error.Description.Should().Be("Title must not be empty.");
@@ -1095,35 +1150,35 @@ public class VolunteerOpportunityTests
 	[Arguments("")]
 	[Arguments("   ")]
 	[Arguments(null)]
-	public void ChangeDescription_ShouldFail_WhenDescriptionIsEmpty_AndPublished(string? description)
+	public void ChangeText_ShouldFail_WhenDescriptionIsEmpty_AndPublished(string? description)
 	{
 		var opportunity = CreatePublishedScheduledSlotsOpportunity();
 
-		var result = opportunity.ChangeDescription(description!, null);
+		var result = opportunity.ChangeText(opportunity.TitleDe, null, description!, null);
 
 		result.IsFailure.Should().BeTrue();
 		result.Error.Description.Should().Be("Description must not be empty.");
 	}
 
 	[Test]
-	public void Rename_ShouldFail_WhenTitleExceedsMaxLength_EvenWhenDraft()
+	public void ChangeText_ShouldFail_WhenTitleExceedsMaxLength_EvenWhenDraft()
 	{
 		var opportunity = CreateDraftScheduledSlotsOpportunity();
 		var title = new string('a', VolunteerOpportunity.MaxTitleLength + 1);
 
-		var result = opportunity.Rename(title, null);
+		var result = opportunity.ChangeText(title, null, opportunity.DescriptionDe, null);
 
 		result.IsFailure.Should().BeTrue();
 		result.Error.Description.Should().Be($"Title must not exceed {VolunteerOpportunity.MaxTitleLength} characters.");
 	}
 
 	[Test]
-	public void ChangeDescription_ShouldFail_WhenDescriptionExceedsMaxLength_EvenWhenDraft()
+	public void ChangeText_ShouldFail_WhenDescriptionExceedsMaxLength_EvenWhenDraft()
 	{
 		var opportunity = CreateDraftScheduledSlotsOpportunity();
 		var description = new string('a', VolunteerOpportunity.MaxDescriptionLength + 1);
 
-		var result = opportunity.ChangeDescription(description, null);
+		var result = opportunity.ChangeText(opportunity.TitleDe, null, description, null);
 
 		result.IsFailure.Should().BeTrue();
 		result.Error.Description.Should().Be($"Description must not exceed {VolunteerOpportunity.MaxDescriptionLength} characters.");
