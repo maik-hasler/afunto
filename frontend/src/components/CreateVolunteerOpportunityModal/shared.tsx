@@ -102,7 +102,7 @@ export function FloatingField({
 	pattern?: string;
 }) {
 	const fieldClass = `peer w-full rounded-xl border bg-white px-4 pb-2 pt-5 text-sm text-gray-900 shadow-sm transition ${fieldBorderClass(Boolean(error))}`;
-	const labelClass = `pointer-events-none absolute left-4 top-1.5 text-xs font-medium transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-placeholder-shown:text-gray-600 peer-focus:top-1.5 peer-focus:text-xs peer-focus:font-medium ${
+	const labelClass = `pointer-events-none absolute left-4 right-4 top-1.5 truncate text-xs font-medium transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-placeholder-shown:text-gray-600 peer-focus:top-1.5 peer-focus:text-xs peer-focus:font-medium ${
 		error
 			? "text-red-600 peer-focus:text-red-600"
 			: "text-gray-600 peer-focus:text-brand-700"

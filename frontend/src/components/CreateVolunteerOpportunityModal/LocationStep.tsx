@@ -72,7 +72,7 @@ export default function LocationStep({
 							{t("createOpportunity.useOrgAddress")}
 						</button>
 					)}
-					<div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_5rem]">
+					<div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_9rem]">
 						<FloatingField
 							id="opportunity-street"
 							label={t("createOpportunity.fieldStreet")}
@@ -90,7 +90,7 @@ export default function LocationStep({
 							maxLength={10}
 						/>
 					</div>
-					<div className="grid grid-cols-1 gap-3 sm:grid-cols-[5rem_1fr]">
+					<div className="grid grid-cols-1 gap-3 sm:grid-cols-[7rem_1fr]">
 						<FloatingField
 							id="opportunity-zip"
 							label={t("createOpportunity.fieldZip")}
