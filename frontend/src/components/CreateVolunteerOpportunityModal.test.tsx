@@ -111,9 +111,8 @@ describe("create-opportunity wizard: translations section (#2387)", () => {
 
 		const german = screen.getByTestId("opportunity-language-version-de");
 		expect(
-			within(german).getByRole("heading", { name: "German" }),
-		).toBeVisible();
-		expect(german).toHaveTextContent("Required");
+			within(german).getByRole("button", { name: /German.*Required/ }),
+		).toHaveAttribute("aria-expanded", "true");
 		expect(
 			within(german).getByRole("textbox", { name: "Title (German)" }),
 		).toBe(title());
@@ -123,6 +122,24 @@ describe("create-opportunity wizard: translations section (#2387)", () => {
 			/every visitor sees the German text unless there is a translation/,
 		);
 		expect(toggle()).toHaveAccessibleName(/Optional/);
+	});
+
+	it("collapses the German version on demand and reopens it on an error", async () => {
+		openWizard();
+		const germanToggle = screen.getByTestId(
+			"opportunity-translation-toggle-de",
+		);
+
+		await userEvent.click(germanToggle);
+		expect(germanToggle).toHaveAttribute("aria-expanded", "false");
+		expect(title()).not.toBeVisible();
+
+		await userEvent.click(screen.getByTestId("modal-next"));
+
+		await waitFor(() => expect(titleError()).not.toBeNull());
+		expect(germanToggle).toHaveAttribute("aria-expanded", "true");
+		expect(germanToggle).toHaveAccessibleName(/Contains errors/);
+		expect(title()).toHaveFocus();
 	});
 
 	it("shows the German fields without a language toggle, the translation collapsed", () => {

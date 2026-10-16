@@ -48,6 +48,9 @@ export default function BasicsStep({
 	// field in the same commit the errors arrive in, and a field still
 	// display:none at that point cannot take focus.
 	const englishExpanded = englishOpen || hasEnglishError;
+	const hasGermanError = Boolean(titleDeError || descriptionDeError);
+	const [germanOpen, setGermanOpen] = useState(true);
+	const germanExpanded = germanOpen || hasGermanError;
 	const englishStatus = hasEnglishError
 		? t("createOpportunity.translationHasError")
 		: hasEnglishText
@@ -60,8 +63,9 @@ export default function BasicsStep({
 		<div className="space-y-4" data-testid="wizard-step-1">
 			{/*
 			 * Every language version of the text sits in one section, German
-			 * first as a fixed, required row and each translation below it as
-			 * an optional, collapsible one. It replaced a DE/EN toggle that
+			 * first as the required row and each translation below it as an
+			 * optional one. Every row collapses; a required row with an error
+			 * is forced open, for the focus reason given above. It replaced a DE/EN toggle that
 			 * carried the site language switcher's own labels and was taken for
 			 * it (#2387), and that presented an optional translation as an
 			 * equal of the required German text without saying why German is
@@ -86,17 +90,38 @@ export default function BasicsStep({
 						{t("createOpportunity.languageVersionsHint")}
 					</p>
 				</div>
-				<div
-					className="mt-2 border-t border-gray-200 px-4 pt-2.5 pb-4"
-					data-testid="opportunity-language-version-de"
-				>
-					<div className="mb-3 flex items-center justify-between gap-3">
-						<h5 className="text-sm font-medium text-gray-800">{germanName}</h5>
-						<span className="rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700">
+				<div className="mt-2" data-testid="opportunity-language-version-de">
+					<button
+						type="button"
+						aria-expanded={germanExpanded}
+						aria-controls="opportunity-language-version-de-fields"
+						data-testid="opportunity-translation-toggle-de"
+						onClick={() => setGermanOpen(!germanExpanded)}
+						className="flex w-full items-center justify-between gap-3 border-t border-gray-200 px-4 py-2.5 text-left text-sm font-medium text-gray-800 hover:bg-gray-50"
+					>
+						<span>{germanName}</span>
+						<span
+							className={`flex items-center gap-1 text-xs ${
+								hasGermanError ? "text-red-600" : "text-brand-700"
+							}`}
+						>
+							{hasGermanError && (
+								<ExclamationTriangleIcon className="h-3 w-3" />
+							)}
 							{t("createOpportunity.languageVersionRequired")}
+							{hasGermanError &&
+								` · ${t("createOpportunity.translationHasError")}`}
+							<ChevronDownIcon
+								className="h-4 w-4 text-gray-500"
+								open={germanExpanded}
+							/>
 						</span>
-					</div>
-					<div className="space-y-4">
+					</button>
+					<div
+						id="opportunity-language-version-de-fields"
+						hidden={!germanExpanded}
+						className="space-y-4 px-4 pt-1 pb-4"
+					>
 						<FloatingField
 							id="opportunity-title"
 							label={t("createOpportunity.fieldTitleInLanguage", {
