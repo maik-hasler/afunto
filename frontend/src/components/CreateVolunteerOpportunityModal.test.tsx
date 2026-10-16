@@ -106,6 +106,25 @@ describe("create-opportunity wizard: translations section (#2387)", () => {
 		await userEvent.type(description(), "Wir sammeln Muell am Strand.");
 	}
 
+	it("presents German as the required version and says why", () => {
+		openWizard();
+
+		const german = screen.getByTestId("opportunity-language-version-de");
+		expect(
+			within(german).getByRole("heading", { name: "German" }),
+		).toBeVisible();
+		expect(german).toHaveTextContent("Required");
+		expect(
+			within(german).getByRole("textbox", { name: "Title (German)" }),
+		).toBe(title());
+		expect(
+			screen.getByRole("region", { name: "Language versions" }),
+		).toHaveAccessibleDescription(
+			/every visitor sees the German text unless there is a translation/,
+		);
+		expect(toggle()).toHaveAccessibleName(/Optional/);
+	});
+
 	it("shows the German fields without a language toggle, the translation collapsed", () => {
 		openWizard();
 
@@ -264,10 +283,10 @@ describe("create-opportunity wizard: the shared required-field marker (#1797)", 
 		openWizard();
 
 		const field = document.querySelector("#opportunity-title");
-		expect(field).toHaveAccessibleName("Title");
+		expect(field).toHaveAccessibleName("Title (German)");
 
 		const label = document.querySelector("label[for='opportunity-title']");
-		expect(label).toHaveTextContent(/^Title\*$/);
+		expect(label).toHaveTextContent(/^Title \(German\)\*$/);
 		const marks = label?.querySelectorAll("span[aria-hidden='true']") ?? [];
 		expect(marks).toHaveLength(1);
 		expect(marks[0]).toHaveTextContent("*");

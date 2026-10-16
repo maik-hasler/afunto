@@ -53,53 +53,76 @@ export default function BasicsStep({
 		: hasEnglishText
 			? t("createOpportunity.translationStatusDone")
 			: t("createOpportunity.translationStatusEmpty");
-	const englishName = t("createOpportunity.translationLanguage.en");
+	const germanName = t("createOpportunity.languageVersionName.de");
+	const englishName = t("createOpportunity.languageVersionName.en");
 
 	return (
 		<div className="space-y-4" data-testid="wizard-step-1">
-			<FloatingField
-				id="opportunity-title"
-				label={t("createOpportunity.fieldTitle")}
-				registration={register("titleDe")}
-				required
-				error={titleDeError}
-				maxLength={150}
-				showCount
-				displayValue={titleDe}
-			/>
-			<FloatingField
-				id="opportunity-description"
-				label={t("createOpportunity.fieldDescription")}
-				registration={register("descriptionDe")}
-				required
-				error={descriptionDeError}
-				maxLength={2000}
-				multiline
-				showCount
-				displayValue={descriptionDe}
-			/>
-
 			{/*
-			 * Translations are a section of their own, below the source text,
-			 * rather than a DE/EN toggle above it: the toggle carried the site
-			 * language switcher's own labels and was taken for it (#2387), and
-			 * it presented an optional translation as an equal of the required
-			 * German text.
+			 * Every language version of the text sits in one section, German
+			 * first as a fixed, required row and each translation below it as
+			 * an optional, collapsible one. It replaced a DE/EN toggle that
+			 * carried the site language switcher's own labels and was taken for
+			 * it (#2387), and that presented an optional translation as an
+			 * equal of the required German text without saying why German is
+			 * the one that is required.
 			 */}
 			<section
-				aria-labelledby="opportunity-translations-heading"
+				aria-labelledby="opportunity-languages-heading"
+				aria-describedby="opportunity-languages-hint"
 				className="rounded-xl border border-gray-200"
 			>
 				<div className="px-4 pt-3">
-					<h3
-						id="opportunity-translations-heading"
+					<h4
+						id="opportunity-languages-heading"
 						className="text-sm font-semibold text-gray-800"
 					>
-						{t("createOpportunity.translationsHeading")}
-					</h3>
-					<p className="mt-0.5 text-xs text-gray-500">
-						{t("createOpportunity.translationsHint")}
+						{t("createOpportunity.languageVersionsHeading")}
+					</h4>
+					<p
+						id="opportunity-languages-hint"
+						className="mt-0.5 text-xs text-gray-500"
+					>
+						{t("createOpportunity.languageVersionsHint")}
 					</p>
+				</div>
+				<div
+					className="mt-2 border-t border-gray-200 px-4 pt-2.5 pb-4"
+					data-testid="opportunity-language-version-de"
+				>
+					<div className="mb-3 flex items-center justify-between gap-3">
+						<h5 className="text-sm font-medium text-gray-800">{germanName}</h5>
+						<span className="rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700">
+							{t("createOpportunity.languageVersionRequired")}
+						</span>
+					</div>
+					<div className="space-y-4">
+						<FloatingField
+							id="opportunity-title"
+							label={t("createOpportunity.fieldTitleInLanguage", {
+								language: germanName,
+							})}
+							registration={register("titleDe")}
+							required
+							error={titleDeError}
+							maxLength={150}
+							showCount
+							displayValue={titleDe}
+						/>
+						<FloatingField
+							id="opportunity-description"
+							label={t("createOpportunity.fieldDescriptionInLanguage", {
+								language: germanName,
+							})}
+							registration={register("descriptionDe")}
+							required
+							error={descriptionDeError}
+							maxLength={2000}
+							multiline
+							showCount
+							displayValue={descriptionDe}
+						/>
+					</div>
 				</div>
 				<button
 					type="button"
@@ -107,7 +130,7 @@ export default function BasicsStep({
 					aria-controls="opportunity-translation-en"
 					data-testid="opportunity-translation-toggle-en"
 					onClick={() => setEnglishOpen(!englishExpanded)}
-					className="mt-2 flex w-full items-center justify-between gap-3 border-t border-gray-200 px-4 py-2.5 text-left text-sm font-medium text-gray-800 hover:bg-gray-50"
+					className="flex w-full items-center justify-between gap-3 border-t border-gray-200 px-4 py-2.5 text-left text-sm font-medium text-gray-800 hover:bg-gray-50"
 				>
 					<span>{englishName}</span>
 					<span
@@ -120,7 +143,7 @@ export default function BasicsStep({
 						}`}
 					>
 						{hasEnglishError && <ExclamationTriangleIcon className="h-3 w-3" />}
-						{englishStatus}
+						{t("createOpportunity.languageVersionOptional")} · {englishStatus}
 						<ChevronDownIcon
 							className="h-4 w-4 text-gray-500"
 							open={englishExpanded}
@@ -134,7 +157,7 @@ export default function BasicsStep({
 				>
 					<FloatingField
 						id="opportunity-title-en"
-						label={t("createOpportunity.fieldTitleTranslated", {
+						label={t("createOpportunity.fieldTitleInLanguage", {
 							language: englishName,
 						})}
 						registration={register("titleEn")}
@@ -145,7 +168,7 @@ export default function BasicsStep({
 					/>
 					<FloatingField
 						id="opportunity-description-en"
-						label={t("createOpportunity.fieldDescriptionTranslated", {
+						label={t("createOpportunity.fieldDescriptionInLanguage", {
 							language: englishName,
 						})}
 						registration={register("descriptionEn")}

@@ -64,6 +64,7 @@ const ALLOWED_IDENTICAL_KEYS = new Set(
 		"createOpportunity.step3Title",
 		"createOpportunity.step4Title",
 		"createOpportunity.fieldTags",
+		"createOpportunity.languageVersionOptional",
 		"common.charCount",
 		"timeSlots.removing",
 		"timeSlots.seriesBadge",
