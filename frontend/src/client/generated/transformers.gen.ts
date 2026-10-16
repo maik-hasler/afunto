@@ -223,6 +223,12 @@ export const createOrganizationResponseTransformer = async (data: any): Promise<
     return data;
 };
 
+const engagementMeetingSummarySchemaResponseTransformer = (data: any) => {
+    data.startsAt = new Date(data.startsAt);
+    data.endsAt = new Date(data.endsAt);
+    return data;
+};
+
 const engagementSummarySchemaResponseTransformer = (data: any) => {
     data.createdOn = new Date(data.createdOn);
     if (data.timeSlotStartDateTime) {
@@ -236,6 +242,9 @@ const engagementSummarySchemaResponseTransformer = (data: any) => {
     }
     if (data.opportunityValidUntil) {
         data.opportunityValidUntil = new Date(data.opportunityValidUntil);
+    }
+    if (data.meeting) {
+        data.meeting = engagementMeetingSummarySchemaResponseTransformer(data.meeting);
     }
     return data;
 };

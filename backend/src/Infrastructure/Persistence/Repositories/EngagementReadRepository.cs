@@ -170,6 +170,7 @@ internal sealed class EngagementReadRepository(
 					e.FeedbackSubmittedAt,
 					e.CreatedOn,
 					e.CancellationReason,
+					e.Meeting,
 				})
 			.Join(
 				dbContext.OrganizationsQuery.Select(org => new { org.Id, org.Name }),
@@ -192,6 +193,7 @@ internal sealed class EngagementReadRepository(
 					x.FeedbackSubmittedAt,
 					x.CreatedOn,
 					x.CancellationReason,
+					x.Meeting,
 				})
 			.OrderByDescending(x => x.CreatedOn)
 			.ThenBy(x => x.Id)
@@ -213,6 +215,8 @@ internal sealed class EngagementReadRepository(
 				.ToDictionaryAsync(u => u.Id.Value, u => u.Phone, cancellationToken);
 		}
 
+		var participantCounts = await CountMeetingParticipantsAsync(raw.Select(x => x.Meeting), cancellationToken);
+
 		var items = raw.Select(x => new EngagementSummary(
 			x.Id.Value,
 			x.OpportunityId.Value,
@@ -231,7 +235,8 @@ internal sealed class EngagementReadRepository(
 				: null,
 			CancellationReason: x.CancellationReason,
 			CheckInMethod: x.CheckInMethod.ToString(),
-			OpportunityTitleEn: x.OpportunityTitleEn)).ToList();
+			OpportunityTitleEn: x.OpportunityTitleEn,
+			Meeting: ToMeetingSummary(x.Meeting, participantCounts))).ToList();
 
 		return new PagedList<EngagementSummary>(items, totalCount, pageNumber, pageSize);
 	}
@@ -269,19 +274,25 @@ internal sealed class EngagementReadRepository(
 		// contact engagement, check-in is the completion signal (there is no
 		// later timestamp to anchor to), otherwise the opportunity's
 		// application deadline; with none of those, it never ends on its own.
+		// A meeting still ahead keeps an expression of interest upcoming past its
+		// deadline: arranging that meeting is exactly what happens after it (#2413).
 		scopedQuery = upcoming
 			? scopedQuery.Where(x =>
 				x.OpportunityExists
 				&& ((x.TimeSlotEnd != null && x.TimeSlotEnd >= now)
 					|| (x.TimeSlotEnd == null
 						&& !x.Engagement.IsCheckedIn
-						&& (x.OpportunityValidUntil == null || x.OpportunityValidUntil >= now))))
+						&& (x.OpportunityValidUntil == null
+							|| x.OpportunityValidUntil >= now
+							|| (x.Engagement.Meeting != null && x.Engagement.Meeting.EndsAt >= now)))))
 			: scopedQuery.Where(x =>
 				!x.OpportunityExists
 				|| (x.TimeSlotEnd != null && x.TimeSlotEnd < now)
 				|| (x.TimeSlotEnd == null
 					&& (x.Engagement.IsCheckedIn
-						|| (x.OpportunityValidUntil != null && x.OpportunityValidUntil < now))));
+						|| (x.OpportunityValidUntil != null
+							&& x.OpportunityValidUntil < now
+							&& (x.Engagement.Meeting == null || x.Engagement.Meeting.EndsAt < now)))));
 
 		var totalCount = await scopedQuery.CountAsync(cancellationToken);
 
@@ -360,6 +371,8 @@ internal sealed class EngagementReadRepository(
 				.ToDictionaryAsync(ts => ts.Id, cancellationToken);
 		}
 
+		var participantCounts = await CountMeetingParticipantsAsync(engagements.Select(e => e.Meeting), cancellationToken);
+
 		return engagements.Select(e =>
 		{
 			opportunities.TryGetValue(e.OpportunityId, out var opportunity);
@@ -401,9 +414,48 @@ internal sealed class EngagementReadRepository(
 				CheckInMethod: (opportunity?.CheckInMethod ?? CheckInMethod.None).ToString(),
 				OpportunityValidUntil: opportunity?.ValidUntil,
 				RemainingReactivations: Engagement.MaxReactivationCount - e.ReactivationCount,
-				OpportunityTitleEn: opportunity?.TitleEn);
+				OpportunityTitleEn: opportunity?.TitleEn,
+				Meeting: ToMeetingSummary(e.Meeting, participantCounts));
 		}).ToList();
 	}
+
+	private async Task<Dictionary<MeetingId, int>> CountMeetingParticipantsAsync(
+		IEnumerable<Meeting?> meetings,
+		CancellationToken cancellationToken)
+	{
+		var meetingIds = meetings
+			.Where(m => m is not null)
+			.Select(m => m!.Id)
+			.Distinct()
+			.ToList();
+
+		if (meetingIds.Count == 0)
+			return [];
+
+		var counts = await dbContext.EngagementsQuery
+			.Where(e => e.Meeting != null && meetingIds.Contains(e.Meeting.Id))
+			.GroupBy(e => e.Meeting!.Id)
+			.Select(g => new { MeetingId = g.Key, Count = g.Count() })
+			.ToListAsync(cancellationToken);
+
+		return counts.ToDictionary(x => x.MeetingId, x => x.Count);
+	}
+
+	private static EngagementMeetingSummary? ToMeetingSummary(
+		Meeting? meeting,
+		Dictionary<MeetingId, int> participantCounts) =>
+		meeting is null
+			? null
+			: new EngagementMeetingSummary(
+				meeting.Id.Value,
+				meeting.StartsAt,
+				meeting.EndsAt,
+				meeting.Format.ToString(),
+				meeting.Location,
+				meeting.Note,
+				meeting.ProposedBy.ToString(),
+				meeting.Response.ToString(),
+				participantCounts.GetValueOrDefault(meeting.Id, 1));
 
 	private static string? FormatAddress(Address? address)
 	{
