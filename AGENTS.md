@@ -19,7 +19,7 @@ See README.md's Tech Stack table for the full breakdown.
 
 ## Development Setup
 
-Required: .NET SDK **10.0.401** (enforced via `backend/global.json`).
+Required: .NET SDK **10.0.402** (enforced via `backend/global.json`).
 
 ```bash
 dotnet run --project backend/src/Aspire/AppHost

@@ -91,7 +91,7 @@ It is built from the AsciiDoc sources in `docs/Architecture/` via AsciiDoctor an
 
 ### Prerequisites
 
-- [.NET 10 SDK](https://dotnet.microsoft.com/) - exact version pinned in `backend/global.json` (10.0.401)
+- [.NET 10 SDK](https://dotnet.microsoft.com/) - exact version pinned in `backend/global.json` (10.0.402)
 - [Docker](https://www.docker.com/) - Aspire runs PostgreSQL and Keycloak as containers
 - [pnpm](https://pnpm.io/) - frontend package manager
 
