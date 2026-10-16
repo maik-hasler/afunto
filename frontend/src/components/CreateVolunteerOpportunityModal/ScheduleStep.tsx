@@ -60,9 +60,18 @@ interface Props {
 	slotChangesAreImmediate: boolean;
 }
 
+const PIN_RANGE = 900000;
+// The largest multiple of PIN_RANGE a Uint32 can hold. A draw at or above it
+// is thrown away rather than folded back with `%`, which would make the low
+// PINs slightly more likely than the high ones.
+const PIN_DRAW_LIMIT = Math.floor(2 ** 32 / PIN_RANGE) * PIN_RANGE;
+
 function generateRandomPin(): string {
-	const [value] = crypto.getRandomValues(new Uint32Array(1));
-	return String(100000 + (value % 900000));
+	const draw = new Uint32Array(1);
+	do {
+		crypto.getRandomValues(draw);
+	} while (draw[0] >= PIN_DRAW_LIMIT);
+	return String(100000 + (draw[0] % PIN_RANGE));
 }
 
 /**

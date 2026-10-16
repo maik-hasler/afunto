@@ -559,6 +559,38 @@ describe("create-opportunity wizard: organizer-set check-in PIN (#549)", () => {
 	});
 });
 
+describe("create-opportunity wizard: an unbiased generated PIN", () => {
+	afterEach(() => vi.restoreAllMocks());
+
+	it("redraws a value past the last whole PIN range instead of folding it back", async () => {
+		const draws = [2 ** 32 - 1, 0];
+		vi.spyOn(crypto, "getRandomValues").mockImplementation((array) => {
+			(array as Uint32Array)[0] = draws.shift() ?? 0;
+			return array;
+		});
+		openWizard();
+		await gotoPin();
+
+		await userEvent.click(
+			screen.getByRole("button", { name: /Generate random/i }),
+		);
+
+		expect(screen.getByLabelText(/Check-in PIN/i)).toHaveValue("100000");
+		expect(draws).toHaveLength(0);
+	});
+
+	async function gotoPin() {
+		await userEvent.type(title(), "PIN bias");
+		await userEvent.type(description(), "Regression test for the PIN draw.");
+		await userEvent.click(screen.getByTestId("wizard-stepper-2"));
+		await userEvent.click(await screen.findByRole("radio", { name: "Remote" }));
+		await userEvent.click(screen.getByTestId("wizard-stepper-3"));
+		await userEvent.click(
+			await screen.findByRole("radio", { name: "PIN code" }),
+		);
+	}
+});
+
 describe("create-opportunity wizard: an address the backend cannot locate (#2320)", () => {
 	it("sends the organizer back to the address step with the fields flagged", async () => {
 		api.createVolunteerOpportunity.mockRejectedValue({
