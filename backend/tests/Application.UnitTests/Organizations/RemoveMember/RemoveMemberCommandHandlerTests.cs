@@ -231,6 +231,7 @@ public class RemoveMemberCommandHandlerTests
 		var orgId = Guid.NewGuid();
 		AllowRequestingUserInOrg(orgId);
 		SetOrganizerCount(orgId, 2);
+		TrackUser(DefaultRequestingUserId.Value);
 		var command = new RemoveMemberCommand(orgId, DefaultRequestingUserId.Value, DefaultRequestingUserId);
 
 		// Act
