@@ -27,12 +27,11 @@ import { RequiredFieldsLegend } from "../RequiredMark";
 import { Stepper } from "./shared";
 import BasicsStep from "./BasicsStep";
 import LocationStep from "./LocationStep";
-import FormatStep from "./FormatStep";
-import DetailsStep, {
+import ScheduleStep, {
 	ADD_SLOT_BUTTON_ID,
 	editSlotButtonId,
-} from "./DetailsStep";
-import type { SeriesEditScope, TimeSlotRow } from "./DetailsStep";
+} from "./ScheduleStep";
+import type { SeriesEditScope, TimeSlotRow } from "./ScheduleStep";
 import SlotEditor from "./SlotEditor";
 import DeleteSeriesSlotDialog from "./DeleteSeriesSlotDialog";
 import { CloseIcon } from "../icons";
@@ -344,6 +343,7 @@ export default function CreateVolunteerOpportunityModal({
 	const createdBatchIdsRef = useRef<Set<string>>(new Set());
 
 	const bodyRef = useRef<HTMLDivElement>(null);
+	const errorRef = useRef<HTMLParagraphElement>(null);
 
 	const focusFieldsRef = useRef<(keyof OpportunityFormValues)[] | null>(null);
 	const [focusAttempt, setFocusAttempt] = useState(0);
@@ -414,6 +414,12 @@ export default function CreateVolunteerOpportunityModal({
 	}, [step]);
 
 	useEffect(() => {
+		if (!error) return;
+		errorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+		errorRef.current?.focus();
+	}, [error, errorToken]);
+
+	useEffect(() => {
 		if (focusAttempt === 0 || !focusFieldsRef.current) return;
 		for (const field of focusFieldsRef.current) {
 			if (getFieldState(field).invalid) {
@@ -468,8 +474,9 @@ export default function CreateVolunteerOpportunityModal({
 		clearErrors(["street", "houseNumber", "zipCode", "city"]);
 	}
 
-	function handleRemoteToggle(checked: boolean) {
-		if (checked) clearErrors(["street", "houseNumber", "zipCode", "city"]);
+	function handleRemoteChange(remote: boolean) {
+		setValue("isRemote", remote, { shouldDirty: true });
+		if (remote) clearErrors([...ADDRESS_FIELDS]);
 	}
 
 	function setCheckInPin(pin: string) {
@@ -898,7 +905,7 @@ export default function CreateVolunteerOpportunityModal({
 			if (!asDraft && pendingSlots.length + existingSlots.length === 0) {
 				setError(t("timeSlots.requiredForPublish"));
 				setErrorToken((tk) => tk + 1);
-				setStep(4);
+				setStep(3);
 				return;
 			}
 			// A slot that was in the future when it was added can have slipped
@@ -909,7 +916,7 @@ export default function CreateVolunteerOpportunityModal({
 			if (pendingSlots.some((s) => Date.parse(s.startDateTime) <= now)) {
 				setError(t("timeSlots.pastSlotsBeforePublish"));
 				setErrorToken((tk) => tk + 1);
-				setStep(4);
+				setStep(3);
 				return;
 			}
 		}
@@ -920,7 +927,7 @@ export default function CreateVolunteerOpportunityModal({
 		) {
 			setError(t("createOpportunity.validUntilRequiredForPublish"));
 			setErrorToken((tk) => tk + 1);
-			setStep(4);
+			setStep(3);
 			return;
 		}
 		setSubmitting(asDraft ? "draft" : "publish");
@@ -1124,7 +1131,6 @@ export default function CreateVolunteerOpportunityModal({
 		t("createOpportunity.step1Title"),
 		t("createOpportunity.step2Title"),
 		t("createOpportunity.step3Title"),
-		t("createOpportunity.step4Title"),
 	];
 
 	const blockedJumpMessage =
@@ -1140,9 +1146,6 @@ export default function CreateVolunteerOpportunityModal({
 		t("createOpportunity.step1Subtitle"),
 		t("createOpportunity.step2Subtitle"),
 		t("createOpportunity.step3Subtitle"),
-		isScheduledSlots
-			? t("createOpportunity.step4SubtitleWaitlist")
-			: t("createOpportunity.step4SubtitleIndividualContact"),
 	];
 
 	const seriesPositionById = new Map<string, number>();
@@ -1329,11 +1332,11 @@ export default function CreateVolunteerOpportunityModal({
 								<BasicsStep
 									register={registerWithRevalidate}
 									watch={watch}
+									control={control}
 									titleDeError={errors.titleDe?.message}
 									titleEnError={errors.titleEn?.message}
 									descriptionDeError={errors.descriptionDe?.message}
 									descriptionEnError={errors.descriptionEn?.message}
-									revalidationAttempt={focusAttempt}
 									bannerPreview={bannerPreview}
 									bannerError={bannerError}
 									onBannerChange={handleBannerChange}
@@ -1344,8 +1347,8 @@ export default function CreateVolunteerOpportunityModal({
 							{step === 2 && (
 								<LocationStep
 									register={registerWithRevalidate}
-									watch={watch}
-									onRemoteToggle={handleRemoteToggle}
+									isRemote={isRemote}
+									onRemoteChange={handleRemoteChange}
 									errors={{
 										street: errors.street?.message,
 										houseNumber: errors.houseNumber?.message,
@@ -1360,18 +1363,12 @@ export default function CreateVolunteerOpportunityModal({
 							)}
 
 							{step === 3 && (
-								<FormatStep
+								<ScheduleStep
 									register={registerWithRevalidate}
 									watch={watch}
+									control={control}
 									setCheckInPin={setCheckInPin}
 									checkInPinError={errors.checkInPin?.message}
-								/>
-							)}
-
-							{step === 4 && (
-								<DetailsStep
-									control={control}
-									isScheduledSlots={isScheduledSlots}
 									allTimeSlots={allTimeSlots}
 									removingSlotId={removingSlotId}
 									onRemoveExistingSlot={handleRequestRemoveExistingSlot}
@@ -1381,8 +1378,15 @@ export default function CreateVolunteerOpportunityModal({
 									onOpenAddSlot={openAddSlot}
 									slotError={slotError}
 									slotChangesAreImmediate={isEditMode}
-									error={error}
-									errorToken={errorToken}
+								/>
+							)}
+
+							{error && (
+								<ErrorBanner
+									ref={errorRef}
+									message={error}
+									tabIndex={-1}
+									className="mt-5 focus:outline-none"
 								/>
 							)}
 						</div>

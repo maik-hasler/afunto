@@ -30,19 +30,18 @@ public class CreateOpportunityRetryTests(AspireFixture fixture) : VisualTestBase
 			"Regression test for the #1227 retry-duplicate-draft bug.");
 
 		await Page.GetByTestId("wizard-stepper-2").ClickAsync();
-		await Page.Locator("#opportunity-remote").CheckAsync();
+		await Page.Locator("label:has(#opportunity-remote)").ClickAsync();
 
 		await Page.GetByTestId("wizard-stepper-3").ClickAsync();
 		await Page.Locator("label:has(input[name='participationType'][value='ScheduledSlots'])").ClickAsync();
 
-		await Page.GetByTestId("wizard-stepper-4").ClickAsync();
-		var step4 = Page.GetByTestId("wizard-step-4");
+		var scheduleStep = Page.GetByTestId("wizard-step-3");
 
 		async Task AddSlotAsync(int daysFromNow)
 		{
 			var start = DateTimeOffset.UtcNow.AddDays(daysFromNow);
 			var end = start.AddHours(2);
-			await step4.GetByRole(AriaRole.Button, new() { Name = "Add time slot", Exact = true }).ClickAsync();
+			await scheduleStep.GetByRole(AriaRole.Button, new() { Name = "Add time slot", Exact = true }).ClickAsync();
 			var slotEditor = Page.GetByTestId("time-slot-editor");
 			await FillDateTimePickerAsync(slotEditor, "slot-start", start);
 			await FillDateTimePickerAsync(slotEditor, "slot-end", end);
@@ -52,7 +51,7 @@ public class CreateOpportunityRetryTests(AspireFixture fixture) : VisualTestBase
 
 		await AddSlotAsync(7);
 		await AddSlotAsync(14);
-		await Expect(step4.Locator("ul li")).ToHaveCountAsync(2);
+		await Expect(scheduleStep.Locator("ul li")).ToHaveCountAsync(2);
 
 		var timeSlotCallCount = 0;
 		await Page.RouteAsync("**/volunteer-opportunities/*/time-slots", async route =>

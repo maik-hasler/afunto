@@ -1,7 +1,7 @@
 import { z } from "zod/mini";
 import type { TFunction } from "i18next";
 
-export const TOTAL_STEPS = 4;
+export const TOTAL_STEPS = 3;
 
 const OCCURRENCE_VALUES = ["OneTime", "Recurring"] as const;
 const PARTICIPATION_TYPE_VALUES = [
@@ -13,6 +13,9 @@ const CHECK_IN_METHOD_VALUES = ["None", "QRCode", "PINCode", "Manual"] as const;
 export function buildOpportunityFormSchema(t: TFunction) {
 	const titleRequired = t("createOpportunity.titleRequired");
 	const descriptionRequired = t("createOpportunity.descriptionRequired");
+	const translationPairRequired = t(
+		"createOpportunity.translationPairRequired",
+	);
 	const streetRequired = t("createOpportunity.streetRequired");
 	const houseNumberRequired = t("createOpportunity.houseNumberRequired");
 	const zipRequired = t("createOpportunity.zipRequired");
@@ -52,6 +55,17 @@ export function buildOpportunityFormSchema(t: TFunction) {
 						code: "custom",
 						path: ["descriptionDe"],
 						message: descriptionRequired,
+					});
+				// The detail page falls back to German per field, not per
+				// opportunity, so an English title over a German description is
+				// what a half-filled translation shows English visitors (#2387).
+				const hasTitleEn = Boolean(data.titleEn.trim());
+				const hasDescriptionEn = Boolean(data.descriptionEn.trim());
+				if (hasTitleEn !== hasDescriptionEn)
+					ctx.addIssue({
+						code: "custom",
+						path: [hasTitleEn ? "descriptionEn" : "titleEn"],
+						message: translationPairRequired,
 					});
 				if (!data.isRemote) {
 					if (!data.street.trim())
@@ -101,7 +115,6 @@ export const STEP_FIELDS: Record<number, (keyof OpportunityFormValues)[]> = {
 	1: ["titleDe", "titleEn", "descriptionDe", "descriptionEn"],
 	2: ["street", "houseNumber", "zipCode", "city"],
 	3: ["checkInPin"],
-	4: [],
 };
 
 export function errorStepsFromFieldErrors(

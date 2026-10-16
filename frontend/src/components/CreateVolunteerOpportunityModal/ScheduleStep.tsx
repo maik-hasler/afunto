@@ -1,16 +1,14 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Controller } from "react-hook-form";
-import type { Control } from "react-hook-form";
-import Dropdown from "../Dropdown";
-import TagsInput from "../TagsInput";
+import type { Control, UseFormRegister, UseFormWatch } from "react-hook-form";
 import DatePicker from "../DatePicker";
-import ErrorBanner from "../ErrorBanner";
 import Chip from "../Chip";
 import Button from "../Button";
 import { PlusIcon } from "../icons";
 import { formatDateTimeRange } from "../../lib/format";
-import { inputSurfaceClass, labelClass } from "../../lib/formClasses";
+import { labelClass } from "../../lib/formClasses";
+import { ChoiceGroup, FloatingField } from "./shared";
 import type { OpportunityFormValues } from "./schema";
 import { findOverlappingSlotIds } from "./timeSlots";
 
@@ -40,8 +38,11 @@ export interface TimeSlotRow {
 }
 
 interface Props {
+	register: UseFormRegister<OpportunityFormValues>;
+	watch: UseFormWatch<OpportunityFormValues>;
 	control: Control<OpportunityFormValues>;
-	isScheduledSlots: boolean;
+	setCheckInPin: (pin: string) => void;
+	checkInPinError?: string;
 	allTimeSlots: TimeSlotRow[];
 	removingSlotId: string | null;
 	onRemoveExistingSlot: (id: string, bookedCount: number) => void;
@@ -57,27 +58,33 @@ interface Props {
 	 * being staged for the wizard's own Save button (#2315).
 	 */
 	slotChangesAreImmediate: boolean;
-	error: string | null;
-
-	errorToken: number;
 }
 
-const CATEGORY_VALUES = [
-	"Social",
-	"Environment",
-	"Sport",
-	"Education",
-	"DisasterRelief",
-	"Health",
-	"Animals",
-	"Culture",
-	"Technology",
-	"Other",
-] as const;
+const PIN_RANGE = 900000;
+// The largest multiple of PIN_RANGE a Uint32 can hold. A draw at or above it
+// is thrown away rather than folded back with `%`, which would make the low
+// PINs slightly more likely than the high ones.
+const PIN_DRAW_LIMIT = Math.floor(2 ** 32 / PIN_RANGE) * PIN_RANGE;
 
-export default function DetailsStep({
+function generateRandomPin(): string {
+	const draw = new Uint32Array(1);
+	do {
+		crypto.getRandomValues(draw);
+	} while (draw[0] >= PIN_DRAW_LIMIT);
+	return String(100000 + (draw[0] % PIN_RANGE));
+}
+
+/**
+ * How volunteers take part and when: one step, because the participation
+ * type decides what the rest of it asks for - time slots or an interest
+ * deadline - and the two used to sit a step apart (#2387).
+ */
+export default function ScheduleStep({
+	register,
+	watch,
 	control,
-	isScheduledSlots,
+	setCheckInPin,
+	checkInPinError,
 	allTimeSlots,
 	removingSlotId,
 	onRemoveExistingSlot,
@@ -87,11 +94,13 @@ export default function DetailsStep({
 	onOpenAddSlot,
 	slotError,
 	slotChangesAreImmediate,
-	error,
-	errorToken,
 }: Props) {
 	const { t, i18n } = useTranslation();
-	const errorRef = useRef<HTMLParagraphElement>(null);
+	const occurrence = watch("occurrence");
+	const participationType = watch("participationType");
+	const checkInMethod = watch("checkInMethod");
+	const checkInPin = watch("checkInPin");
+	const isScheduledSlots = participationType === "ScheduledSlots";
 
 	const today = new Date();
 	const todayDateInputValue = new Date(
@@ -99,12 +108,6 @@ export default function DetailsStep({
 	)
 		.toISOString()
 		.slice(0, 10);
-
-	useEffect(() => {
-		if (!error) return;
-		errorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-		errorRef.current?.focus();
-	}, [error, errorToken]);
 
 	// Two slots covering the same hour let one volunteer sign up for both and
 	// be double-booked, so the list flags them; the slot editor warns before
@@ -121,72 +124,59 @@ export default function DetailsStep({
 	}
 
 	return (
-		<div className="space-y-5" data-testid="wizard-step-4">
-			<div>
-				<label htmlFor="create-category" className={`mb-1.5 ${labelClass}`}>
-					{t("createOpportunity.fieldCategory")}
-				</label>
-				<Controller
-					name="category"
-					control={control}
-					render={({ field }) => (
-						<Dropdown
-							id="create-category"
-							value={field.value ?? ""}
-							onChange={(v) => field.onChange(v || undefined)}
-							className={inputSurfaceClass}
-							options={[
-								{
-									value: "",
-									label: t("createOpportunity.fieldCategoryNone"),
-								},
-								...CATEGORY_VALUES.map((c) => ({
-									value: c,
-									label: t(`opportunities.category.${c}`),
-								})),
-							]}
-						/>
-					)}
-				/>
-			</div>
-
-			<Controller
-				name="tags"
-				control={control}
-				render={({ field }) => (
-					<TagsInput
-						id="create-tags"
-						label={t("createOpportunity.fieldTags")}
-						value={field.value}
-						onChange={field.onChange}
-						placeholder={t("createOpportunity.fieldTagsPlaceholder")}
-						hint={t("createOpportunity.fieldTagsHint")}
-					/>
-				)}
+		<div className="space-y-6" data-testid="wizard-step-3">
+			<ChoiceGroup
+				legend={t("createOpportunity.fieldParticipationType")}
+				name="participationType"
+				value={participationType}
+				registration={register("participationType")}
+				options={[
+					{ value: "ScheduledSlots", label: t("opportunities.waitlist") },
+					{
+						value: "IndividualContact",
+						label: t("opportunities.individualContact"),
+					},
+				]}
 			/>
 
-			{isScheduledSlots && (
-				<div className="rounded-card border border-gray-200 bg-gray-50 p-4">
-					<p className="mb-1 text-sm font-semibold text-gray-800">
+			<ChoiceGroup
+				legend={t("createOpportunity.fieldFrequency")}
+				name="occurrence"
+				value={occurrence}
+				registration={register("occurrence")}
+				options={[
+					{ value: "OneTime", label: t("opportunities.oneTime") },
+					{ value: "Recurring", label: t("opportunities.recurring") },
+				]}
+			/>
+
+			{isScheduledSlots ? (
+				<section aria-labelledby="time-slots-heading">
+					<h4
+						id="time-slots-heading"
+						className="text-sm font-semibold text-gray-800"
+					>
 						{t("timeSlots.sectionTitle")}
+					</h4>
+					<p className="mt-0.5 mb-3 text-xs text-gray-500">
+						{slotChangesAreImmediate
+							? t("timeSlots.immediateHint")
+							: t("timeSlots.requiredHint")}
 					</p>
 
-					{slotChangesAreImmediate && (
-						<p className="mb-3 text-xs text-amber-700">
-							{t("timeSlots.immediateHint")}
-						</p>
-					)}
-
 					{allTimeSlots.length === 0 ? (
-						<p className="mb-3 text-xs text-gray-500">
+						<p className="mb-3 text-sm text-gray-500">
 							{t("timeSlots.noSlots")}
 						</p>
 					) : (
-						<ul className="mb-3 space-y-2" data-testid="time-slot-list">
+						<ul
+							className="mb-3 divide-y divide-gray-200 rounded-xl border border-gray-200"
+							data-testid="time-slot-list"
+						>
 							{allTimeSlots.map((slot) => (
 								<li
 									key={slot.id}
-									className="flex flex-col gap-1 rounded-lg bg-white px-3 py-2 text-sm shadow-sm sm:flex-row sm:items-center sm:justify-between"
+									className="flex flex-col gap-1 px-3 py-2 text-sm sm:flex-row sm:items-center sm:justify-between"
 								>
 									<span className="text-gray-700">
 										{formatDateTimeRange(
@@ -273,11 +263,9 @@ export default function DetailsStep({
 						<PlusIcon className="h-4 w-4" />
 						{t("timeSlots.addTitle")}
 					</Button>
-				</div>
-			)}
-
-			{!isScheduledSlots && (
-				<div className="rounded-card border border-gray-200 bg-gray-50 p-4">
+				</section>
+			) : (
+				<div>
 					<label
 						htmlFor="create-valid-until"
 						className={`mb-1.5 ${labelClass}`}
@@ -302,13 +290,65 @@ export default function DetailsStep({
 				</div>
 			)}
 
-			{error && (
-				<ErrorBanner
-					ref={errorRef}
-					message={error}
-					tabIndex={-1}
-					className="focus:outline-none"
-				/>
+			<ChoiceGroup
+				legend={t("createOpportunity.fieldCheckInMethod")}
+				name="checkInMethod"
+				value={checkInMethod}
+				registration={register("checkInMethod")}
+				options={[
+					{ value: "None", label: t("checkInMethod.none") },
+					{ value: "QRCode", label: t("checkInMethod.qrCode") },
+					{ value: "PINCode", label: t("checkInMethod.pinCode") },
+					{ value: "Manual", label: t("checkInMethod.manual") },
+				]}
+			>
+				{checkInMethod === "None" && isScheduledSlots && (
+					<p className="mt-2 text-xs text-gray-500">
+						{t("createOpportunity.checkInMethodNoneHint")}
+					</p>
+				)}
+				{checkInMethod === "None" && !isScheduledSlots && (
+					<p className="mt-2 text-xs text-amber-700">
+						{t("createOpportunity.checkInMethodNoneIndividualWarning")}
+					</p>
+				)}
+			</ChoiceGroup>
+
+			{checkInMethod === "PINCode" && (
+				<div>
+					<div className="flex items-start gap-2">
+						<FloatingField
+							id="create-check-in-pin"
+							label={t("createOpportunity.fieldCheckInPin")}
+							registration={register("checkInPin", {
+								onChange: (e) => {
+									const sanitized = e.target.value
+										.replace(/\D/g, "")
+										.slice(0, 6);
+									if (sanitized !== e.target.value) setCheckInPin(sanitized);
+								},
+							})}
+							error={checkInPinError}
+							maxLength={6}
+							inputMode="numeric"
+							pattern="[0-9]*"
+							displayValue={checkInPin}
+							wrapperClassName="flex-1"
+						/>
+						<button
+							type="button"
+							onClick={() => setCheckInPin(generateRandomPin())}
+							className="mt-0.5 shrink-0 rounded-xl border border-gray-500 px-4 py-3.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+						>
+							{t("createOpportunity.generateRandomPin")}
+						</button>
+					</div>
+					{!checkInPinError && (
+						<p className="mt-1 text-xs text-gray-500">
+							{t("createOpportunity.checkInPinHint")}
+						</p>
+					)}
+				</div>
 			)}
 		</div>
 	);

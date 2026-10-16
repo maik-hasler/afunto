@@ -59,7 +59,6 @@ public class CheckInAndSlotTests(AspireFixture fixture) : VisualTestBase(fixture
 		await Expect(pinInput).ToBeVisibleAsync();
 		await pinInput.FillAsync(pin);
 
-		await Page.GetByTestId("wizard-stepper-4").ClickAsync();
 		await Page.GetByTestId("modal-submit").ClickAsync();
 		await Expect(Page.Locator("[role='dialog']")).Not.ToBeVisibleAsync(new() { Timeout = 15_000 });
 

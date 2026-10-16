@@ -62,7 +62,26 @@ describe("CreateVolunteerOpportunityModal a11y", () => {
 		await expectNoA11yViolations();
 	});
 
-	async function gotoDetails() {
+	it("has no violations with the translation section open and rejecting a half translation", async () => {
+		open();
+		await userEvent.click(
+			screen.getByTestId("opportunity-translation-toggle-en"),
+		);
+		await userEvent.type(
+			screen.getByRole("textbox", { name: "Title (English)" }),
+			"Beach cleanup",
+		);
+		await userEvent.click(screen.getByRole("button", { name: "Next" }));
+
+		await waitFor(() =>
+			expect(
+				document.querySelector("#opportunity-description-en-error"),
+			).not.toBeNull(),
+		);
+		await expectNoA11yViolations();
+	});
+
+	async function gotoSchedule() {
 		await userEvent.type(
 			screen.getAllByRole("textbox", { name: /title/i })[0],
 			"Strandreinigung",
@@ -71,7 +90,7 @@ describe("CreateVolunteerOpportunityModal a11y", () => {
 			screen.getAllByRole("textbox", { name: /description/i })[0],
 			"Wir sammeln einen Vormittag lang Muell am Strand.",
 		);
-		for (const stepTitle of ["Location", "Format", "Details"]) {
+		for (const stepTitle of ["Location", "Schedule"]) {
 			await userEvent.click(screen.getByRole("button", { name: "Next" }));
 			await waitFor(() =>
 				screen.getByRole("heading", { name: new RegExp(stepTitle, "i") }),
@@ -101,7 +120,7 @@ describe("CreateVolunteerOpportunityModal a11y", () => {
 		try {
 			vi.setSystemTime(new Date("2026-09-10T06:00:00Z"));
 			open();
-			await gotoDetails();
+			await gotoSchedule();
 			await openSlotEditor();
 
 			await userEvent.click(screen.getByTestId("slot-start-trigger"));
@@ -124,7 +143,7 @@ describe("CreateVolunteerOpportunityModal a11y", () => {
 		try {
 			vi.setSystemTime(new Date("2026-09-10T06:00:00Z"));
 			open();
-			await gotoDetails();
+			await gotoSchedule();
 			await addSlot("2026-09-10T10:00", "2026-09-10T12:00");
 			await addSlot("2026-09-10T11:00", "2026-09-10T13:00");
 
@@ -182,6 +201,16 @@ describe("CreateVolunteerOpportunityModal a11y", () => {
 		await expectNoA11yViolations();
 	});
 
+	it("has no violations with the optional details opened (#2387)", async () => {
+		open();
+
+		await userEvent.click(
+			screen.getByRole("button", { name: /More details/i }),
+		);
+		expect(screen.getByLabelText("Tags")).toBeVisible();
+		await expectNoA11yViolations();
+	});
+
 	it("has no violations on every step of the wizard", async () => {
 		open();
 
@@ -194,7 +223,7 @@ describe("CreateVolunteerOpportunityModal a11y", () => {
 			"Wir sammeln einen Vormittag lang Muell am Strand.",
 		);
 
-		for (const stepTitle of ["Location", "Format", "Details"]) {
+		for (const stepTitle of ["Location", "Schedule"]) {
 			await userEvent.click(screen.getByRole("button", { name: "Next" }));
 			const reached = await waitFor(() =>
 				screen.getByRole("heading", { name: new RegExp(stepTitle, "i") }),
