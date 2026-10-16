@@ -14,7 +14,7 @@ import {
 	toZonedDatetimeLocalValue,
 	zonedDatetimeLocalToUtc,
 } from "../../lib/timezone";
-import type { SeriesEditScope } from "./DetailsStep";
+import type { SeriesEditScope } from "./ScheduleStep";
 import {
 	isCompleteDateTime,
 	MAX_PARTICIPANTS_LIMIT,

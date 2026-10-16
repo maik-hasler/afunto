@@ -4,7 +4,7 @@ import Modal from "../Modal";
 import Button from "../Button";
 import ErrorBanner from "../ErrorBanner";
 import { radioClass } from "../../lib/formClasses";
-import type { SeriesEditScope } from "./DetailsStep";
+import type { SeriesEditScope } from "./ScheduleStep";
 
 interface Props {
 	bookedCount: number;

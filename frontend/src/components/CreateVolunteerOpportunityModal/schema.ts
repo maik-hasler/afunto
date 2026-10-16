@@ -1,7 +1,7 @@
 import { z } from "zod/mini";
 import type { TFunction } from "i18next";
 
-export const TOTAL_STEPS = 4;
+export const TOTAL_STEPS = 3;
 
 const OCCURRENCE_VALUES = ["OneTime", "Recurring"] as const;
 const PARTICIPATION_TYPE_VALUES = [
@@ -115,7 +115,6 @@ export const STEP_FIELDS: Record<number, (keyof OpportunityFormValues)[]> = {
 	1: ["titleDe", "titleEn", "descriptionDe", "descriptionEn"],
 	2: ["street", "houseNumber", "zipCode", "city"],
 	3: ["checkInPin"],
-	4: [],
 };
 
 export function errorStepsFromFieldErrors(

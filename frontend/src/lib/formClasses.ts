@@ -61,6 +61,6 @@ export const checkboxClass = "shrink-0 accent-brand-600";
 // takes its checked fill from `accent-color` alone, so a radio group left
 // without this class renders the browser/OS default (blue on most platforms)
 // instead of brand green. Not needed on a radio that is itself `sr-only` and
-// styled entirely through its wrapping `<label>` (see `FormatStep.tsx`'s
-// `RadioCardGroup`) - there the native dot is never painted at all.
+// styled entirely through its wrapping `<label>` (see `CreateVolunteerOpportunityModal/shared.tsx`'s
+// `ChoiceGroup`) - there the native dot is never painted at all.
 export const radioClass = "shrink-0 accent-brand-600";
