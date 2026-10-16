@@ -645,6 +645,10 @@ namespace Infrastructure.Persistence.Migrations
 						.HasColumnType("timestamp with time zone")
 						.HasColumnName("modified_on");
 
+					b.Property<DateTimeOffset?>("PermissionsChangedOn")
+						.HasColumnType("timestamp with time zone")
+						.HasColumnName("permissions_changed_on");
+
 					b.Property<string>("Phone")
 						.HasMaxLength(30)
 						.HasColumnType("character varying(30)")

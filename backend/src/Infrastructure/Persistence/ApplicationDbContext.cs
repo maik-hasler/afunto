@@ -592,6 +592,16 @@ internal sealed class ApplicationDbContext(
 			?? throw new InvalidOperationException($"User '{userId.Value}' was not found immediately after being inserted.");
 	}
 
+	public async Task<DateTimeOffset?> GetPermissionsChangedOnAsync(
+		UserId userId,
+		CancellationToken cancellationToken = default) =>
+		await Set<User>()
+			.IgnoreQueryFilters()
+			.AsNoTracking()
+			.Where(u => u.Id == userId)
+			.Select(u => u.PermissionsChangedOn)
+			.FirstOrDefaultAsync(cancellationToken);
+
 	public async Task<Engagement?> GetTerminalEngagementAsync(
 		UserId volunteerId,
 		VolunteerOpportunityId opportunityId,

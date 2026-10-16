@@ -1,9 +1,11 @@
 using Application.Common.Exceptions;
 using Application.Common.Keycloak;
 using Application.Common.Persistence;
+using Application.UnitTests.Common.Time;
 using Application.Users.SetUserAdminStatus.v1;
 using AwesomeAssertions;
 using Domain.AuditLogs;
+using Domain.Users;
 using NSubstitute;
 
 namespace Application.UnitTests.Users.SetUserAdminStatus;
@@ -15,11 +17,14 @@ public class SetUserAdminStatusCommandHandlerTests
 	private readonly IAggregateRepository<AuditLog, AuditLogId> _auditLogRepo =
 		Substitute.For<IAggregateRepository<AuditLog, AuditLogId>>();
 	private readonly SetUserAdminStatusCommandHandler _sut;
+	private static readonly DateTimeOffset Now = new(2026, 10, 15, 14, 0, 0, TimeSpan.Zero);
 
 	public SetUserAdminStatusCommandHandlerTests()
 	{
 		_dbContext.AuditLogs.Returns(_auditLogRepo);
-		_sut = new SetUserAdminStatusCommandHandler(_keycloakService, _dbContext);
+		_dbContext.GetOrCreateUserAsync(Arg.Any<UserId>(), Arg.Any<CancellationToken>())
+			.Returns(call => User.Create(call.Arg<UserId>()));
+		_sut = new SetUserAdminStatusCommandHandler(_keycloakService, _dbContext, new FakeTimeProvider(Now));
 	}
 
 	[Test]
@@ -121,5 +126,55 @@ public class SetUserAdminStatusCommandHandlerTests
 		await act.Should().ThrowAsync<ResultFailureException>()
 			.WithMessage("*service account*");
 		await _keycloakService.DidNotReceive().AssignAdminRoleAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
+	}
+
+	[Test]
+	public async Task Handle_ShouldRecordPermissionsChangedOnTarget_WhenDemotingAnotherUser(
+		CancellationToken cancellationToken)
+	{
+		// Arrange
+		var targetUserId = Guid.NewGuid();
+		var targetUser = User.Create(UserId.Create(targetUserId).Value);
+		_dbContext.GetOrCreateUserAsync(targetUser.Id, cancellationToken).Returns(targetUser);
+		var command = new SetUserAdminStatusCommand(targetUserId, Guid.NewGuid(), IsAdmin: false);
+
+		// Act
+		await _sut.Handle(command, cancellationToken);
+
+		// Assert
+		targetUser.PermissionsChangedOn.Should().Be(Now);
+	}
+
+	[Test]
+	public async Task Handle_ShouldNotRecordPermissionsChanged_WhenActorDemotesThemselves(
+		CancellationToken cancellationToken)
+	{
+		// Arrange
+		var actingUserId = Guid.NewGuid();
+		var command = new SetUserAdminStatusCommand(actingUserId, actingUserId, IsAdmin: false);
+
+		// Act
+		Func<Task> act = async () => await _sut.Handle(command, cancellationToken);
+
+		// Assert
+		await act.Should().ThrowAsync<ResultFailureException>();
+		await _dbContext.DidNotReceive().GetOrCreateUserAsync(Arg.Any<UserId>(), Arg.Any<CancellationToken>());
+	}
+
+	[Test]
+	public async Task Handle_ShouldNotRecordPermissionsChanged_WhenTargetIsAServiceAccount(
+		CancellationToken cancellationToken)
+	{
+		// Arrange
+		var targetUserId = Guid.NewGuid();
+		_keycloakService.IsServiceAccountAsync(targetUserId, cancellationToken).Returns(true);
+		var command = new SetUserAdminStatusCommand(targetUserId, Guid.NewGuid(), IsAdmin: false);
+
+		// Act
+		Func<Task> act = async () => await _sut.Handle(command, cancellationToken);
+
+		// Assert
+		await act.Should().ThrowAsync<ResultFailureException>();
+		await _dbContext.DidNotReceive().GetOrCreateUserAsync(Arg.Any<UserId>(), Arg.Any<CancellationToken>());
 	}
 }

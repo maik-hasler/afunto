@@ -1,28 +1,28 @@
 import { useEffect, useRef } from "react";
 import { useAuth } from "react-oidc-context";
-import { useTranslation } from "react-i18next";
-import { useLocation } from "react-router";
-import { dispatchToast } from "../lib/toastBus";
 import { subscribeSessionExpired } from "../lib/sessionExpiryBus";
-import { signinLocaleArgs } from "../lib/authLocale";
-import {
-	recordAuthRecoveryAttempt,
-	AUTH_RECOVERY_REDIRECT_LIMIT,
-} from "../lib/authRecovery";
+import { hasExhaustedAuthRecovery } from "../lib/authRecovery";
 import {
 	useSetSessionExpiredFlag,
 	useSetAuthRecoveryFailedFlag,
 } from "../contexts/AuthStatusContext";
 
+/**
+ * Marks the session as over once neither the token nor a silent renewal is
+ * accepted any more - by then the Keycloak session itself has ended, usually
+ * after a long idle stretch.
+ *
+ * Deliberately quiet: no toast and no automatic redirect to Keycloak (#2392).
+ * Both fired a few seconds after someone came back to an idle tab, took the
+ * page away mid-read and spoke of "sessions" to people who never asked for
+ * one. The header's sign-in button is the one place that says it now, and
+ * the page stays where it is until they press it.
+ */
 export function useSessionExpiryHandler() {
 	const auth = useAuth();
-	const { t } = useTranslation();
-	const location = useLocation();
 	const setSessionExpired = useSetSessionExpiredFlag();
 	const setAuthRecoveryFailed = useSetAuthRecoveryFailedFlag();
 	const handledRef = useRef(false);
-	const locationRef = useRef(location);
-	locationRef.current = location;
 	const authRef = useRef(auth);
 	authRef.current = auth;
 
@@ -31,35 +31,24 @@ export function useSessionExpiryHandler() {
 	}, [auth.isAuthenticated]);
 
 	useEffect(() => {
-		let redirectTimer: ReturnType<typeof setTimeout> | null = null;
-
 		function handleExpiry() {
 			if (!authRef.current.isAuthenticated) return;
 
 			if (handledRef.current) return;
 			handledRef.current = true;
 
-			// Bounded recovery (#2208): a redirect through Keycloak only counts
-			// as "handled" once an authenticated API call actually succeeds
-			// (cleared in api-instance.ts) - so a second consecutive expiry
-			// without one in between means the redirect isn't fixing anything
-			// (e.g. a ValidIssuers mismatch) and would otherwise loop forever.
-			if (recordAuthRecoveryAttempt() > AUTH_RECOVERY_REDIRECT_LIMIT) {
+			// Bounded recovery (#2208): signing in again only counts as having
+			// worked once an authenticated API call actually succeeds (cleared
+			// in api-instance.ts) - so an expiry after the user already signed
+			// in again, without one in between, means signing in isn't fixing
+			// anything (e.g. a ValidIssuers mismatch) and the user would
+			// otherwise loop forever.
+			if (hasExhaustedAuthRecovery()) {
 				setAuthRecoveryFailed(true);
 				return;
 			}
 
 			setSessionExpired(true);
-			dispatchToast("error", t("error.sessionExpired"));
-
-			redirectTimer = setTimeout(() => {
-				void auth.signinRedirect({
-					...signinLocaleArgs(),
-					state: {
-						returnTo: locationRef.current.pathname + locationRef.current.search,
-					},
-				});
-			}, 2000);
 		}
 
 		const unsubscribeBus = subscribeSessionExpired(handleExpiry);
@@ -69,7 +58,6 @@ export function useSessionExpiryHandler() {
 		return () => {
 			unsubscribeBus();
 			unsubscribeSilentRenewError();
-			if (redirectTimer !== null) clearTimeout(redirectTimer);
 		};
-	}, [auth, t, setSessionExpired, setAuthRecoveryFailed]);
+	}, [auth, setSessionExpired, setAuthRecoveryFailed]);
 }

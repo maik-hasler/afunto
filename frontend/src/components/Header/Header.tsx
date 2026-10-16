@@ -10,7 +10,10 @@ import { useMyOrganizations } from "../../hooks/useMyOrganizations";
 import { signinRedirectForRegistration } from "../../lib/keycloakRegistration";
 import { signinLocaleArgs } from "../../lib/authLocale";
 import { clearActiveOrgId } from "../../lib/activeOrg";
-import { clearAuthRecoveryAttempts } from "../../lib/authRecovery";
+import {
+	clearAuthRecoveryAttempts,
+	recordAuthRecoveryAttempt,
+} from "../../lib/authRecovery";
 import { clearSeenAchievements } from "../../hooks/useAchievementNotifier";
 import { useDisplayName } from "../../hooks/useDisplayName";
 import { clearDisplayNameOverride } from "../../lib/displayName";
@@ -107,6 +110,9 @@ export default function Header({
 	const isTransparent = overlaysBand && !scrolled;
 
 	function handleSignIn() {
+		// Counts toward the bounded recovery (#2208) only when it recovers an
+		// ended session - a first sign-in starts no episode.
+		if (authStatus === "sessionExpired") recordAuthRecoveryAttempt();
 		auth.signinRedirect({
 			...signinLocaleArgs(),
 			state: { returnTo: location.pathname + location.search },

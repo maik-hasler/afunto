@@ -1,12 +1,15 @@
 const STORAGE_KEY = "afunto:auth-recovery";
 
-// One automatic sign-in redirect is allowed per recovery episode. A second
-// consecutive 401 without a successful authenticated call landing in
-// between means the redirect itself didn't fix anything (e.g. a
-// ValidIssuers mismatch), so retrying it forever would just loop the user
-// through Keycloak indefinitely (#2208). The count lives in sessionStorage
-// because the redirect is a full-page navigation that would otherwise wipe
-// any in-memory guard.
+// One sign-in round trip is allowed per recovery episode. The header's
+// "Sign in again" button records it; an expiry after that, without a
+// successful authenticated call landing in between, means signing in again
+// didn't fix anything (e.g. a ValidIssuers mismatch), so offering it forever
+// would just loop the user through Keycloak indefinitely (#2208). Counting
+// sign-ins rather than expiries matters since nothing redirects on its own
+// any more (#2392): a reload that meets the same rejected token is a second
+// expiry, but not a second attempt. The count lives in sessionStorage because
+// signing in is a full-page navigation that would otherwise wipe any
+// in-memory guard.
 export const AUTH_RECOVERY_REDIRECT_LIMIT = 1;
 
 function readAttempts(): number {
@@ -17,6 +20,10 @@ function readAttempts(): number {
 	} catch {
 		return 0;
 	}
+}
+
+export function hasExhaustedAuthRecovery(): boolean {
+	return readAttempts() >= AUTH_RECOVERY_REDIRECT_LIMIT;
 }
 
 export function recordAuthRecoveryAttempt(): number {

@@ -69,6 +69,10 @@ Covered by `backend/tests/IntegrationTests/Email/RealmSmtpDeliveryTests.cs`, whi
 **File:** `realms/afunto-realm.json`  
 Imported on container startup. This file IS the auth configuration - edit here, not in the Keycloak UI (UI changes don't persist across container restarts in dev).
 
+### Session length
+
+`ssoSessionIdleTimeout` (28800 s = 8 h) and `ssoSessionMaxLifespan` (36000 s = 10 h, Keycloak's default, written out so the pair reads as one decision) are set explicitly (#2392). With Keycloak's 30-minute idle default, a tab left open over a meeting or a laptop lid closed for half an hour came back to a dead session. 8 h covers a working day; the tokens still live in `sessionStorage`, so closing the tab still ends the sign-in (#1171). The access token keeps Keycloak's 5-minute default - role changes no longer wait for it (`backend/AGENTS.md`, Authorization policies). `--import-realm` skips a realm that already exists, so a deployed instance needs the same two values set once under Realm settings > Sessions.
+
 ### Roles (realm-level)
 
 | Role | Purpose |

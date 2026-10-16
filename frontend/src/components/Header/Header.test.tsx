@@ -3,6 +3,7 @@ import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import Header from "./Header";
 import { renderWithProviders } from "../../test/render";
+import { hasExhaustedAuthRecovery } from "../../lib/authRecovery";
 
 const { api } = await vi.hoisted(async () => {
 	const { createApiMock } = await import("../../test/apiMock");
@@ -54,11 +55,29 @@ describe("Header after a failed token renewal (#2224)", () => {
 
 		expect(
 			screen.getAllByRole("button", {
-				name: "Session expired - sign in again",
+				name: "Sign in again",
 			})[0],
 		).toBeInTheDocument();
 		expect(screen.queryByRole("button", { name: "Sign in" })).toBeNull();
 		expect(screen.queryByRole("button", { name: "User menu" })).toBeNull();
+	});
+
+	// #2208: only a sign-in that recovers an ended session uses up the one
+	// allowed attempt - a reload alone must not.
+	it("counts signing in again toward the bounded recovery", async () => {
+		sessionStorage.clear();
+		const signinRedirect = vi.fn().mockResolvedValue(undefined);
+		renderWithProviders(<Header />, {
+			auth: { isAuthenticated: true, signinRedirect },
+			sessionExpired: true,
+		});
+
+		await userEvent.click(
+			screen.getAllByRole("button", { name: "Sign in again" })[0],
+		);
+
+		expect(signinRedirect).toHaveBeenCalledTimes(1);
+		expect(hasExhaustedAuthRecovery()).toBe(true);
 	});
 });
 

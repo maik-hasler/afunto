@@ -43,7 +43,7 @@
       "signIn": "Anmelden",
       "register": "Registrieren",
       "checkingSignIn": "Anmeldestatus wird geprüft…",
-      "sessionExpired": "Sitzung abgelaufen – bitte erneut anmelden",
+      "sessionExpired": "Erneut anmelden",
       "openMenu": "Menü öffnen",
       "closeMenu": "Menü schließen",
       "menu": "Menü"
@@ -1371,7 +1371,6 @@
     },
     "error": {
       "forbidden": "Du hast keine Berechtigung für diese Aktion.",
-      "sessionExpired": "Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.",
       "rateLimited": "Zu viele Anfragen. Bitte warte {{count}} Sekunden und versuche es erneut.",
       "rateLimited_one": "Zu viele Anfragen. Bitte warte {{count}} Sekunde und versuche es erneut.",
       "rateLimited_other": "Zu viele Anfragen. Bitte warte {{count}} Sekunden und versuche es erneut.",

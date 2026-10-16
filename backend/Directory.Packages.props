@@ -36,6 +36,8 @@
 		<PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="[13.6.1]" />
 		<PackageVersion Include="Aspire.Hosting.JavaScript" Version="[13.6.1]" />
 		<PackageVersion Include="Aspire.Hosting.Testing" Version="[13.6.1]" />
+		<!-- Transitive via Aspire.Hosting (StreamJsonRpc): pinned past GHSA-qhrr-8q5h-9q3h until Aspire ships a fixed version itself. -->
+		<PackageVersion Include="MessagePack" Version="[2.5.307]" />
 		<PackageVersion Include="AwesomeAssertions" Version="[9.6.0]" />
 		<PackageVersion Include="Deque.AxeCore.Playwright" Version="[4.13.0]" />
 		<PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="[10.0.12]" />
