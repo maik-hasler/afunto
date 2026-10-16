@@ -146,18 +146,25 @@ export const createClientConfig: CreateClientConfig = (config) => ({
 	baseUrl: runtimeConfig.apiUrl,
 	throwOnError: true,
 	fetch: async (input: RequestInfo | URL, init?: RequestInit) => {
-		// A Request's body can be read once; the retry below needs its own copy.
-		const retryInput = input instanceof Request ? input.clone() : input;
-
 		const accessToken = getAccessToken();
+		// A Request's body can be read once; the retry below needs its own copy.
+		// Only a signed-in request is ever retried, so only that one pays for it.
+		const retryInput =
+			accessToken && input instanceof Request ? input.clone() : input;
+
 		let response = await send(input, init, accessToken);
 
 		// The API rejects a token issued before the user's permissions changed
 		// (#2395, #2403, #2407). A silently fetched one carries the current
 		// roles, so the request succeeds without the user noticing; only when
-		// that fails too is the session really over.
+		// that fails too is the session really over. A token another request
+		// renewed while this one was in flight is used as it is.
 		if (response.status === 401 && accessToken) {
-			const renewedToken = await refreshAccessToken();
+			const currentToken = getAccessToken();
+			const renewedToken =
+				currentToken && currentToken !== accessToken
+					? currentToken
+					: await refreshAccessToken();
 			if (renewedToken && renewedToken !== accessToken)
 				response = await send(retryInput, init, renewedToken);
 		}

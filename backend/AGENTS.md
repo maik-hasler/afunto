@@ -127,7 +127,7 @@ Because dispatch now happens in a fresh scope after commit (not inline inside th
 | `AfuntoDefaultUserPolicy` | `user` |
 | `AfuntoOrganisatorPolicy` | `organisator` |
 
-A token issued before someone changed the user's permissions is rejected with 401 before any policy runs (`Api/Common/Authentication/PermissionsChangedTokenValidator.cs`, #2395/#2403/#2407). A handler that changes *another* user's roles or enabled state must call `User.RecordPermissionsChanged` on the target - otherwise the change waits for the token to expire.
+A token issued before someone changed the user's permissions is rejected with 401 before any policy runs (`Api/Common/Authentication/PermissionsChangedTokenValidator.cs`, #2395/#2403/#2407). A handler that grants or revokes a realm role (`admin`, `organisator`) or changes a user's enabled state must call `User.RecordPermissionsChanged` on that user - otherwise the change waits for the token to expire. A token from the same second as the change counts as fresh (see the validator's comment).
 
 ## Organization domain model
 

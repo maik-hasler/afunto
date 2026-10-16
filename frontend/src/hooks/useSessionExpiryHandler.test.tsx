@@ -3,7 +3,10 @@ import { act, screen, waitFor } from "@testing-library/react";
 import { useSessionExpiryHandler } from "./useSessionExpiryHandler";
 import { useAuthDisplayStatus } from "./useAuthDisplayStatus";
 import { notifySessionExpired } from "../lib/sessionExpiryBus";
-import { clearAuthRecoveryAttempts } from "../lib/authRecovery";
+import {
+	clearAuthRecoveryAttempts,
+	recordAuthRecoveryAttempt,
+} from "../lib/authRecovery";
 import { useAuthRecoveryFailedFlag } from "../contexts/AuthStatusContext";
 import { renderWithProviders } from "../test/render";
 
@@ -104,6 +107,8 @@ describe("bounded auth recovery (#2208)", () => {
 			auth: { isAuthenticated: true, signinRedirect },
 		});
 		act(() => notifySessionExpired());
+		// Stands in for the header's "Sign in again" button.
+		recordAuthRecoveryAttempt();
 		first.unmount();
 
 		renderWithProviders(<RecoveryHarness />, {
@@ -114,11 +119,27 @@ describe("bounded auth recovery (#2208)", () => {
 		expect(screen.getByTestId("recovery-failed")).toHaveTextContent("true");
 	});
 
+	it("keeps offering to sign in when a reload meets the same ended session", async () => {
+		const first = renderWithProviders(<RecoveryHarness />, {
+			auth: { isAuthenticated: true, signinRedirect },
+		});
+		act(() => notifySessionExpired());
+		first.unmount();
+
+		renderWithProviders(<RecoveryHarness />, {
+			auth: { isAuthenticated: true, signinRedirect },
+		});
+		act(() => notifySessionExpired());
+
+		expect(screen.getByTestId("recovery-failed")).toHaveTextContent("false");
+	});
+
 	it("starts a fresh episode once a successful API call clears the counter", async () => {
 		const first = renderWithProviders(<RecoveryHarness />, {
 			auth: { isAuthenticated: true, signinRedirect },
 		});
 		act(() => notifySessionExpired());
+		recordAuthRecoveryAttempt();
 		first.unmount();
 
 		// Stands in for api-instance.ts's own clear-on-success call.

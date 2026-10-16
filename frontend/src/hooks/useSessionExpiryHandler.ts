@@ -1,10 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useAuth } from "react-oidc-context";
 import { subscribeSessionExpired } from "../lib/sessionExpiryBus";
-import {
-	recordAuthRecoveryAttempt,
-	AUTH_RECOVERY_REDIRECT_LIMIT,
-} from "../lib/authRecovery";
+import { hasExhaustedAuthRecovery } from "../lib/authRecovery";
 import {
 	useSetSessionExpiredFlag,
 	useSetAuthRecoveryFailedFlag,
@@ -42,10 +39,11 @@ export function useSessionExpiryHandler() {
 
 			// Bounded recovery (#2208): signing in again only counts as having
 			// worked once an authenticated API call actually succeeds (cleared
-			// in api-instance.ts) - so a second consecutive expiry without one
-			// in between means signing in isn't fixing anything (e.g. a
-			// ValidIssuers mismatch) and the user would otherwise loop forever.
-			if (recordAuthRecoveryAttempt() > AUTH_RECOVERY_REDIRECT_LIMIT) {
+			// in api-instance.ts) - so an expiry after the user already signed
+			// in again, without one in between, means signing in isn't fixing
+			// anything (e.g. a ValidIssuers mismatch) and the user would
+			// otherwise loop forever.
+			if (hasExhaustedAuthRecovery()) {
 				setAuthRecoveryFailed(true);
 				return;
 			}

@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import {
 	recordAuthRecoveryAttempt,
 	clearAuthRecoveryAttempts,
+	hasExhaustedAuthRecovery,
 	AUTH_RECOVERY_REDIRECT_LIMIT,
 } from "./authRecovery";
 
@@ -58,5 +59,14 @@ describe("authRecovery", () => {
 		expect(() => recordAuthRecoveryAttempt()).not.toThrow();
 
 		window.sessionStorage.getItem = original;
+	});
+
+	it("is exhausted only once the allowed sign-ins have been used", () => {
+		expect(hasExhaustedAuthRecovery()).toBe(false);
+		for (let i = 0; i < AUTH_RECOVERY_REDIRECT_LIMIT; i++)
+			recordAuthRecoveryAttempt();
+		expect(hasExhaustedAuthRecovery()).toBe(true);
+		clearAuthRecoveryAttempts();
+		expect(hasExhaustedAuthRecovery()).toBe(false);
 	});
 });

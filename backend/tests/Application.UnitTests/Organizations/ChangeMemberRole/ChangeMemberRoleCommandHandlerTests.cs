@@ -2,6 +2,7 @@ using Application.Common.Exceptions;
 using Application.Common.Keycloak;
 using Application.Common.Persistence;
 using Application.Organizations.ChangeMemberRole.v1;
+using Application.UnitTests.Common.Time;
 using AwesomeAssertions;
 using Domain.Organizations;
 using Domain.Primitives;
@@ -92,6 +93,7 @@ public class ChangeMemberRoleCommandHandlerTests
 		// Assert
 		result.Should().BeTrue();
 		await _keycloakService.DidNotReceive().RevokeOrganizerRoleAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
+		_targetUser.PermissionsChangedOn.Should().BeNull();
 	}
 
 	[Test]
@@ -162,10 +164,5 @@ public class ChangeMemberRoleCommandHandlerTests
 		(await act.Should().ThrowAsync<ResultFailureException>())
 			.Which.Error.Type.Should().Be(ErrorType.Forbidden);
 		await _dbContext.DidNotReceive().GetMembershipAsync(Arg.Any<OrganizationId>(), Arg.Any<UserId>(), Arg.Any<CancellationToken>());
-	}
-
-	private sealed class FakeTimeProvider(DateTimeOffset utcNow) : TimeProvider
-	{
-		public override DateTimeOffset GetUtcNow() => utcNow;
 	}
 }

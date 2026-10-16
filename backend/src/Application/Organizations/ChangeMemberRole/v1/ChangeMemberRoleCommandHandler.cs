@@ -5,6 +5,7 @@ using Application.Common.Messaging;
 using Application.Common.Persistence;
 using Domain.Organizations;
 using Domain.Primitives;
+using Domain.Users;
 
 namespace Application.Organizations.ChangeMemberRole.v1;
 
@@ -44,12 +45,11 @@ internal sealed class ChangeMemberRoleCommandHandler(
 
 		membership.ChangeRole(request.Role).ThrowIfFailure();
 
-		var promoting = request.Role == OrganizationMemberRole.Organizer && !wasOrganizer;
-
-		if (promoting)
+		if (request.Role == OrganizationMemberRole.Organizer && !wasOrganizer)
 		{
 			await keycloakOrganizationService.AssignOrganizerRoleAsync(
 				request.TargetUserId.Value, cancellationToken);
+			await RecordPermissionsChangedAsync(request.TargetUserId, cancellationToken);
 		}
 		else if (demoting)
 		{
@@ -57,17 +57,22 @@ internal sealed class ChangeMemberRoleCommandHandler(
 				request.TargetUserId, cancellationToken);
 			var stillOrganizerElsewhere = remainingOrganizerOrgs.Any(o => o.Id != request.OrganizationId);
 
+			// Still an organizer elsewhere: the realm role and so the token stay
+			// the same, and the membership guard already enforces the demotion.
 			if (!stillOrganizerElsewhere)
+			{
 				await keycloakOrganizationService.RevokeOrganizerRoleAsync(
 					request.TargetUserId.Value, cancellationToken);
-		}
-
-		if (promoting || demoting)
-		{
-			var targetUser = await dbContext.GetOrCreateUserAsync(request.TargetUserId, cancellationToken);
-			targetUser.RecordPermissionsChanged(timeProvider.GetUtcNow());
+				await RecordPermissionsChangedAsync(request.TargetUserId, cancellationToken);
+			}
 		}
 
 		return true;
+	}
+
+	private async Task RecordPermissionsChangedAsync(UserId targetUserId, CancellationToken cancellationToken)
+	{
+		var targetUser = await dbContext.GetOrCreateUserAsync(targetUserId, cancellationToken);
+		targetUser.RecordPermissionsChanged(timeProvider.GetUtcNow());
 	}
 }

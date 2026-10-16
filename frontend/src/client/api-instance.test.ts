@@ -321,6 +321,28 @@ describe("the client's fetch", () => {
 			expect(notifySessionExpired).toHaveBeenCalledTimes(1);
 		});
 
+		it("reuses a token another request renewed meanwhile", async () => {
+			accessToken = "stale-token";
+			const { fetch, underlying } = await loadFetchAnswering();
+			underlying
+				.mockImplementationOnce(() => {
+					// A parallel request's renewal lands while this one is in flight.
+					accessToken = "fresh-token";
+					return Promise.resolve(makeResponse(401));
+				})
+				.mockResolvedValueOnce(makeResponse(200));
+
+			const response = await fetch("https://api.test/v1/organizations");
+
+			expect(response.status).toBe(200);
+			expect(refreshAccessToken).not.toHaveBeenCalled();
+			expect(
+				new Headers(
+					(underlying.mock.calls[1][1] as RequestInit).headers as HeadersInit,
+				).get("Authorization"),
+			).toBe("Bearer fresh-token");
+		});
+
 		it("does not resend when renewal hands back the same token", async () => {
 			accessToken = "stale-token";
 			refreshAccessToken.mockResolvedValue("stale-token");
