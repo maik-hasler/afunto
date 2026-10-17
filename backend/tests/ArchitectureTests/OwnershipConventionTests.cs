@@ -9,6 +9,11 @@ public sealed class OwnershipConventionTests
 	private static readonly HashSet<string> AllowListedExceptions = new()
 	{
 		"Application.VolunteerOpportunities.GetVolunteerOpportunityDetails.v1.GetVolunteerOpportunityDetailsQueryHandler",
+		// Public listings carry the optional viewer so members-only opportunities show up
+		// for the members of the owning organization and for nobody else; there is no
+		// organization to guard, the read repository filters by membership.
+		"Application.VolunteerOpportunities.GetVolunteerOpportunities.v1.GetVolunteerOpportunitiesQueryHandler",
+		"Application.VolunteerOpportunities.GetVolunteerOpportunityDateAvailability.v1.GetVolunteerOpportunityDateAvailabilityQueryHandler",
 
 		"Application.Notifications.MarkNotificationRead.v1.MarkNotificationReadCommandHandler",
 		"Application.Notifications.MarkNotificationUnread.v1.MarkNotificationUnreadCommandHandler",
