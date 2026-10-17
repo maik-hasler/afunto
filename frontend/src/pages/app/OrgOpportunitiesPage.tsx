@@ -10,7 +10,11 @@ import { useLoadMore } from "../../hooks/useLoadMore";
 import { usePageTitle } from "../../hooks/usePageTitle";
 import { dispatchToast } from "../../lib/toastBus";
 import { getApiErrorMessage } from "../../lib/apiError";
-import { checkboxClass, labelClass, textareaClass } from "../../lib/formClasses";
+import {
+	checkboxClass,
+	labelClass,
+	textareaClass,
+} from "../../lib/formClasses";
 import { cardClass } from "../../lib/surfaceClasses";
 import { getOpportunityCapacity } from "../../lib/opportunityCapacity";
 import { formatSignUpCount, pickLocalizedText } from "../../lib/format";
