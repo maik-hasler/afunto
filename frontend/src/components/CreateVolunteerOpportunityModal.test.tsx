@@ -86,7 +86,7 @@ describe("create-opportunity wizard: focus on the first invalid field (#2077)", 
 
 	it("focuses the blocking field when a stepper jump is refused", async () => {
 		openWizard();
-		await userEvent.click(screen.getByTestId("wizard-stepper-4"));
+		await userEvent.click(screen.getByTestId("wizard-stepper-3"));
 
 		await waitFor(() => expect(blocked()).not.toBeNull());
 		expect(screen.getByTestId("wizard-step-1")).toBeInTheDocument();
@@ -94,52 +94,137 @@ describe("create-opportunity wizard: focus on the first invalid field (#2077)", 
 	});
 });
 
-describe("create-opportunity wizard: language tab error indicator (#2234)", () => {
-	it("exposes the error on the German tab through its accessible name, not colour alone", async () => {
+describe("create-opportunity wizard: translations section (#2387)", () => {
+	const toggle = () => screen.getByTestId("opportunity-translation-toggle-en");
+	const titleEn = () =>
+		document.querySelector("#opportunity-title-en") as HTMLElement;
+	const descriptionEn = () =>
+		document.querySelector("#opportunity-description-en") as HTMLElement;
+
+	async function fillGerman() {
+		await userEvent.type(title(), "Strandreinigung");
+		await userEvent.type(description(), "Wir sammeln Muell am Strand.");
+	}
+
+	it("presents German as the required version and says why", () => {
 		openWizard();
-		await userEvent.click(screen.getByTestId("modal-next"));
 
-		await waitFor(() => expect(titleError()).not.toBeNull());
-
-		const deTab = screen.getByTestId("opportunity-content-language-de");
-		expect(deTab).toHaveAccessibleName(/Contains errors/);
+		const german = screen.getByTestId("opportunity-language-version-de");
+		expect(
+			within(german).getByRole("button", { name: /German.*Required/ }),
+		).toHaveAttribute("aria-expanded", "true");
+		expect(
+			within(german).getByRole("textbox", { name: "Title (German)" }),
+		).toBe(title());
+		expect(
+			screen.getByRole("region", { name: "Language versions" }),
+		).toHaveAccessibleDescription(
+			/every visitor sees the German text unless there is a translation/,
+		);
+		expect(toggle()).toHaveAccessibleName(/Optional/);
 	});
 
-	it("carries no error indicator on the English tab, which has none", async () => {
+	it("collapses the German version on demand and reopens it on an error", async () => {
 		openWizard();
+		const germanToggle = screen.getByTestId(
+			"opportunity-translation-toggle-de",
+		);
+
+		await userEvent.click(germanToggle);
+		expect(germanToggle).toHaveAttribute("aria-expanded", "false");
+		expect(title()).not.toBeVisible();
+
 		await userEvent.click(screen.getByTestId("modal-next"));
 
 		await waitFor(() => expect(titleError()).not.toBeNull());
+		expect(germanToggle).toHaveAttribute("aria-expanded", "true");
+		expect(germanToggle).toHaveAccessibleName(/Contains errors/);
+		expect(title()).toHaveFocus();
+	});
 
-		const enTab = screen.getByTestId("opportunity-content-language-en");
-		expect(enTab).not.toHaveAccessibleName(/Contains errors/);
+	it("shows the German fields without a language toggle, the translation collapsed", () => {
+		openWizard();
+
+		expect(title()).toBeVisible();
+		expect(description()).toBeVisible();
+		expect(
+			screen.queryByRole("button", { name: "English" }),
+		).not.toBeInTheDocument();
+		expect(toggle()).toHaveAttribute("aria-expanded", "false");
+		expect(toggle()).toHaveAccessibleName(/Not translated/);
+		expect(titleEn()).not.toBeVisible();
+	});
+
+	it("reveals the English fields on demand and reports them as translated once filled", async () => {
+		openWizard();
+		await userEvent.click(toggle());
+
+		expect(toggle()).toHaveAttribute("aria-expanded", "true");
+		await userEvent.type(titleEn(), "Beach cleanup");
+
+		expect(toggle()).toHaveAccessibleName(/Translated/);
+		expect(toggle()).not.toHaveAccessibleName(/Not translated/);
+	});
+
+	it("refuses an English title without an English description, and focuses the gap", async () => {
+		openWizard();
+		await fillGerman();
+		await userEvent.click(toggle());
+		await userEvent.type(titleEn(), "Beach cleanup");
+		await userEvent.click(toggle());
+		expect(titleEn()).not.toBeVisible();
+
+		await userEvent.click(screen.getByTestId("modal-next"));
+
+		await waitFor(() =>
+			expect(
+				document.querySelector("#opportunity-description-en-error"),
+			).toHaveTextContent(
+				"Fill in both the English title and description, or leave both blank.",
+			),
+		);
+		expect(toggle()).toHaveAttribute("aria-expanded", "true");
+		expect(toggle()).toHaveAccessibleName(/Contains errors/);
+		expect(descriptionEn()).toHaveFocus();
+		expect(screen.getByTestId("wizard-step-1")).toBeInTheDocument();
+	});
+
+	it("lets a German-only opportunity through", async () => {
+		openWizard();
+		await fillGerman();
+
+		await userEvent.click(screen.getByTestId("modal-next"));
+
+		await waitFor(() =>
+			expect(screen.queryByTestId("wizard-step-1")).toBeNull(),
+		);
 	});
 });
 
 describe("create-opportunity wizard: blocked stepper jumps (#1782)", () => {
 	it("names the step standing in the way, in an assertive live region tied to the refused control", async () => {
 		openWizard();
-		await userEvent.click(screen.getByTestId("wizard-stepper-4"));
+		await userEvent.click(screen.getByTestId("wizard-stepper-3"));
 
 		await waitFor(() => expect(blocked()).not.toBeNull());
 		const message = blocked();
 		expect(message).toHaveAttribute("role", "alert");
 		expect(message).toHaveAttribute("aria-live", "assertive");
-		expect(message).toHaveTextContent("Step 4 is not available yet");
+		expect(message).toHaveTextContent("Step 3 is not available yet");
 		expect(message).toHaveTextContent("step 1 (Basics)");
 
-		expect(screen.getByTestId("wizard-stepper-4")).toHaveAttribute(
+		expect(screen.getByTestId("wizard-stepper-3")).toHaveAttribute(
 			"aria-describedby",
 			"create-opportunity-step-blocked",
 		);
 
 		expect(screen.getByTestId("wizard-step-1")).toBeInTheDocument();
-		expect(screen.queryByTestId("wizard-step-4")).toBeNull();
+		expect(screen.queryByTestId("wizard-step-3")).toBeNull();
 	});
 
 	it("retires the refusal once the named step is fixed, and lets the same click through", async () => {
 		openWizard();
-		await userEvent.click(screen.getByTestId("wizard-stepper-4"));
+		await userEvent.click(screen.getByTestId("wizard-stepper-3"));
 		await waitFor(() => expect(blocked()).not.toBeNull());
 
 		await userEvent.type(title(), "Blocked step jump regression");
@@ -147,14 +232,14 @@ describe("create-opportunity wizard: blocked stepper jumps (#1782)", () => {
 		await userEvent.tab();
 
 		await waitFor(() => expect(blocked()).toBeNull());
-		expect(screen.getByTestId("wizard-stepper-4")).not.toHaveAttribute(
+		expect(screen.getByTestId("wizard-stepper-3")).not.toHaveAttribute(
 			"aria-describedby",
 			"create-opportunity-step-blocked",
 		);
 
-		await userEvent.click(screen.getByTestId("wizard-stepper-4"));
+		await userEvent.click(screen.getByTestId("wizard-stepper-3"));
 		await waitFor(() =>
-			expect(screen.getByTestId("wizard-step-4")).toBeInTheDocument(),
+			expect(screen.getByTestId("wizard-step-3")).toBeInTheDocument(),
 		);
 		expect(blocked()).toBeNull();
 	});
@@ -175,7 +260,7 @@ describe("create-opportunity wizard: blocked stepper jumps (#1782)", () => {
 		await waitFor(() =>
 			expect(screen.getByTestId("wizard-step-1")).toBeInTheDocument(),
 		);
-		await userEvent.click(screen.getByTestId("wizard-stepper-4"));
+		await userEvent.click(screen.getByTestId("wizard-stepper-3"));
 
 		await waitFor(() =>
 			expect(blocked()).toHaveTextContent("step 2 (Location)"),
@@ -215,10 +300,10 @@ describe("create-opportunity wizard: the shared required-field marker (#1797)", 
 		openWizard();
 
 		const field = document.querySelector("#opportunity-title");
-		expect(field).toHaveAccessibleName("Title");
+		expect(field).toHaveAccessibleName("Title (German)");
 
 		const label = document.querySelector("label[for='opportunity-title']");
-		expect(label).toHaveTextContent(/^Title\*$/);
+		expect(label).toHaveTextContent(/^Title \(German\)\*$/);
 		const marks = label?.querySelectorAll("span[aria-hidden='true']") ?? [];
 		expect(marks).toHaveLength(1);
 		expect(marks[0]).toHaveTextContent("*");
@@ -248,12 +333,13 @@ describe("create-opportunity wizard: distinct control names (#1957)", () => {
 });
 
 describe("create-opportunity wizard: shape and the draft gate", () => {
-	it("offers all four steps and a draft button, with no accent band", async () => {
+	it("offers three steps and a draft button, with no accent band", async () => {
 		openWizard();
 
-		for (const n of [1, 2, 3, 4]) {
+		for (const n of [1, 2, 3]) {
 			expect(await screen.findByTestId(`wizard-stepper-${n}`)).toBeVisible();
 		}
+		expect(screen.queryByTestId("wizard-stepper-4")).toBeNull();
 		expect(screen.getByTestId("modal-save-draft")).toBeInTheDocument();
 		expect(document.querySelector(".from-brand-600")).toBeNull();
 	});
@@ -296,7 +382,92 @@ describe("create-opportunity wizard: shape and the draft gate", () => {
 	});
 });
 
-async function fillBasicsAndFormat(pinCode: string) {
+describe("create-opportunity wizard: three steps, extras folded away (#2387)", () => {
+	async function fillBasics() {
+		await userEvent.type(title(), "Strandreinigung");
+		await userEvent.type(description(), "Wir sammeln Muell am Strand.");
+	}
+
+	async function gotoSchedule() {
+		await fillBasics();
+		await userEvent.click(screen.getByTestId("wizard-stepper-2"));
+		await userEvent.click(await screen.findByRole("radio", { name: "Remote" }));
+		await userEvent.click(screen.getByTestId("wizard-stepper-3"));
+		await screen.findByTestId("wizard-step-3");
+	}
+
+	it("keeps banner, category and tags behind one optional toggle", async () => {
+		openWizard();
+
+		const toggle = screen.getByTestId("opportunity-more-details-toggle");
+		expect(toggle).toHaveAttribute("aria-expanded", "false");
+		expect(screen.getByLabelText("Tags")).not.toBeVisible();
+		expect(screen.getByLabelText("Category")).not.toBeVisible();
+
+		await userEvent.click(toggle);
+
+		expect(toggle).toHaveAttribute("aria-expanded", "true");
+		expect(screen.getByLabelText("Tags")).toBeVisible();
+		expect(screen.getByLabelText("Category")).toBeVisible();
+		expect(screen.getByText("Upload image")).toBeVisible();
+	});
+
+	it("drops the address fields for a remote opportunity and brings them back on site", async () => {
+		openWizard();
+		await fillBasics();
+		await userEvent.click(screen.getByTestId("wizard-stepper-2"));
+
+		const onSite = await screen.findByRole("radio", { name: "On site" });
+		expect(onSite).toBeChecked();
+		await waitFor(() =>
+			expect(document.querySelector("#opportunity-street")).toHaveValue(
+				"Strandweg",
+			),
+		);
+
+		await userEvent.click(screen.getByRole("radio", { name: "Remote" }));
+		expect(document.querySelector("#opportunity-street")).toBeNull();
+		expect(screen.getByText(/No address needed/)).toBeInTheDocument();
+
+		await userEvent.click(onSite);
+		expect(document.querySelector("#opportunity-street")).toHaveValue(
+			"Strandweg",
+		);
+	});
+
+	it("asks for time slots or a deadline in the step that picks the participation type", async () => {
+		openWizard();
+		await gotoSchedule();
+
+		expect(
+			screen.getByRole("button", { name: "Add time slot" }),
+		).toBeInTheDocument();
+		expect(screen.queryByLabelText(/Interest deadline/i)).toBeNull();
+
+		await userEvent.click(
+			screen.getByRole("radio", { name: "Express interest" }),
+		);
+
+		expect(screen.getByLabelText(/Interest deadline/i)).toBeInTheDocument();
+		expect(screen.queryByRole("button", { name: "Add time slot" })).toBeNull();
+	});
+
+	it("names the missing time slot on the last step and moves focus to it", async () => {
+		openWizard();
+		await gotoSchedule();
+
+		await userEvent.click(screen.getByTestId("modal-submit"));
+
+		const alert = await screen.findByText(
+			"A Scheduled slots opportunity must have at least one time slot before it can be published.",
+		);
+		await waitFor(() => expect(alert.closest('[tabindex="-1"]')).toHaveFocus());
+		expect(screen.getByTestId("wizard-step-3")).toBeInTheDocument();
+		expect(api.createVolunteerOpportunity).not.toHaveBeenCalled();
+	});
+});
+
+async function fillBasicsAndSchedule(pinCode: string) {
 	await userEvent.type(title(), "PIN Test Opportunity");
 	await userEvent.type(
 		description(),
@@ -320,9 +491,9 @@ async function fillBasicsAndFormat(pinCode: string) {
 describe("create-opportunity wizard: organizer-set check-in PIN (#549)", () => {
 	it("sends the organizer-typed PIN exactly, in the create payload", async () => {
 		openWizard();
-		await fillBasicsAndFormat("482170");
+		await fillBasicsAndSchedule("482170");
 
-		await userEvent.click(screen.getByTestId("wizard-stepper-4"));
+		await userEvent.click(screen.getByTestId("wizard-stepper-3"));
 		await screen.findByLabelText(/Interest deadline/i);
 		await pickDate("create-valid-until", "2027-06-30");
 
@@ -375,7 +546,7 @@ describe("create-opportunity wizard: organizer-set check-in PIN (#549)", () => {
 		expect(generatedPin).toMatch(/^\d{6}$/);
 		expect(generatedPin).not.toBe("135790");
 
-		await userEvent.click(screen.getByTestId("wizard-stepper-4"));
+		await userEvent.click(screen.getByTestId("wizard-stepper-3"));
 		api.updateVolunteerOpportunity.mockResolvedValue(undefined);
 		await userEvent.click(screen.getByTestId("modal-submit"));
 
@@ -386,6 +557,38 @@ describe("create-opportunity wizard: organizer-set check-in PIN (#549)", () => {
 			}),
 		);
 	});
+});
+
+describe("create-opportunity wizard: an unbiased generated PIN", () => {
+	afterEach(() => vi.restoreAllMocks());
+
+	it("redraws a value past the last whole PIN range instead of folding it back", async () => {
+		const draws = [2 ** 32 - 1, 0];
+		vi.spyOn(crypto, "getRandomValues").mockImplementation((array) => {
+			(array as Uint32Array)[0] = draws.shift() ?? 0;
+			return array;
+		});
+		openWizard();
+		await gotoPin();
+
+		await userEvent.click(
+			screen.getByRole("button", { name: /Generate random/i }),
+		);
+
+		expect(screen.getByLabelText(/Check-in PIN/i)).toHaveValue("100000");
+		expect(draws).toHaveLength(0);
+	});
+
+	async function gotoPin() {
+		await userEvent.type(title(), "PIN bias");
+		await userEvent.type(description(), "Regression test for the PIN draw.");
+		await userEvent.click(screen.getByTestId("wizard-stepper-2"));
+		await userEvent.click(await screen.findByRole("radio", { name: "Remote" }));
+		await userEvent.click(screen.getByTestId("wizard-stepper-3"));
+		await userEvent.click(
+			await screen.findByRole("radio", { name: "PIN code" }),
+		);
+	}
 });
 
 describe("create-opportunity wizard: an address the backend cannot locate (#2320)", () => {
@@ -448,9 +651,9 @@ describe("create-opportunity wizard: a time slot that ends before it starts (#23
 
 		await userEvent.type(title(), "Zeitslot Regression");
 		await userEvent.type(description(), "Regression test for #2320.");
-		await userEvent.click(await screen.findByTestId("wizard-stepper-4"));
+		await userEvent.click(await screen.findByTestId("wizard-stepper-3"));
 		await waitFor(() =>
-			expect(screen.getByTestId("wizard-step-4")).toBeInTheDocument(),
+			expect(screen.getByTestId("wizard-step-3")).toBeInTheDocument(),
 		);
 
 		await userEvent.click(
@@ -519,7 +722,7 @@ describe("edit wizard: time slot changes are not staged (#2315)", () => {
 
 	it("says up front that slot changes do not wait for Save", async () => {
 		openEditWizard();
-		await userEvent.click(await screen.findByTestId("wizard-stepper-4"));
+		await userEvent.click(await screen.findByTestId("wizard-stepper-3"));
 
 		expect(await screen.findByText(IMMEDIATE_HINT)).toBeInTheDocument();
 	});
@@ -532,15 +735,15 @@ describe("edit wizard: time slot changes are not staged (#2315)", () => {
 		await userEvent.click(
 			await screen.findByLabelText(/remote|Remote/i, { selector: "input" }),
 		);
-		await userEvent.click(screen.getByTestId("wizard-stepper-4"));
+		await userEvent.click(screen.getByTestId("wizard-stepper-3"));
 
-		await screen.findByTestId("wizard-step-4");
+		await screen.findByTestId("wizard-step-3");
 		expect(screen.queryByText(IMMEDIATE_HINT)).toBeNull();
 	});
 
 	it("asks before deleting a slot that is already on the server", async () => {
 		openEditWizard();
-		await userEvent.click(await screen.findByTestId("wizard-stepper-4"));
+		await userEvent.click(await screen.findByTestId("wizard-stepper-3"));
 
 		await userEvent.click(
 			await screen.findByRole("button", { name: "Remove" }),
@@ -564,7 +767,7 @@ describe("edit wizard: time slot changes are not staged (#2315)", () => {
 	it("deletes the slot once the removal is confirmed", async () => {
 		api.deleteTimeSlot.mockResolvedValue({ deletedTimeSlotIds: ["slot-1"] });
 		openEditWizard();
-		await userEvent.click(await screen.findByTestId("wizard-stepper-4"));
+		await userEvent.click(await screen.findByTestId("wizard-stepper-3"));
 
 		await userEvent.click(
 			await screen.findByRole("button", { name: "Remove" }),
@@ -589,7 +792,7 @@ describe("edit wizard: time slot changes are not staged (#2315)", () => {
 	it("keeps the dialog open, with the reason, when the delete fails", async () => {
 		api.deleteTimeSlot.mockRejectedValue(new Error("500"));
 		openEditWizard();
-		await userEvent.click(await screen.findByTestId("wizard-stepper-4"));
+		await userEvent.click(await screen.findByTestId("wizard-stepper-3"));
 
 		await userEvent.click(
 			await screen.findByRole("button", { name: "Remove" }),
@@ -615,7 +818,7 @@ describe("edit wizard: time slot changes are not staged (#2315)", () => {
 
 	it("spells out that volunteers lose their spot when the slot is booked", async () => {
 		openEditWizard({ ...SLOT, bookedCount: 2 });
-		await userEvent.click(await screen.findByTestId("wizard-stepper-4"));
+		await userEvent.click(await screen.findByTestId("wizard-stepper-3"));
 
 		await userEvent.click(
 			await screen.findByRole("button", { name: "Remove" }),
@@ -634,7 +837,7 @@ describe("edit wizard: time slot changes are not staged (#2315)", () => {
 	it("tells the closing organizer which changes the discard does not cover", async () => {
 		api.deleteTimeSlot.mockResolvedValue({ deletedTimeSlotIds: ["slot-1"] });
 		openEditWizard();
-		await userEvent.click(await screen.findByTestId("wizard-stepper-4"));
+		await userEvent.click(await screen.findByTestId("wizard-stepper-3"));
 
 		await userEvent.click(
 			await screen.findByRole("button", { name: "Remove" }),
@@ -665,7 +868,7 @@ describe("edit wizard: time slot changes are not staged (#2315)", () => {
 	it("edits a slot in the slot editor and returns focus to its row", async () => {
 		api.updateTimeSlot.mockResolvedValue({ skippedTimeSlotIds: [] });
 		openEditWizard();
-		await userEvent.click(await screen.findByTestId("wizard-stepper-4"));
+		await userEvent.click(await screen.findByTestId("wizard-stepper-3"));
 
 		await userEvent.click(await screen.findByRole("button", { name: "Edit" }));
 
@@ -695,7 +898,7 @@ describe("edit wizard: time slot changes are not staged (#2315)", () => {
 
 	it("keeps the slot as it was when the edit is cancelled", async () => {
 		openEditWizard();
-		await userEvent.click(await screen.findByTestId("wizard-stepper-4"));
+		await userEvent.click(await screen.findByTestId("wizard-stepper-3"));
 		await userEvent.click(await screen.findByRole("button", { name: "Edit" }));
 		await screen.findByTestId("time-slot-editor");
 
@@ -740,8 +943,8 @@ describe("create-opportunity wizard: time slot guards (#2325)", () => {
 		await userEvent.click(
 			await screen.findByLabelText(/remote|Remote/i, { selector: "input" }),
 		);
-		await userEvent.click(screen.getByTestId("wizard-stepper-4"));
-		await screen.findByTestId("wizard-step-4");
+		await userEvent.click(screen.getByTestId("wizard-stepper-3"));
+		await screen.findByTestId("wizard-step-3");
 	}
 
 	const slotEditor = () => screen.queryByTestId("time-slot-editor");
@@ -967,7 +1170,7 @@ describe("create-opportunity wizard: time slot guards (#2325)", () => {
 		expect(
 			screen.getByRole("heading", { name: "Add time slot" }),
 		).toHaveFocus();
-		expect(screen.queryByTestId("wizard-step-4")).toBeNull();
+		expect(screen.queryByTestId("wizard-step-3")).toBeNull();
 		expect(screen.queryByTestId("modal-submit")).toBeNull();
 		expect(screen.queryByTestId("modal-save-draft")).toBeNull();
 	});
@@ -1005,7 +1208,7 @@ describe("create-opportunity wizard: time slot guards (#2325)", () => {
 		await userEvent.keyboard("{Escape}");
 
 		await waitFor(() => expect(slotEditor()).toBeNull());
-		expect(screen.getByTestId("wizard-step-4")).toBeInTheDocument();
+		expect(screen.getByTestId("wizard-step-3")).toBeInTheDocument();
 		expect(
 			screen.queryByRole("dialog", { name: "Discard unsaved changes?" }),
 		).toBeNull();

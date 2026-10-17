@@ -150,6 +150,17 @@ public sealed class VolunteerOpportunity
 		return Result.Success();
 	}
 
+	// Each text falls back to German on its own, so an English title without
+	// an English description showed English visitors one language over the
+	// other (#2387).
+	private static Result EnsureCompleteTranslation(string? titleEn, string? descriptionEn)
+	{
+		if (string.IsNullOrWhiteSpace(titleEn) != string.IsNullOrWhiteSpace(descriptionEn))
+			return Result.Failure(Error.Validation("VolunteerOpportunity.IncompleteTranslation", "Provide both the English title and the English description, or neither."));
+
+		return Result.Success();
+	}
+
 	private static Result EnsureValidTags(IReadOnlyCollection<string> tags)
 	{
 		if (tags.Count > MaxTagsCount)
@@ -221,6 +232,10 @@ public sealed class VolunteerOpportunity
 		var validDescriptionEnLength = EnsureValidDescriptionLength(descriptionEn);
 		if (validDescriptionEnLength.IsFailure)
 			return Result.Failure<VolunteerOpportunity>(validDescriptionEnLength.Error);
+
+		var completeTranslation = EnsureCompleteTranslation(titleEn, descriptionEn);
+		if (completeTranslation.IsFailure)
+			return Result.Failure<VolunteerOpportunity>(completeTranslation.Error);
 
 		var validTags = EnsureValidTags(tags ?? []);
 		if (validTags.IsFailure)
@@ -390,7 +405,11 @@ public sealed class VolunteerOpportunity
 		return Result.Success();
 	}
 
-	public Result Rename(string titleDe, string? titleEn)
+	/// <summary>
+	/// Replaces the title and description in both languages at once: the
+	/// English pair can only be checked for completeness as a whole.
+	/// </summary>
+	public Result ChangeText(string titleDe, string? titleEn, string descriptionDe, string? descriptionEn)
 	{
 		var validTitleDeLength = EnsureValidTitleLength(titleDe);
 		if (validTitleDeLength.IsFailure)
@@ -400,20 +419,6 @@ public sealed class VolunteerOpportunity
 		if (validTitleEnLength.IsFailure)
 			return validTitleEnLength;
 
-		if (Status == OpportunityStatus.Published)
-		{
-			var publishable = EnsurePublishable(titleDe, DescriptionDe, IsRemote, Address);
-			if (publishable.IsFailure)
-				return publishable;
-		}
-
-		TitleDe = titleDe;
-		TitleEn = titleEn;
-		return Result.Success();
-	}
-
-	public Result ChangeDescription(string descriptionDe, string? descriptionEn)
-	{
 		var validDescriptionDeLength = EnsureValidDescriptionLength(descriptionDe);
 		if (validDescriptionDeLength.IsFailure)
 			return validDescriptionDeLength;
@@ -422,13 +427,19 @@ public sealed class VolunteerOpportunity
 		if (validDescriptionEnLength.IsFailure)
 			return validDescriptionEnLength;
 
+		var completeTranslation = EnsureCompleteTranslation(titleEn, descriptionEn);
+		if (completeTranslation.IsFailure)
+			return completeTranslation;
+
 		if (Status == OpportunityStatus.Published)
 		{
-			var publishable = EnsurePublishable(TitleDe, descriptionDe, IsRemote, Address);
+			var publishable = EnsurePublishable(titleDe, descriptionDe, IsRemote, Address);
 			if (publishable.IsFailure)
 				return publishable;
 		}
 
+		TitleDe = titleDe;
+		TitleEn = titleEn;
 		DescriptionDe = descriptionDe;
 		DescriptionEn = descriptionEn;
 		return Result.Success();

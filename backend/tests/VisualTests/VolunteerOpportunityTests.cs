@@ -239,15 +239,14 @@ public class VolunteerOpportunityTests(AspireFixture fixture) : VisualTestBase(f
 			"Regression test for the ScheduledSlots publish-with-no-slots gap.");
 
 		await Page.GetByTestId("wizard-stepper-2").ClickAsync();
-		await Page.Locator("#opportunity-remote").CheckAsync();
+		await Page.Locator("label:has(#opportunity-remote)").ClickAsync();
 
 		await Page.GetByTestId("wizard-stepper-3").ClickAsync();
 		await Page.Locator("label:has(input[name='participationType'][value='ScheduledSlots'])").ClickAsync();
 
-		await Page.GetByTestId("wizard-stepper-4").ClickAsync();
 		await Page.GetByTestId("modal-submit").ClickAsync();
 		await Expect(Page.Locator("[role='dialog']")).ToBeVisibleAsync();
-		await Expect(Page.GetByTestId("wizard-step-4")).ToBeVisibleAsync();
+		await Expect(Page.GetByTestId("wizard-step-3")).ToBeVisibleAsync();
 
 		var publishError = Page.GetByRole(AriaRole.Alert)
 			.Filter(new() { HasTextString = "time slot" });
@@ -257,15 +256,15 @@ public class VolunteerOpportunityTests(AspireFixture fixture) : VisualTestBase(f
 
 		var start = DateTimeOffset.UtcNow.AddDays(7);
 		var end = start.AddHours(2);
-		var step4 = Page.GetByTestId("wizard-step-4");
-		await step4.GetByRole(AriaRole.Button, new() { Name = "Add time slot", Exact = true }).ClickAsync();
+		var scheduleStep = Page.GetByTestId("wizard-step-3");
+		await scheduleStep.GetByRole(AriaRole.Button, new() { Name = "Add time slot", Exact = true }).ClickAsync();
 		var slotEditor = Page.GetByTestId("time-slot-editor");
 		await FillDateTimePickerAsync(slotEditor, "slot-start", start);
 		await FillDateTimePickerAsync(slotEditor, "slot-end", end);
 		await slotEditor.GetByRole(AriaRole.Button, new() { Name = "Add", Exact = true }).ClickAsync();
 		await Expect(slotEditor).Not.ToBeVisibleAsync();
 
-		await Expect(step4.GetByText("No time slots added yet.")).Not.ToBeVisibleAsync(
+		await Expect(scheduleStep.GetByText("No time slots added yet.")).Not.ToBeVisibleAsync(
 			new() { Timeout = 5000 });
 
 		await Page.GetByTestId("modal-submit").ClickAsync();

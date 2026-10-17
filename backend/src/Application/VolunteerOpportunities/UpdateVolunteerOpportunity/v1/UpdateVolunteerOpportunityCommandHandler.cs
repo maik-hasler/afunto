@@ -48,8 +48,7 @@ internal sealed class UpdateVolunteerOpportunityCommandHandler(
 		var prevAddress = opportunity.Address;
 		var prevOccurrence = opportunity.Occurrence;
 
-		opportunity.Rename(request.TitleDe, request.TitleEn).ThrowIfFailure();
-		opportunity.ChangeDescription(request.DescriptionDe, request.DescriptionEn).ThrowIfFailure();
+		opportunity.ChangeText(request.TitleDe, request.TitleEn, request.DescriptionDe, request.DescriptionEn).ThrowIfFailure();
 
 		opportunity.Relocate(request.IsRemote, request.Address).ThrowIfFailure();
 		opportunity.Reschedule(request.Occurrence);
