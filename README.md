@@ -67,7 +67,7 @@ The app itself is served in German by default, since Afunto's primary audience i
 | Layer | Tech |
 |---|---|
 | Backend | .NET 10, Clean Architecture (Api -> Application -> Domain, Infrastructure -> Domain), EF Core 10, PostgreSQL 18, CQRS-style command/query handlers, transactional outbox for domain events |
-| Auth | Keycloak 26.7.4 (OIDC, JWT, Keycloak Organizations) |
+| Auth | Keycloak 26.8.1 (OIDC, JWT, Keycloak Organizations) |
 | Frontend | Vite SPA, React 19, React Router v8, Tailwind CSS 4, react-oidc-context, Leaflet/react-leaflet |
 | API client | TypeScript client generated from the backend OpenAPI spec by `@hey-api/openapi-ts`, and a C# one for the integration tests by NSwag - neither is hand-edited |
 | Object storage | RustFS, S3-compatible (avatars, organization logos, opportunity banners) |

@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/aspnet:10.0.12 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:10.0.13 AS base
 USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
@@ -8,7 +8,7 @@ EXPOSE 8081
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
 	CMD bash -c '{ printf "GET /alive HTTP/1.1\r\nhost: localhost\r\nconnection: close\r\n\r\n" >&0; grep -q "HTTP/1.1 200"; } 0<>/dev/tcp/127.0.0.1/8080'
 
-FROM mcr.microsoft.com/dotnet/sdk:10.0.401 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0.402 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /repo
 COPY . .

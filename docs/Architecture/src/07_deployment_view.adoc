@@ -38,7 +38,7 @@ Local development is optimized for fast iteration. All services run on `localhos
 
 |Identity Provider
 |Docker container
-|`quay.io/keycloak/keycloak:26.7.4`, port 8080
+|`quay.io/keycloak/keycloak:26.8.1`, port 8080
 
 |Application Database
 |Docker container

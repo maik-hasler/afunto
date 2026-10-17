@@ -67,7 +67,7 @@ The following table summarizes the key architectural decisions and how they addr
 |Custom in-house mediator (`ISender`, no external library)
 
 |Authentication / Authorization
-|Keycloak 26.7.4, OIDC, JWT Bearer
+|Keycloak 26.8.1, OIDC, JWT Bearer
 
 |Database
 |PostgreSQL 18
