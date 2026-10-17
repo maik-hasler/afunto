@@ -5,6 +5,7 @@ import type { UseFormRegister, UseFormWatch } from "react-hook-form";
 import { FloatingField } from "./shared";
 import type { OpportunityFormValues } from "./schema";
 import { ExclamationTriangleIcon, PhotoIcon } from "../icons";
+import { checkboxClass } from "../../lib/formClasses";
 import { IMAGE_UPLOAD_ACCEPT, getImageUploadHint } from "../../lib/imageUpload";
 
 interface Props {
@@ -206,6 +207,24 @@ export default function BasicsStep({
 					</p>
 				)}
 			</div>
+
+			<label
+				htmlFor="opportunity-members-only"
+				className="flex cursor-pointer items-start gap-3 rounded-xl border-2 border-gray-200 bg-white px-4 py-3 transition hover:border-brand-200 hover:bg-brand-50 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50"
+			>
+				<input
+					type="checkbox"
+					id="opportunity-members-only"
+					className={`mt-0.5 h-4 w-4 ${checkboxClass}`}
+					{...register("membersOnly")}
+				/>
+				<span className="text-sm font-medium text-gray-800">
+					{t("createOpportunity.fieldMembersOnly")}
+					<span className="mt-0.5 block text-xs font-normal text-gray-500">
+						{t("createOpportunity.fieldMembersOnlyHint")}
+					</span>
+				</span>
+			</label>
 		</div>
 	);
 }

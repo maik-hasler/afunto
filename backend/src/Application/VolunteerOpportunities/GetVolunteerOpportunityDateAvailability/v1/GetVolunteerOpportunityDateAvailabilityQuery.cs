@@ -14,5 +14,6 @@ public sealed record GetVolunteerOpportunityDateAvailabilityQuery(
 	double? RadiusKm,
 	string[]? Categories,
 	string? Tag,
-	string? Keyword)
+	string? Keyword,
+	Guid? RequestingUserId = null)
 	: IQuery<IReadOnlyList<VolunteerOpportunityAvailableDate>>;

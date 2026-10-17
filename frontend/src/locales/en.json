@@ -355,6 +355,8 @@
       "orgAddressTip": "Tip: Save a default address in your organization settings and it will be pre-filled here automatically.",
       "orgSettingsLink": "Open organization settings",
       "fieldRemote": "Remote (no location required)",
+      "fieldMembersOnly": "Members only",
+      "fieldMembersOnlyHint": "Only members of your organization can see this opportunity and sign up for it. Everyone else will not find it.",
       "fieldRemoteHint": "This opportunity takes place online or at a flexible location.",
       "editTitle": "Edit opportunity",
       "save": "Save",

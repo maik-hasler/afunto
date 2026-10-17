@@ -22,7 +22,8 @@ internal sealed class GetVolunteerOpportunityDateAvailabilityQueryHandler(
 			request.RadiusKm,
 			request.Categories,
 			request.Tag,
-			request.Keyword);
+			request.Keyword,
+			request.RequestingUserId);
 
 		return await readRepository.GetDateAvailabilityAsync(filter, cancellationToken);
 	}

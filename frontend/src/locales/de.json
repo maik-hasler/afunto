@@ -355,6 +355,8 @@
       "orgAddressTip": "Tipp: Hinterlege eine Standard-Adresse in den Organisationseinstellungen – sie wird hier automatisch vorausgefüllt.",
       "orgSettingsLink": "Zu den Organisationseinstellungen",
       "fieldRemote": "Remote (kein Standort erforderlich)",
+      "fieldMembersOnly": "Nur für Mitglieder",
+      "fieldMembersOnlyHint": "Nur Mitglieder deiner Organisation können diesen Einsatz sehen und sich anmelden. Alle anderen finden ihn nicht.",
       "fieldRemoteHint": "Der Einsatz findet online oder an einem flexiblen Ort statt.",
       "editTitle": "Einsatz bearbeiten",
       "save": "Speichern",

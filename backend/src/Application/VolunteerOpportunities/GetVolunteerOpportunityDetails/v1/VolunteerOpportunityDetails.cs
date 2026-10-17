@@ -26,7 +26,8 @@ public sealed record VolunteerOpportunityDetails(
 	int CurrentParticipantCount,
 	string Status,
 	string? BannerImageUrl,
-	IReadOnlyList<CurrentUserEngagementInfo> CurrentUserEngagements);
+	IReadOnlyList<CurrentUserEngagementInfo> CurrentUserEngagements,
+	bool MembersOnly = false);
 
 public sealed record TimeSlotDetail(
 	Guid Id,

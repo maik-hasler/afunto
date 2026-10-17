@@ -38,6 +38,7 @@ export function buildOpportunityFormSchema(t: TFunction) {
 			category: z.optional(z.string()),
 			tags: z.array(z.string()),
 			validUntil: z.string(),
+			membersOnly: z.boolean(),
 		})
 		.check(
 			z.superRefine((data, ctx) => {

@@ -34,6 +34,7 @@ internal sealed class VolunteerOpportunityReadRepository(
 
 		return await dbContext.VolunteerOpportunitiesQuery
 			.Where(vo => vo.Status == OpportunityStatus.Published)
+			.Where(vo => !vo.MembersOnly)
 			.Where(vo => vo.TimeSlots.Any(ts => ts.EndDateTime >= now) || (!vo.TimeSlots.Any() && vo.ValidUntil != null && vo.ValidUntil >= now))
 			.Select(vo => new SitemapEntry(vo.Id.Value, vo.ModifiedOn ?? vo.CreatedOn))
 			.ToListAsync(cancellationToken);
@@ -54,7 +55,8 @@ internal sealed class VolunteerOpportunityReadRepository(
 			filter.Categories,
 			filter.Tag,
 			filter.Keyword,
-			ResolveBoundingBox(filter.CenterLatitude, filter.CenterLongitude, filter.RadiusKm));
+			ResolveBoundingBox(filter.CenterLatitude, filter.CenterLongitude, filter.RadiusKm),
+			ResolveViewer(filter.RequestingUserId));
 
 		// DateFrom/DateTo describe one window, so a slot has to satisfy both bounds at once.
 		// Testing them as two separate Any() calls let a series with slots on 03/10/17 match a
@@ -243,7 +245,8 @@ internal sealed class VolunteerOpportunityReadRepository(
 			filter.Categories,
 			filter.Tag,
 			filter.Keyword,
-			ResolveBoundingBox(filter.CenterLatitude, filter.CenterLongitude, filter.RadiusKm));
+			ResolveBoundingBox(filter.CenterLatitude, filter.CenterLongitude, filter.RadiusKm),
+			ResolveViewer(filter.RequestingUserId));
 
 		var slots = await query
 			.SelectMany(vo => vo.TimeSlots
@@ -297,6 +300,19 @@ internal sealed class VolunteerOpportunityReadRepository(
 			.ToDictionaryAsync(x => x.Id.Value, x => (x.Name, x.LogoUrl), cancellationToken);
 	}
 
+	private static UserId? ResolveViewer(Guid? requestingUserId) =>
+		requestingUserId is Guid id ? UserId.Create(id).GetValueOrThrow() : null;
+
+	// A members-only opportunity exists only for the owning organization's members
+	// (organizers included); anyone else, signed in or not, gets no row at all (afunto#2406).
+	private IQueryable<VolunteerOpportunity> ApplyMembersOnlyVisibility(
+		IQueryable<VolunteerOpportunity> source,
+		UserId? viewerId) =>
+		viewerId is UserId viewer
+			? source.Where(vo => !vo.MembersOnly ||
+				dbContext.OrganizationMembershipsQuery.Any(m => m.OrganizationId == vo.OrganizationId && m.UserId == viewer))
+			: source.Where(vo => !vo.MembersOnly);
+
 	private IQueryable<VolunteerOpportunity> ApplyPubliclyListedFilters(
 		IQueryable<VolunteerOpportunity> source,
 		DateTimeOffset now,
@@ -306,9 +322,10 @@ internal sealed class VolunteerOpportunityReadRepository(
 		string[]? categories,
 		string? tag,
 		string? keyword,
-		GeoBoundingBox? boundingBox)
+		GeoBoundingBox? boundingBox,
+		UserId? viewerId)
 	{
-		var query = source
+		var query = ApplyMembersOnlyVisibility(source, viewerId)
 			.Where(vo => vo.Status == OpportunityStatus.Published)
 
 			.Where(vo => vo.TimeSlots.Any(ts => ts.EndDateTime >= now) || (!vo.TimeSlots.Any() && vo.ValidUntil != null && vo.ValidUntil >= now));
@@ -517,12 +534,25 @@ internal sealed class VolunteerOpportunityReadRepository(
 				x.vo.CreatedOn,
 				x.vo.ValidUntil,
 				x.vo.Status,
+				x.vo.MembersOnly,
 				BannerImageUrl = x.vo.BannerImageUrl
 			})
 			.FirstOrDefaultAsync(cancellationToken);
 
 		if (result is null)
 			return null;
+
+		if (result.MembersOnly)
+		{
+			var isMember = requestingUserId is Guid memberUserId &&
+				await dbContext.IsMemberAsync(
+					result.OrganizationId,
+					UserId.Create(memberUserId).GetValueOrThrow(),
+					cancellationToken);
+
+			if (!isMember)
+				return null;
+		}
 
 		if (result.Status != OpportunityStatus.Published)
 		{
@@ -615,7 +645,8 @@ internal sealed class VolunteerOpportunityReadRepository(
 			currentParticipantCount,
 			result.Status.ToString(),
 			result.BannerImageUrl,
-			currentUserEngagements);
+			currentUserEngagements,
+			result.MembersOnly);
 	}
 
 	public async ValueTask<IReadOnlyList<VolunteerOpportunitySummary>> GetSummariesByOrganizationAsync(
@@ -626,8 +657,10 @@ internal sealed class VolunteerOpportunityReadRepository(
 		var organizationId_ = OrganizationId.Create(organizationId).GetValueOrThrow();
 		var now = DateTimeOffset.UtcNow;
 
+		// Only the public organization profile reads this, and that response is shared
+		// between viewers - members-only opportunities never belong on it (afunto#2406).
 		var orgQuery = dbContext.VolunteerOpportunitiesQuery
-			.Where(vo => vo.OrganizationId == organizationId_);
+			.Where(vo => vo.OrganizationId == organizationId_ && !vo.MembersOnly);
 
 		if (status is OpportunityStatus s)
 			orgQuery = orgQuery.Where(vo => vo.Status == s);

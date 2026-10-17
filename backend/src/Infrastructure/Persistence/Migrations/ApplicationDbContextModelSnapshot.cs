@@ -863,6 +863,12 @@ namespace Infrastructure.Persistence.Migrations
 						.HasColumnType("boolean")
 						.HasColumnName("is_remote");
 
+					b.Property<bool>("MembersOnly")
+						.ValueGeneratedOnAdd()
+						.HasColumnType("boolean")
+						.HasDefaultValue(false)
+						.HasColumnName("members_only");
+
 					b.Property<DateTimeOffset?>("ModifiedOn")
 						.HasColumnType("timestamp with time zone")
 						.HasColumnName("modified_on");

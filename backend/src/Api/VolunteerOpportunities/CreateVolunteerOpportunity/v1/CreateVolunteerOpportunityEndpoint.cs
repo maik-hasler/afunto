@@ -139,7 +139,8 @@ internal sealed class CreateVolunteerOpportunityEndpoint
 			status,
 			userId,
 			string.IsNullOrWhiteSpace(request.CheckInPin) ? null : request.CheckInPin,
-			request.ValidUntil);
+			request.ValidUntil,
+			request.MembersOnly);
 
 		var opportunity = await sender.Send(command, cancellationToken);
 
@@ -166,7 +167,8 @@ internal sealed class CreateVolunteerOpportunityEndpoint
 			opportunity.Tags,
 			opportunity.CreatedOn,
 			opportunity.Status.ToString(),
-			opportunity.ValidUntil);
+			opportunity.ValidUntil,
+			opportunity.MembersOnly);
 
 		return Results.Ok(response);
 	}
