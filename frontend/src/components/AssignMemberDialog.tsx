@@ -55,7 +55,11 @@ export default function AssignMemberDialog({
 		try {
 			await api.assignMemberToOpportunity({
 				path: { opportunityId },
-				body: { memberId, timeSlotId: needsSlot ? timeSlotId : null },
+				body: {
+					memberId,
+					timeSlotId: needsSlot ? timeSlotId : null,
+					message: null,
+				},
 			});
 			onAssigned();
 		} catch (err) {
