@@ -283,6 +283,19 @@
       "notFoundTitle": "Einsatz nicht gefunden",
       "notFoundMessage": "Dieser Einsatz existiert nicht oder wurde entfernt. Prüfe den Link, dem du gefolgt bist – die ID darin könnte unvollständig sein."
     },
+    "assignMember": {
+      "title": "Mitglied zuweisen",
+      "message": "Das Mitglied wird sofort eingetragen und über die bestätigte Eintragung benachrichtigt.",
+      "confirm": "Zuweisen",
+      "cancel": "Abbrechen",
+      "memberLabel": "Mitglied",
+      "memberPlaceholder": "Mitglied auswählen",
+      "slotLabel": "Zeitfenster",
+      "slotPlaceholder": "Zeitfenster auswählen",
+      "incomplete": "Bitte wähle ein Mitglied und, falls angeboten, ein Zeitfenster.",
+      "button": "Mitglied zuweisen",
+      "success": "Mitglied zugewiesen."
+    },
     "createOpportunity": {
       "title": "Einsatz erstellen",
       "stepOf": "Schritt {{current}} von {{total}}",

@@ -283,6 +283,19 @@
       "notFoundTitle": "Opportunity not found",
       "notFoundMessage": "This opportunity does not exist, or it has been removed. Check the link you followed - the id in it may be incomplete."
     },
+    "assignMember": {
+      "title": "Assign a member",
+      "message": "The member is signed up right away and notified that the sign-up is confirmed.",
+      "confirm": "Assign",
+      "cancel": "Cancel",
+      "memberLabel": "Member",
+      "memberPlaceholder": "Choose a member",
+      "slotLabel": "Time slot",
+      "slotPlaceholder": "Choose a time slot",
+      "incomplete": "Please choose a member and, if offered, a time slot.",
+      "button": "Assign a member",
+      "success": "Member assigned."
+    },
     "createOpportunity": {
       "title": "Create opportunity",
       "stepOf": "Step {{current}} of {{total}}",
