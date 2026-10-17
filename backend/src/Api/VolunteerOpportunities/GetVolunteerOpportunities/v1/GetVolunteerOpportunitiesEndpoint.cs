@@ -47,8 +47,7 @@ internal sealed class GetVolunteerOpportunitiesEndpoint
 			request.Occurrence,
 			request.ParticipationType,
 			request.Categories,
-			request.Keyword,
-			Guid.TryParse(user.FindFirstValue("sub"), out var uid) ? uid : null);
+			request.Keyword);
 
 		if (filterProblem is not null)
 			return filterProblem;
@@ -66,7 +65,8 @@ internal sealed class GetVolunteerOpportunitiesEndpoint
 			request.RadiusKm,
 			request.Categories,
 			request.Tag,
-			request.Keyword);
+			request.Keyword,
+			Guid.TryParse(user.FindFirstValue("sub"), out var uid) ? uid : null);
 
 		var result = await sender.Send(query, cancellationToken);
 
