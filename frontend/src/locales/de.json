@@ -356,7 +356,7 @@
       "orgSettingsLink": "Zu den Organisationseinstellungen",
       "fieldRemote": "Remote (kein Standort erforderlich)",
       "fieldMembersOnly": "Nur für Mitglieder",
-      "fieldMembersOnlyHint": "Nur Mitglieder deiner Organisation können diesen Einsatz sehen und sich anmelden. Alle anderen finden ihn nicht.",
+      "fieldMembersOnlyHint": "Nur Mitglieder deiner Organisation können diesen Einsatz sehen und sich eintragen. Alle anderen finden ihn nicht.",
       "fieldRemoteHint": "Der Einsatz findet online oder an einem flexiblen Ort statt.",
       "editTitle": "Einsatz bearbeiten",
       "save": "Speichern",
