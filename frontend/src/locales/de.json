@@ -516,6 +516,7 @@
       "participantsNoSlots_one": "{{count}} Eintragung (noch keine Zeitslots)",
       "participantsNoSlots_other": "{{count}} Eintragungen (noch keine Zeitslots)",
       "editLoading": "Wird geöffnet…",
+      "internalOnlyFilter": "Nur interne Einsätze",
       "loadMore": "Mehr laden"
     },
     "orgDashboard": {

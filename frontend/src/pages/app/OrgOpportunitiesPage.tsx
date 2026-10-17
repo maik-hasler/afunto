@@ -10,7 +10,7 @@ import { useLoadMore } from "../../hooks/useLoadMore";
 import { usePageTitle } from "../../hooks/usePageTitle";
 import { dispatchToast } from "../../lib/toastBus";
 import { getApiErrorMessage } from "../../lib/apiError";
-import { labelClass, textareaClass } from "../../lib/formClasses";
+import { checkboxClass, labelClass, textareaClass } from "../../lib/formClasses";
 import { cardClass } from "../../lib/surfaceClasses";
 import { getOpportunityCapacity } from "../../lib/opportunityCapacity";
 import { formatSignUpCount, pickLocalizedText } from "../../lib/format";
@@ -58,6 +58,8 @@ export default function OrgOpportunitiesPage() {
 	// The generated client types every OpenAPI integer as `number | string`,
 	// so the paging counters are narrowed back to numbers here - `useLoadMore`
 	// compares `pageCount` against the page it just asked for.
+	const [internalOnly, setInternalOnly] = useState(false);
+
 	async function loadOpportunities(status: string, page: number) {
 		const result = await api.getOrganizationOpportunities({
 			path: { organizationId },
@@ -65,6 +67,7 @@ export default function OrgOpportunitiesPage() {
 				status,
 				pageNumber: page,
 				pageSize: OPPORTUNITIES_PAGE_SIZE,
+				membersOnly: internalOnly ? true : undefined,
 			},
 		});
 		return {
@@ -89,7 +92,7 @@ export default function OrgOpportunitiesPage() {
 	} = useLoadMore<VolunteerOpportunitySummary>(
 		(page) => loadOpportunities("Draft", page),
 		{
-			deps: [organizationId],
+			deps: [organizationId, internalOnly],
 			getErrorMessage: (e) => getApiErrorMessage(e, t("error.serverError")),
 		},
 	);
@@ -107,7 +110,7 @@ export default function OrgOpportunitiesPage() {
 	} = useLoadMore<VolunteerOpportunitySummary>(
 		(page) => loadOpportunities("Published", page),
 		{
-			deps: [organizationId],
+			deps: [organizationId, internalOnly],
 			getErrorMessage: (e) => getApiErrorMessage(e, t("error.serverError")),
 		},
 	);
@@ -125,7 +128,7 @@ export default function OrgOpportunitiesPage() {
 	} = useLoadMore<VolunteerOpportunitySummary>(
 		(page) => loadOpportunities("Unpublished", page),
 		{
-			deps: [organizationId],
+			deps: [organizationId, internalOnly],
 			getErrorMessage: (e) => getApiErrorMessage(e, t("error.serverError")),
 		},
 	);
@@ -143,7 +146,7 @@ export default function OrgOpportunitiesPage() {
 	} = useLoadMore<VolunteerOpportunitySummary>(
 		(page) => loadOpportunities("Cancelled", page),
 		{
-			deps: [organizationId],
+			deps: [organizationId, internalOnly],
 			getErrorMessage: (e) => getApiErrorMessage(e, t("error.serverError")),
 		},
 	);
@@ -556,6 +559,17 @@ export default function OrgOpportunitiesPage() {
 
 	return (
 		<div>
+			<label className="mb-4 flex w-fit cursor-pointer items-center gap-2 text-sm text-gray-700">
+				<input
+					type="checkbox"
+					className={`h-4 w-4 ${checkboxClass}`}
+					checked={internalOnly}
+					onChange={(e) => setInternalOnly(e.target.checked)}
+					data-testid="internal-only-filter"
+				/>
+				{t("orgOpportunities.internalOnlyFilter")}
+			</label>
+
 			{initialLoading && !anyError && (
 				<div
 					role="status"

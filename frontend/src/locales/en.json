@@ -516,6 +516,7 @@
       "participantsNoSlots_one": "{{count}} sign-up (no time slots yet)",
       "participantsNoSlots_other": "{{count}} sign-ups (no time slots yet)",
       "editLoading": "Opening…",
+      "internalOnlyFilter": "Internal opportunities only",
       "loadMore": "Load more"
     },
     "orgDashboard": {

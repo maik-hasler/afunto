@@ -744,6 +744,7 @@ internal sealed class VolunteerOpportunityReadRepository(
 		OpportunityStatus status,
 		int pageNumber,
 		int pageSize,
+		bool? membersOnly,
 		CancellationToken cancellationToken = default)
 	{
 		var organizationId_ = OrganizationId.Create(organizationId).GetValueOrThrow();
@@ -751,6 +752,9 @@ internal sealed class VolunteerOpportunityReadRepository(
 
 		var orgQuery = dbContext.VolunteerOpportunitiesQuery
 			.Where(vo => vo.OrganizationId == organizationId_ && vo.Status == status);
+
+		if (membersOnly is bool wantMembersOnly)
+			orgQuery = orgQuery.Where(vo => vo.MembersOnly == wantMembersOnly);
 
 		var totalCount = await orgQuery.CountAsync(cancellationToken);
 

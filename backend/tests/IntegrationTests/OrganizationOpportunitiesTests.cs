@@ -18,7 +18,7 @@ public class OrganizationOpportunitiesTests(IntegrationTestFixture fixture)
 		var client = await fixture.CreateAuthenticatedClientAsync("olaf", "olaf123");
 		var orgId = await CreateOrganizationAsync(client, cancellationToken);
 
-		var result = await client.GetOrganizationOpportunitiesAsync(orgId, "Published", 1, 10, cancellationToken);
+		var result = await client.GetOrganizationOpportunitiesAsync(orgId, "Published", 1, 10, null, cancellationToken);
 
 		result.TotalItems.Should().Be(0);
 		result.Items.Should().BeEmpty();
@@ -36,7 +36,7 @@ public class OrganizationOpportunitiesTests(IntegrationTestFixture fixture)
 		await CreateDraftOpportunityAsync(client, orgId, "Draft 1", cancellationToken);
 		await CreatePublishedOpportunityAsync(client, orgId, "Published 1", cancellationToken);
 
-		var result = await client.GetOrganizationOpportunitiesAsync(orgId, "Draft", 1, 10, cancellationToken);
+		var result = await client.GetOrganizationOpportunitiesAsync(orgId, "Draft", 1, 10, null, cancellationToken);
 
 		result.TotalItems.Should().Be(1);
 		result.Items.Single().TitleDe.Should().Be("Draft 1");
@@ -52,7 +52,7 @@ public class OrganizationOpportunitiesTests(IntegrationTestFixture fixture)
 		await CreateDraftOpportunityAsync(client, orgId, "Draft 1", cancellationToken);
 		await CreatePublishedOpportunityAsync(client, orgId, "Published 1", cancellationToken);
 
-		var result = await client.GetOrganizationOpportunitiesAsync(orgId, "Published", 1, 10, cancellationToken);
+		var result = await client.GetOrganizationOpportunitiesAsync(orgId, "Published", 1, 10, null, cancellationToken);
 
 		result.TotalItems.Should().Be(1);
 		result.Items.Single().TitleDe.Should().Be("Published 1");
@@ -69,7 +69,7 @@ public class OrganizationOpportunitiesTests(IntegrationTestFixture fixture)
 		await CreatePublishedOpportunityAsync(client, orgId, "Opportunity 2", cancellationToken);
 		await CreatePublishedOpportunityAsync(client, orgId, "Opportunity 3", cancellationToken);
 
-		var result = await client.GetOrganizationOpportunitiesAsync(orgId, "Published", 1, 2, cancellationToken);
+		var result = await client.GetOrganizationOpportunitiesAsync(orgId, "Published", 1, 2, null, cancellationToken);
 
 		result.TotalItems.Should().Be(3);
 		result.Items.Should().HaveCount(2);
@@ -88,7 +88,7 @@ public class OrganizationOpportunitiesTests(IntegrationTestFixture fixture)
 		await CreatePublishedOpportunityAsync(client, orgId, "Opportunity 2", cancellationToken);
 		await CreatePublishedOpportunityAsync(client, orgId, "Opportunity 3", cancellationToken);
 
-		var result = await client.GetOrganizationOpportunitiesAsync(orgId, "Published", 2, 2, cancellationToken);
+		var result = await client.GetOrganizationOpportunitiesAsync(orgId, "Published", 2, 2, null, cancellationToken);
 
 		result.TotalItems.Should().Be(3);
 		result.Items.Should().HaveCount(1);
@@ -102,7 +102,7 @@ public class OrganizationOpportunitiesTests(IntegrationTestFixture fixture)
 		var client = await fixture.CreateAuthenticatedClientAsync("olaf", "olaf123");
 		var orgId = await CreateOrganizationAsync(client, cancellationToken);
 
-		var act = () => client.GetOrganizationOpportunitiesAsync(orgId, "NotAStatus", 1, 10, cancellationToken);
+		var act = () => client.GetOrganizationOpportunitiesAsync(orgId, "NotAStatus", 1, 10, null, cancellationToken);
 
 		var exception = await act.Should().ThrowAsync<ApiException>();
 		exception.Which.StatusCode.Should().Be(400);
@@ -115,7 +115,7 @@ public class OrganizationOpportunitiesTests(IntegrationTestFixture fixture)
 		var client = await fixture.CreateAuthenticatedClientAsync("olaf", "olaf123");
 		var orgId = await CreateOrganizationAsync(client, cancellationToken);
 
-		var act = () => client.GetOrganizationOpportunitiesAsync(orgId, "Published", 0, 10, cancellationToken);
+		var act = () => client.GetOrganizationOpportunitiesAsync(orgId, "Published", 0, 10, null, cancellationToken);
 
 		var exception = await act.Should().ThrowAsync<ApiException>();
 		exception.Which.StatusCode.Should().Be(400);
@@ -128,7 +128,7 @@ public class OrganizationOpportunitiesTests(IntegrationTestFixture fixture)
 		var client = await fixture.CreateAuthenticatedClientAsync("olaf", "olaf123");
 		var orgId = await CreateOrganizationAsync(client, cancellationToken);
 
-		var act = () => client.GetOrganizationOpportunitiesAsync(orgId, "Published", 1, 101, cancellationToken);
+		var act = () => client.GetOrganizationOpportunitiesAsync(orgId, "Published", 1, 101, null, cancellationToken);
 
 		var exception = await act.Should().ThrowAsync<ApiException>();
 		exception.Which.StatusCode.Should().Be(400);
@@ -140,7 +140,7 @@ public class OrganizationOpportunitiesTests(IntegrationTestFixture fixture)
 	{
 		var anonClient = new AfuntoApi(fixture.CreateHttpClient());
 
-		var act = () => anonClient.GetOrganizationOpportunitiesAsync(Guid.NewGuid(), "Published", 1, 10, cancellationToken);
+		var act = () => anonClient.GetOrganizationOpportunitiesAsync(Guid.NewGuid(), "Published", 1, 10, null, cancellationToken);
 
 		var exception = await act.Should().ThrowAsync<ApiException>();
 		exception.Which.StatusCode.Should().Be(401);
@@ -160,7 +160,7 @@ public class OrganizationOpportunitiesTests(IntegrationTestFixture fixture)
 
 		await CreateOrganizationAsync(veraClient, cancellationToken);
 
-		var act = () => veraClient.GetOrganizationOpportunitiesAsync(org1Id, "Published", 1, 10, cancellationToken);
+		var act = () => veraClient.GetOrganizationOpportunitiesAsync(org1Id, "Published", 1, 10, null, cancellationToken);
 
 		var exception = await act.Should().ThrowAsync<ApiException>();
 		exception.Which.StatusCode.Should().Be(403);
@@ -182,7 +182,7 @@ public class OrganizationOpportunitiesTests(IntegrationTestFixture fixture)
 
 		await fixture.AddPlainMemberDirectlyAsync(orgId, vera.Id, cancellationToken);
 
-		var result = await veraClient.GetOrganizationOpportunitiesAsync(orgId, "Published", 1, 10, cancellationToken);
+		var result = await veraClient.GetOrganizationOpportunitiesAsync(orgId, "Published", 1, 10, null, cancellationToken);
 
 		result.TotalItems.Should().Be(1);
 		result.Items.Single().TitleDe.Should().Be("Published 1");
