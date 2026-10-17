@@ -1,15 +1,15 @@
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
-import type { UseFormRegister, UseFormWatch } from "react-hook-form";
+import type { UseFormRegister } from "react-hook-form";
 import type { AddressDto } from "../../client";
-import { FloatingField } from "./shared";
+import { ChoiceGroup, FloatingField } from "./shared";
 import type { OpportunityFormValues } from "./schema";
-import { checkboxClass } from "../../lib/formClasses";
+import { inlineLinkClass } from "../../lib/linkClasses";
 
 interface Props {
 	register: UseFormRegister<OpportunityFormValues>;
-	watch: UseFormWatch<OpportunityFormValues>;
-	onRemoteToggle: (checked: boolean) => void;
+	isRemote: boolean;
+	onRemoteChange: (isRemote: boolean) => void;
 	errors: {
 		street?: string;
 		houseNumber?: string;
@@ -22,10 +22,12 @@ interface Props {
 	onApplyOrgAddress: () => void;
 }
 
+type LocationMode = "onSite" | "remote";
+
 export default function LocationStep({
 	register,
-	watch,
-	onRemoteToggle,
+	isRemote,
+	onRemoteChange,
 	errors,
 	organizationId,
 	orgAddress,
@@ -33,63 +35,44 @@ export default function LocationStep({
 	onApplyOrgAddress,
 }: Props) {
 	const { t } = useTranslation();
-	const isRemote = watch("isRemote");
 
 	return (
-		<div className="space-y-4" data-testid="wizard-step-2">
-			<label
-				htmlFor="opportunity-remote"
-				className="flex cursor-pointer items-start gap-3 rounded-xl border-2 border-gray-200 bg-white px-4 py-3 transition hover:border-brand-200 hover:bg-brand-50 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50"
-			>
-				<input
-					type="checkbox"
-					id="opportunity-remote"
-					className={`mt-0.5 h-4 w-4 ${checkboxClass}`}
-					{...register("isRemote", {
-						onChange: (e) => onRemoteToggle(e.target.checked),
-					})}
-				/>
-				<span className="text-sm font-medium text-gray-800">
-					{t("createOpportunity.fieldRemote")}
-					<span className="mt-0.5 block text-xs font-normal text-gray-500">
-						{t("createOpportunity.fieldRemoteHint")}
-					</span>
-				</span>
-			</label>
+		<div className="space-y-5" data-testid="wizard-step-2">
+			<ChoiceGroup<LocationMode>
+				legend={t("createOpportunity.locationModeLegend")}
+				name="opportunity-location-mode"
+				value={isRemote ? "remote" : "onSite"}
+				onChange={(mode) => onRemoteChange(mode === "remote")}
+				options={[
+					{
+						value: "onSite",
+						label: t("createOpportunity.locationOnSite"),
+						id: "opportunity-on-site",
+					},
+					{
+						value: "remote",
+						label: t("createOpportunity.locationRemote"),
+						id: "opportunity-remote",
+					},
+				]}
+			/>
 
-			{!isRemote && (
-				<>
-					<div
-						data-testid="location-hint"
-						className="rounded-card border border-brand-100 bg-brand-50 px-4 py-3"
-					>
-						<div className="flex items-start justify-between gap-3">
-							<p className="text-sm leading-relaxed text-brand-800">
-								{t("createOpportunity.locationHint")}
-							</p>
-							{orgAddress && !isEditMode && (
-								<button
-									type="button"
-									onClick={onApplyOrgAddress}
-									className="shrink-0 rounded-lg border border-brand-200 bg-white px-3 py-1.5 text-xs font-semibold text-brand-700 transition hover:bg-brand-100"
-								>
-									{t("createOpportunity.useOrgAddress")}
-								</button>
-							)}
-						</div>
-						{!orgAddress && !isEditMode && (
-							<p className="mt-2 text-xs leading-relaxed text-brand-700">
-								{t("createOpportunity.orgAddressTip")}{" "}
-								<Link
-									to={`/app/${organizationId}/dashboard/settings`}
-									className="font-semibold underline hover:text-brand-900"
-								>
-									{t("createOpportunity.orgSettingsLink")}
-								</Link>
-							</p>
-						)}
-					</div>
-					<div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_5rem]">
+			{isRemote ? (
+				<p className="text-xs text-gray-500">
+					{t("createOpportunity.locationRemoteHint")}
+				</p>
+			) : (
+				<div className="space-y-3">
+					{orgAddress && !isEditMode && (
+						<button
+							type="button"
+							onClick={onApplyOrgAddress}
+							className="min-h-6 text-sm font-medium text-brand-700 hover:underline"
+						>
+							{t("createOpportunity.useOrgAddress")}
+						</button>
+					)}
+					<div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_9rem]">
 						<FloatingField
 							id="opportunity-street"
 							label={t("createOpportunity.fieldStreet")}
@@ -107,7 +90,7 @@ export default function LocationStep({
 							maxLength={10}
 						/>
 					</div>
-					<div className="grid grid-cols-1 gap-3 sm:grid-cols-[5rem_1fr]">
+					<div className="grid grid-cols-1 gap-3 sm:grid-cols-[7rem_1fr]">
 						<FloatingField
 							id="opportunity-zip"
 							label={t("createOpportunity.fieldZip")}
@@ -127,7 +110,22 @@ export default function LocationStep({
 							maxLength={100}
 						/>
 					</div>
-				</>
+					<p className="text-xs text-gray-500" data-testid="location-hint">
+						{t("createOpportunity.locationHint")}
+						{!orgAddress && !isEditMode && (
+							<>
+								{" "}
+								{t("createOpportunity.orgAddressTip")}{" "}
+								<Link
+									to={`/app/${organizationId}/dashboard/settings`}
+									className={inlineLinkClass}
+								>
+									{t("createOpportunity.orgSettingsLink")}
+								</Link>
+							</>
+						)}
+					</p>
+				</div>
 			)}
 		</div>
 	);

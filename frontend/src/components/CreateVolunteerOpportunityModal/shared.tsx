@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { UseFormRegisterReturn } from "react-hook-form";
 
 import CharCount from "../CharCount";
@@ -101,7 +102,7 @@ export function FloatingField({
 	pattern?: string;
 }) {
 	const fieldClass = `peer w-full rounded-xl border bg-white px-4 pb-2 pt-5 text-sm text-gray-900 shadow-sm transition ${fieldBorderClass(Boolean(error))}`;
-	const labelClass = `pointer-events-none absolute left-4 top-1.5 text-xs font-medium transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-placeholder-shown:text-gray-600 peer-focus:top-1.5 peer-focus:text-xs peer-focus:font-medium ${
+	const labelClass = `pointer-events-none absolute left-4 right-4 top-1.5 truncate text-xs font-medium transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-placeholder-shown:text-gray-600 peer-focus:top-1.5 peer-focus:text-xs peer-focus:font-medium ${
 		error
 			? "text-red-600 peer-focus:text-red-600"
 			: "text-gray-600 peer-focus:text-brand-700"
@@ -154,5 +155,73 @@ export function FloatingField({
 				)
 			)}
 		</div>
+	);
+}
+
+interface ChoiceOption<T extends string> {
+	value: T;
+	label: string;
+	id?: string;
+}
+
+/**
+ * One question answered by picking one of a few options, drawn as a row of
+ * compact segments rather than a grid of large cards: the wizard asks four
+ * of these, and at card size they were most of what made it feel crowded
+ * (#2387). A real fieldset with a legend, so each radio is announced with
+ * its question. Driven either by a react-hook-form registration (string
+ * fields) or by `value`/`onChange` (the remote flag, which is a boolean).
+ */
+export function ChoiceGroup<T extends string>({
+	legend,
+	name,
+	options,
+	value,
+	onChange,
+	registration,
+	children,
+}: {
+	legend: string;
+	name: string;
+	options: readonly ChoiceOption<T>[];
+	value: T;
+	onChange?: (value: T) => void;
+	registration?: UseFormRegisterReturn;
+	children?: ReactNode;
+}) {
+	return (
+		<fieldset>
+			<legend className="mb-2 text-sm font-semibold text-gray-800">
+				{legend}
+			</legend>
+			<div
+				className={`grid gap-2 ${options.length > 2 ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-2"}`}
+			>
+				{options.map((option) => (
+					<label
+						key={option.value}
+						className={`flex min-h-11 cursor-pointer items-center justify-center rounded-xl border px-3 py-2 text-center text-sm font-medium transition ${
+							value === option.value
+								? "border-brand-600 bg-brand-50 text-brand-800"
+								: "border-gray-500 bg-white text-gray-700 hover:bg-gray-50"
+						}`}
+					>
+						<input
+							type="radio"
+							id={option.id}
+							name={name}
+							value={option.value}
+							className="sr-only"
+							{...(registration ?? {
+								checked: value === option.value,
+								onChange: () => onChange?.(option.value),
+							})}
+						/>
+						{option.label}
+					</label>
+				))}
+			</div>
+			{children}
+		</fieldset>
 	);
 }

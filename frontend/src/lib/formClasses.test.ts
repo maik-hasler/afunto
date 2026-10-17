@@ -125,7 +125,10 @@ describe("the shared checkbox recipe", () => {
 				).toContain("checkboxClass");
 			}
 		}
-		expect(checked).toBeGreaterThanOrEqual(7);
+		// A floor, so a scan that silently matches nothing cannot pass. Six since
+		// the opportunity wizard's remote checkbox became an on-site/remote
+		// choice (#2387).
+		expect(checked).toBeGreaterThanOrEqual(6);
 	});
 });
 

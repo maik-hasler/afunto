@@ -688,6 +688,8 @@ public class NotificationTests(IntegrationTestFixture fixture)
 				TitleDe = title,
 				TitleEn = titleEn,
 				DescriptionDe = "Integration test opportunity for notifications",
+				// The English title and description are only accepted as a pair.
+				DescriptionEn = titleEn is null ? null : "Integration test opportunity for notifications (EN)",
 				OrganizationId = orgId,
 				Street = "Test Street",
 				HouseNumber = "1",
