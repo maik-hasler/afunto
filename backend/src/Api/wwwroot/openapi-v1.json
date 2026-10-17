@@ -1315,6 +1315,13 @@
               ],
               "format": "int32"
             }
+          },
+          {
+            "name": "membersOnly",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -7577,6 +7584,107 @@
         }
       }
     },
+    "/v1/volunteer-opportunities/{opportunityId}/assignments": {
+      "post": {
+        "tags": [
+          "Engagements"
+        ],
+        "operationId": "AssignMemberToOpportunity",
+        "parameters": [
+          {
+            "name": "opportunityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignMemberToOpportunityRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EngagementStatusResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/admin/audit-logs": {
       "get": {
         "tags": [
@@ -7990,6 +8098,33 @@
             "items": {
               "type": "string"
             }
+          }
+        }
+      },
+      "AssignMemberToOpportunityRequest": {
+        "required": [
+          "memberId",
+          "timeSlotId",
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "memberId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "timeSlotId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "message": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
@@ -8663,6 +8798,10 @@
               "string"
             ],
             "format": "date-time"
+          },
+          "membersOnly": {
+            "type": "boolean",
+            "default": false
           }
         }
       },
@@ -8688,7 +8827,8 @@
           "tags",
           "createdOn",
           "status",
-          "validUntil"
+          "validUntil",
+          "membersOnly"
         ],
         "type": "object",
         "properties": {
@@ -8797,6 +8937,9 @@
               "string"
             ],
             "format": "date-time"
+          },
+          "membersOnly": {
+            "type": "boolean"
           }
         }
       },
@@ -9666,6 +9809,10 @@
             "items": {
               "$ref": "#/components/schemas/CalendarTimeSlotDto"
             }
+          },
+          "membersOnly": {
+            "type": "boolean",
+            "default": false
           }
         }
       },
@@ -11269,6 +11416,10 @@
               "string"
             ],
             "format": "date-time"
+          },
+          "membersOnly": {
+            "type": "boolean",
+            "default": false
           }
         }
       },
@@ -11460,6 +11611,10 @@
             "items": {
               "$ref": "#/components/schemas/CurrentUserEngagementInfo"
             }
+          },
+          "membersOnly": {
+            "type": "boolean",
+            "default": false
           }
         }
       },
@@ -11649,6 +11804,10 @@
               "null",
               "string"
             ]
+          },
+          "membersOnly": {
+            "type": "boolean",
+            "default": false
           }
         }
       }
