@@ -13,5 +13,6 @@ public enum NotificationKind
 	InvitationReceived,
 	InvitationAccepted,
 	InvitationDeclined,
-	FeedbackSubmitted
+	FeedbackSubmitted,
+	MembersOnlyOpportunityPublished
 }

@@ -285,6 +285,9 @@ public sealed class VolunteerOpportunity
 		if (!isRemote && address is not null && address.Latitude is null)
 			opportunity.AddEvent(new VolunteerOpportunityGeocodingRequestedDomainEvent(opportunity.Id));
 
+		if (status == OpportunityStatus.Published)
+			opportunity.AddEvent(new VolunteerOpportunityPublishedDomainEvent(opportunity.Id, organizationId));
+
 		return opportunity;
 	}
 

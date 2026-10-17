@@ -314,7 +314,7 @@ namespace Infrastructure.Persistence.Migrations
 
 					b.ToTable("notification", null, t =>
 						{
-							t.HasCheckConstraint("ck_notification_kind_valid", "kind IN ('EngagementCreated', 'EngagementConfirmed', 'EngagementCancelled', 'EngagementWithdrawn', 'OpportunityUpdated', 'OpportunityDeleted', 'OpportunityUnpublished', 'OpportunityCancelled', 'InvitationReceived', 'InvitationAccepted', 'InvitationDeclined', 'FeedbackSubmitted')");
+							t.HasCheckConstraint("ck_notification_kind_valid", "kind IN ('EngagementCreated', 'EngagementConfirmed', 'EngagementCancelled', 'EngagementWithdrawn', 'OpportunityUpdated', 'OpportunityDeleted', 'OpportunityUnpublished', 'OpportunityCancelled', 'InvitationReceived', 'InvitationAccepted', 'InvitationDeclined', 'FeedbackSubmitted', 'MembersOnlyOpportunityPublished')");
 						});
 				});
 

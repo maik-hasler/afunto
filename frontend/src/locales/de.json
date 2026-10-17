@@ -1066,7 +1066,8 @@
         "InvitationReceived": "Du wurdest eingeladen, <titleSpan>{{title}}</titleSpan> beizutreten",
         "InvitationAccepted": "Deine Einladung, <titleSpan>{{title}}</titleSpan> beizutreten, wurde angenommen",
         "InvitationDeclined": "Deine Einladung, <titleSpan>{{title}}</titleSpan> beizutreten, wurde abgelehnt",
-        "FeedbackSubmitted": "Neues Feedback erhalten für <titleSpan>{{title}}</titleSpan>"
+        "FeedbackSubmitted": "Neues Feedback erhalten für <titleSpan>{{title}}</titleSpan>",
+        "MembersOnlyOpportunityPublished": "Neuer interner Einsatz: <titleSpan>{{title}}</titleSpan>"
       }
     },
     "language": {
