@@ -10,7 +10,10 @@ public sealed record OrganizationCalendarEventDto(
 	// it is where an organizer plans - but a list of what still needs staffing
 	// must not present a draft as a shift that is short of people.
 	string Status,
-	IReadOnlyList<CalendarTimeSlotDto> TimeSlots);
+	IReadOnlyList<CalendarTimeSlotDto> TimeSlots,
+	// Internal opportunities look like any other shift on the board, so organizers get
+	// told - nobody should assume a members-only shift is publicly staffed (afunto#2406).
+	bool MembersOnly = false);
 
 public sealed record CalendarTimeSlotDto(
 	Guid TimeSlotId,

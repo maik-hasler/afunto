@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { addDays, endOfDay, startOfDay } from "date-fns";
 import type { OrganizationCalendarEventDto } from "../../../client";
 import { useApiClient } from "../../../hooks/useApiClient";
+import Chip from "../../../components/Chip";
 import Skeleton from "../../../components/Skeleton";
 import ErrorBanner from "../../../components/ErrorBanner";
 import EmptyState from "../../../components/EmptyState";
@@ -154,6 +155,11 @@ function UpcomingOpportunitiesWidget({
 								>
 									{slot.title}
 								</p>
+								{slot.membersOnly && (
+									<Chip tone="warning" size="sm" className="mt-1">
+										{t("opportunities.membersOnlyBadge")}
+									</Chip>
+								)}
 								<div
 									className={`mt-0.5 flex gap-x-2 text-xs text-gray-500 ${
 										narrow

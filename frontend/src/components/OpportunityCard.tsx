@@ -57,6 +57,7 @@ export interface OpportunityCardItem {
 	organizationLogoUrl?: string | null;
 	tags?: string[] | null;
 	bannerImageUrl?: string | null;
+	membersOnly?: boolean;
 }
 
 /**
@@ -269,6 +270,11 @@ export default function OpportunityCard({
 						<Chip tone="neutral" size="sm" className="shrink-0">
 							{formatOccurrence(item.occurrence, t)}
 						</Chip>
+						{item.membersOnly && (
+							<Chip tone="warning" size="sm" className="shrink-0">
+								{t("opportunities.membersOnlyBadge")}
+							</Chip>
+						)}
 						{viewerEngagement && (
 							<Chip
 								data-testid="opportunity-viewer-engagement"

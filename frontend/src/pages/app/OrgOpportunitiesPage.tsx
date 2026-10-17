@@ -376,6 +376,16 @@ export default function OrgOpportunitiesPage() {
 								{badgeLabel}
 							</Chip>
 						)}
+						{item.membersOnly && (
+							<Chip
+								data-testid="opportunity-members-only-badge"
+								tone="warning"
+								size="sm"
+								className="shrink-0"
+							>
+								{t("opportunities.membersOnlyBadge")}
+							</Chip>
+						)}
 					</div>
 					{description && (
 						<p

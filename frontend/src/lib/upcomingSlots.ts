@@ -31,6 +31,8 @@ export interface UpcomingSlot {
 
 	/** `null` when the slot takes as many people as turn up. */
 	maxParticipants: number | null;
+
+	membersOnly: boolean;
 }
 
 /**
@@ -79,6 +81,7 @@ export function selectUpcomingSlots(
 						startMs,
 						bookedCount: slot.bookedCount,
 						maxParticipants: slot.maxParticipants ?? null,
+						membersOnly: event.membersOnly,
 					},
 				];
 			});

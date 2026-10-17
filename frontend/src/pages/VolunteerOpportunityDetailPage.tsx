@@ -936,6 +936,17 @@ export default function VolunteerOpportunityDetailPage() {
 						saves, and Report to the page footer: a rare moderation action does
 						not deserve the same weight at the top of the page as the schedule
 						(#2330). Every control still keeps its label at every width. */}
+						{opportunity.membersOnly && (
+							<div>
+								<Chip
+									tone="warning"
+									size="sm"
+									data-testid="opportunity-detail-members-only-badge"
+								>
+									{t("opportunities.membersOnlyBadge")}
+								</Chip>
+							</div>
+						)}
 						{hasOwnerToolbar && (
 							<div
 								className="flex flex-wrap items-center gap-2"
