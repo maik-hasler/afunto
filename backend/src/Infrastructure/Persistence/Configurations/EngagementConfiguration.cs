@@ -68,6 +68,57 @@ internal sealed class EngagementConfiguration
 
 		builder.Property(e => e.FeedbackSubmittedAt);
 
+		builder.OwnsOne(e => e.Meeting, meeting =>
+		{
+			meeting.Property(m => m.Id)
+				.HasConversion(
+					id => id.Value,
+					guid => MeetingId.Create(guid).GetValueOrThrow())
+				.IsRequired();
+
+			meeting.Property(m => m.StartsAt).IsRequired();
+
+			meeting.Property(m => m.EndsAt).IsRequired();
+
+			meeting.Property(m => m.Format)
+				.HasConversion<string>()
+				.IsRequired();
+
+			meeting.Property(m => m.Location)
+				.HasMaxLength(Meeting.MaxLocationLength)
+				.IsRequired();
+
+			meeting.Property(m => m.Note)
+				.HasMaxLength(Meeting.MaxNoteLength);
+
+			meeting.Property(m => m.ProposedBy)
+				.HasConversion<string>()
+				.IsRequired();
+
+			meeting.Property(m => m.Response)
+				.HasConversion<string>()
+				.IsRequired();
+
+			// A group meeting is found by its id across the engagements carrying it.
+			meeting.HasIndex(m => m.Id);
+		});
+
+		builder.ToTable(t => t.HasCheckConstraint(
+			"ck_engagement_meeting_proposed_by_valid",
+			"meeting_proposed_by IS NULL OR meeting_proposed_by IN ('Organization', 'Volunteer')"));
+
+		builder.ToTable(t => t.HasCheckConstraint(
+			"ck_engagement_meeting_format_valid",
+			"meeting_format IS NULL OR meeting_format IN ('InPerson', 'Online')"));
+
+		builder.ToTable(t => t.HasCheckConstraint(
+			"ck_engagement_meeting_response_valid",
+			"meeting_response IS NULL OR meeting_response IN ('Pending', 'Accepted', 'Declined')"));
+
+		builder.Property(e => e.MeetingProposalCount)
+			.IsRequired()
+			.HasDefaultValue(0);
+
 		builder.Property(e => e.Status)
 			.HasConversion<string>()
 			.IsRequired();

@@ -14,5 +14,9 @@ public enum NotificationKind
 	InvitationAccepted,
 	InvitationDeclined,
 	FeedbackSubmitted,
+	MeetingProposed,
+	MeetingAccepted,
+	MeetingDeclined,
+	MeetingCancelled,
 	MembersOnlyOpportunityPublished
 }

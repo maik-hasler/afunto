@@ -20,6 +20,20 @@ internal sealed class NotificationReadRepository(
 		NotificationKind.EngagementCancelled,
 		NotificationKind.EngagementWithdrawn,
 		NotificationKind.FeedbackSubmitted,
+		NotificationKind.MeetingProposed,
+		NotificationKind.MeetingAccepted,
+		NotificationKind.MeetingDeclined,
+		NotificationKind.MeetingCancelled,
+	];
+
+	// Both sides of a meeting get these, so the link follows the recipient: the
+	// volunteer lands on their sign-ups, an organizer on the opportunity's list.
+	private static readonly NotificationKind[] MeetingKinds =
+	[
+		NotificationKind.MeetingProposed,
+		NotificationKind.MeetingAccepted,
+		NotificationKind.MeetingDeclined,
+		NotificationKind.MeetingCancelled,
 	];
 
 	private static readonly NotificationKind[] InvitationKinds =
@@ -102,14 +116,16 @@ internal sealed class NotificationReadRepository(
 		}
 
 		Dictionary<Guid, Guid> engagementToOpportunity = [];
+		Dictionary<Guid, Guid?> engagementToVolunteer = [];
 		if (engagementIds.Count > 0)
 		{
 			var engagementIdVOs = engagementIds.Select(id => EngagementId.Create(id).GetValueOrThrow()).ToList();
 			var engagementRows = await dbContext.EngagementsQuery
 				.Where(e => engagementIdVOs.Contains(e.Id))
-				.Select(e => new { e.Id, e.OpportunityId })
+				.Select(e => new { e.Id, e.OpportunityId, e.VolunteerId })
 				.ToListAsync(cancellationToken);
 			engagementToOpportunity = engagementRows.ToDictionary(x => x.Id.Value, x => x.OpportunityId.Value);
+			engagementToVolunteer = engagementRows.ToDictionary(x => x.Id.Value, x => x.VolunteerId?.Value);
 		}
 
 		var opportunityIdsFromEngagements = engagementToOpportunity.Values.ToHashSet();
@@ -143,7 +159,11 @@ internal sealed class NotificationReadRepository(
 				relatedTitle ??= n.TitleSnapshot;
 				opportunityTitlesEn.TryGetValue(opportunityId, out relatedTitleEn);
 
-				actionUrl = n.Kind is NotificationKind.EngagementCreated or NotificationKind.EngagementWithdrawn or NotificationKind.FeedbackSubmitted
+				var isForOrganizer = MeetingKinds.Contains(n.Kind)
+					? engagementToVolunteer.GetValueOrDefault(n.RelatedEntityId) != recipientId.Value
+					: n.Kind is NotificationKind.EngagementCreated or NotificationKind.EngagementWithdrawn or NotificationKind.FeedbackSubmitted;
+
+				actionUrl = isForOrganizer
 					? (opportunityOrganizations.TryGetValue(opportunityId, out var organizationId)
 						? $"/app/{organizationId}/dashboard/opportunities/{opportunityId}/engagements"
 						: null)

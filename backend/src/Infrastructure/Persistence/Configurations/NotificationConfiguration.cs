@@ -19,7 +19,8 @@ internal sealed class NotificationConfiguration
 			"ck_notification_kind_valid",
 			"kind IN ('EngagementCreated', 'EngagementConfirmed', 'EngagementCancelled', 'EngagementWithdrawn', " +
 			"'OpportunityUpdated', 'OpportunityDeleted', 'OpportunityUnpublished', 'OpportunityCancelled', 'InvitationReceived', " +
-			"'InvitationAccepted', 'InvitationDeclined', 'FeedbackSubmitted', 'MembersOnlyOpportunityPublished')"));
+			"'InvitationAccepted', 'InvitationDeclined', 'FeedbackSubmitted', 'MeetingProposed', 'MeetingAccepted', " +
+			"'MeetingDeclined', 'MeetingCancelled', 'MembersOnlyOpportunityPublished')"));
 
 		builder.Property(n => n.Id)
 			.HasConversion(

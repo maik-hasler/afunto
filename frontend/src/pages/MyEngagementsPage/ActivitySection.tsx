@@ -45,6 +45,7 @@ import ErrorBanner from "../../components/ErrorBanner";
 import LoadMoreError from "../../components/LoadMoreError";
 import LoadMoreButton from "../../components/LoadMoreButton";
 import WarningBanner from "../../components/WarningBanner";
+import VolunteerMeetingPanel from "./VolunteerMeetingPanel";
 import { inlineLinkClass } from "../../lib/linkClasses";
 import {
 	ArrowsRightLeftIcon,
@@ -92,6 +93,7 @@ export default function ActivitySection() {
 		hasMore: hasMoreEngagements,
 		loadMore: loadMoreEngagements,
 		retryLoadMore: retryLoadMoreEngagements,
+		reset: reloadEngagements,
 	} = useLoadMore<EngagementSummary>(
 		(pageNumber) =>
 			api
@@ -686,6 +688,12 @@ export default function ActivitySection() {
 												: "myEngagements.pendingExplanation",
 										)}
 									</p>
+								)}
+								{isInterest && !!e.opportunityTitle && (
+									<VolunteerMeetingPanel
+										engagement={e}
+										onChanged={reloadEngagements}
+									/>
 								)}
 								<div className="mt-auto flex flex-wrap items-center gap-2">
 									{awaitingCheckIn && needsVolunteerCheckIn && checkInOpen && (

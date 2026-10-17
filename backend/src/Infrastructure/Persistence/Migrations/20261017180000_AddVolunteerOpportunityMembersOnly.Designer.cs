@@ -170,6 +170,12 @@ namespace Infrastructure.Persistence.Migrations
 						.HasDefaultValue(false)
 						.HasColumnName("is_checked_in");
 
+					b.Property<int>("MeetingProposalCount")
+						.ValueGeneratedOnAdd()
+						.HasColumnType("integer")
+						.HasDefaultValue(0)
+						.HasColumnName("meeting_proposal_count");
+
 					b.Property<string>("Message")
 						.HasColumnType("text")
 						.HasColumnName("message");
@@ -250,6 +256,12 @@ namespace Infrastructure.Persistence.Migrations
 						{
 							t.HasCheckConstraint("CK_engagement_feedback_rating_range", "feedback_rating IS NULL OR feedback_rating BETWEEN 1 AND 5");
 
+							t.HasCheckConstraint("ck_engagement_meeting_format_valid", "meeting_format IS NULL OR meeting_format IN ('InPerson', 'Online')");
+
+							t.HasCheckConstraint("ck_engagement_meeting_proposed_by_valid", "meeting_proposed_by IS NULL OR meeting_proposed_by IN ('Organization', 'Volunteer')");
+
+							t.HasCheckConstraint("ck_engagement_meeting_response_valid", "meeting_response IS NULL OR meeting_response IN ('Pending', 'Accepted', 'Declined')");
+
 							t.HasCheckConstraint("ck_engagement_status_valid", "status IN ('Pending', 'Confirmed', 'Cancelled', 'Withdrawn')");
 						});
 				});
@@ -314,7 +326,7 @@ namespace Infrastructure.Persistence.Migrations
 
 					b.ToTable("notification", null, t =>
 						{
-							t.HasCheckConstraint("ck_notification_kind_valid", "kind IN ('EngagementCreated', 'EngagementConfirmed', 'EngagementCancelled', 'EngagementWithdrawn', 'OpportunityUpdated', 'OpportunityDeleted', 'OpportunityUnpublished', 'OpportunityCancelled', 'InvitationReceived', 'InvitationAccepted', 'InvitationDeclined', 'FeedbackSubmitted', 'MembersOnlyOpportunityPublished')");
+							t.HasCheckConstraint("ck_notification_kind_valid", "kind IN ('EngagementCreated', 'EngagementConfirmed', 'EngagementCancelled', 'EngagementWithdrawn', 'OpportunityUpdated', 'OpportunityDeleted', 'OpportunityUnpublished', 'OpportunityCancelled', 'InvitationReceived', 'InvitationAccepted', 'InvitationDeclined', 'FeedbackSubmitted', 'MeetingProposed', 'MeetingAccepted', 'MeetingDeclined', 'MeetingCancelled', 'MembersOnlyOpportunityPublished')");
 						});
 				});
 
@@ -1063,6 +1075,64 @@ namespace Infrastructure.Persistence.Migrations
 						.HasForeignKey("TimeSlotId")
 						.OnDelete(DeleteBehavior.SetNull)
 						.HasConstraintName("fk_engagement_time_slot_time_slot_id");
+
+					b.OwnsOne("Domain.Engagements.Meeting", "Meeting", b1 =>
+						{
+							b1.Property<Guid>("EngagementId")
+								.HasColumnType("uuid")
+								.HasColumnName("id");
+
+							b1.Property<DateTimeOffset>("EndsAt")
+								.HasColumnType("timestamp with time zone")
+								.HasColumnName("meeting_ends_at");
+
+							b1.Property<string>("Format")
+								.IsRequired()
+								.HasColumnType("text")
+								.HasColumnName("meeting_format");
+
+							b1.Property<Guid>("Id")
+								.HasColumnType("uuid")
+								.HasColumnName("meeting_id");
+
+							b1.Property<string>("Location")
+								.IsRequired()
+								.HasMaxLength(300)
+								.HasColumnType("character varying(300)")
+								.HasColumnName("meeting_location");
+
+							b1.Property<string>("Note")
+								.HasMaxLength(500)
+								.HasColumnType("character varying(500)")
+								.HasColumnName("meeting_note");
+
+							b1.Property<string>("ProposedBy")
+								.IsRequired()
+								.HasColumnType("text")
+								.HasColumnName("meeting_proposed_by");
+
+							b1.Property<string>("Response")
+								.IsRequired()
+								.HasColumnType("text")
+								.HasColumnName("meeting_response");
+
+							b1.Property<DateTimeOffset>("StartsAt")
+								.HasColumnType("timestamp with time zone")
+								.HasColumnName("meeting_starts_at");
+
+							b1.HasKey("EngagementId");
+
+							b1.HasIndex("Id")
+								.HasDatabaseName("ix_engagement_meeting_id");
+
+							b1.ToTable("engagement");
+
+							b1.WithOwner()
+								.HasForeignKey("EngagementId")
+								.HasConstraintName("fk_engagement_engagement_id");
+						});
+
+					b.Navigation("Meeting");
 				});
 
 			modelBuilder.Entity("Domain.Organizations.Organization", b =>

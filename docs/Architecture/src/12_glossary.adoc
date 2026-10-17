@@ -29,6 +29,9 @@ These are the terms the domain model in <<section-concepts>> is built from. They
 |Invitation
 |An organizer's offer to a user to join an organization with an intended role. Expires after 14 days if not accepted or declined.
 
+|Meeting
+|An appointment the organizer and a volunteer arrange after an `IndividualContact` expression of interest (German UI: "Treffen"): one day with a start and end time, whether it takes place in person (with an address or meeting point) or online (with an https link), and an optional note. Either side may propose one; the other side accepts or declines it, and a new proposal replaces the old one rather than editing it. An organizer can propose one meeting to several interested volunteers at once (a group meeting). A meeting is not a confirmation of the engagement and earns no achievement.
+
 |Members only
 |A flag on a volunteer opportunity (`MembersOnly`). Such an opportunity exists only for the members of its organization, organizers included: everyone else, signed in or not, neither finds it in the listing, the date availability, the details, the sitemap or the public organization profile, nor can sign up. Organizers can also assign a member to it directly.
 

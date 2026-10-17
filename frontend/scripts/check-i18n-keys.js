@@ -58,6 +58,7 @@ const ALLOWED_IDENTICAL_KEYS = new Set(
 
 		"opportunities.remote",
 		"opportunities.filterLabelRemote",
+		"meetings.form.format.Online",
 		"opportunities.dateRangeDisplay",
 		"opportunities.radiusKmValue",
 		"opportunities.category.Sport",
