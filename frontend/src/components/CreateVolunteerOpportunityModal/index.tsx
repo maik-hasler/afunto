@@ -211,7 +211,7 @@ function formFromOpportunity(
 		category: opp.category ?? undefined,
 		tags: opp.tags ?? [],
 		validUntil: opp.validUntil ? toDateInputValue(opp.validUntil) : "",
-		membersOnly: opp.membersOnly,
+		membersOnly: opp.membersOnly ?? false,
 	};
 }
 

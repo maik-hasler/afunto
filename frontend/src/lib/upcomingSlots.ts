@@ -81,7 +81,7 @@ export function selectUpcomingSlots(
 						startMs,
 						bookedCount: slot.bookedCount,
 						maxParticipants: slot.maxParticipants ?? null,
-						membersOnly: event.membersOnly,
+						membersOnly: event.membersOnly ?? false,
 					},
 				];
 			});
