@@ -154,7 +154,7 @@ jobs:
         run: |
           docker pull quay.io/keycloak/keycloak:26.7.4
           docker pull ghcr.io/axllent/mailpit:v1.31.2
-          docker pull rustfs/rustfs:1.0.1
+          docker pull rustfs/rustfs:1.0.3
 
       - name: Test - IntegrationTests (Aspire + Docker)
         working-directory: backend
@@ -223,7 +223,7 @@ jobs:
         run: |
           docker pull quay.io/keycloak/keycloak:26.7.4
           docker pull ghcr.io/axllent/mailpit:v1.31.2
-          docker pull rustfs/rustfs:1.0.1
+          docker pull rustfs/rustfs:1.0.3
 
       - name: Resolve shard filter
         id: shard
@@ -304,7 +304,7 @@ jobs:
 
           docker run -d --name smoke-storage --network backend-smoke-test -p 19000:9000 \
             -e RUSTFS_ACCESS_KEY=storage -e RUSTFS_SECRET_KEY=storage123 \
-            rustfs/rustfs:1.0.1
+            rustfs/rustfs:1.0.3
 
       - name: Wait for backing services to be ready
         run: |
