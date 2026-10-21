@@ -244,6 +244,7 @@
       "byInterest": "Interessenbekundung",
       "noOpenSpots": "Keine offenen Plätze",
       "noSpotsYet": "Noch keine Plätze",
+      "membersOnlyBadge": "Nur für Mitglieder",
       "draftBadge": "Entwurf",
       "publish": "Veröffentlichen",
       "publishing": "Wird veröffentlicht…",
@@ -281,6 +282,19 @@
       "offlineDetail": "Sobald deine Verbindung zurück ist, laden wir diese Seite erneut.",
       "notFoundTitle": "Einsatz nicht gefunden",
       "notFoundMessage": "Dieser Einsatz existiert nicht oder wurde entfernt. Prüfe den Link, dem du gefolgt bist – die ID darin könnte unvollständig sein."
+    },
+    "assignMember": {
+      "title": "Mitglied zuweisen",
+      "message": "Das Mitglied wird sofort eingetragen und über die bestätigte Eintragung benachrichtigt.",
+      "confirm": "Zuweisen",
+      "cancel": "Abbrechen",
+      "memberLabel": "Mitglied",
+      "memberPlaceholder": "Mitglied auswählen",
+      "slotLabel": "Zeitfenster",
+      "slotPlaceholder": "Zeitfenster auswählen",
+      "incomplete": "Bitte wähle ein Mitglied und, falls angeboten, ein Zeitfenster.",
+      "button": "Mitglied zuweisen",
+      "success": "Mitglied zugewiesen."
     },
     "createOpportunity": {
       "title": "Einsatz erstellen",
@@ -366,6 +380,8 @@
       "bannerUploadFailed": "Der Einsatz wurde erstellt, aber das Bannerbild konnte nicht hochgeladen werden.",
       "orgAddressTip": "Tipp: Hinterlege eine Standard-Adresse in den Organisationseinstellungen – sie wird hier automatisch vorausgefüllt.",
       "orgSettingsLink": "Zu den Organisationseinstellungen",
+      "fieldMembersOnly": "Nur für Mitglieder",
+      "fieldMembersOnlyHint": "Nur Mitglieder deiner Organisation können diesen Einsatz sehen und sich eintragen. Alle anderen finden ihn nicht.",
       "editTitle": "Einsatz bearbeiten",
       "save": "Speichern",
       "saving": "Wird gespeichert…",
@@ -524,6 +540,7 @@
       "participantsNoSlots_one": "{{count}} Eintragung (noch keine Zeitslots)",
       "participantsNoSlots_other": "{{count}} Eintragungen (noch keine Zeitslots)",
       "editLoading": "Wird geöffnet…",
+      "internalOnlyFilter": "Nur interne Einsätze",
       "loadMore": "Mehr laden"
     },
     "orgDashboard": {
@@ -1077,7 +1094,8 @@
         "MeetingProposed": "Neuer Vorschlag für ein Treffen zu <titleSpan>{{title}}</titleSpan>",
         "MeetingAccepted": "Einem Treffen zu <titleSpan>{{title}}</titleSpan> wurde zugesagt",
         "MeetingDeclined": "Ein Treffen zu <titleSpan>{{title}}</titleSpan> wurde abgelehnt",
-        "MeetingCancelled": "Ein Treffen zu <titleSpan>{{title}}</titleSpan> wurde abgesagt"
+        "MeetingCancelled": "Ein Treffen zu <titleSpan>{{title}}</titleSpan> wurde abgesagt",
+        "MembersOnlyOpportunityPublished": "Neuer interner Einsatz: <titleSpan>{{title}}</titleSpan>"
       }
     },
     "language": {

@@ -244,6 +244,7 @@
       "byInterest": "By expression of interest",
       "noOpenSpots": "No open spots",
       "noSpotsYet": "No spots yet",
+      "membersOnlyBadge": "Members only",
       "draftBadge": "Draft",
       "publish": "Publish",
       "publishing": "Publishing…",
@@ -281,6 +282,19 @@
       "offlineDetail": "We will load this page again as soon as your connection is back.",
       "notFoundTitle": "Opportunity not found",
       "notFoundMessage": "This opportunity does not exist, or it has been removed. Check the link you followed - the id in it may be incomplete."
+    },
+    "assignMember": {
+      "title": "Assign a member",
+      "message": "The member is signed up right away and notified that the sign-up is confirmed.",
+      "confirm": "Assign",
+      "cancel": "Cancel",
+      "memberLabel": "Member",
+      "memberPlaceholder": "Choose a member",
+      "slotLabel": "Time slot",
+      "slotPlaceholder": "Choose a time slot",
+      "incomplete": "Please choose a member and, if offered, a time slot.",
+      "button": "Assign a member",
+      "success": "Member assigned."
     },
     "createOpportunity": {
       "title": "Create opportunity",
@@ -366,6 +380,8 @@
       "bannerUploadFailed": "The opportunity was created, but the banner image could not be uploaded.",
       "orgAddressTip": "Tip: Save a default address in your organization settings and it will be pre-filled here automatically.",
       "orgSettingsLink": "Open organization settings",
+      "fieldMembersOnly": "Members only",
+      "fieldMembersOnlyHint": "Only members of your organization can see this opportunity and sign up for it. Everyone else will not find it.",
       "editTitle": "Edit opportunity",
       "save": "Save",
       "saving": "Saving…",
@@ -524,6 +540,7 @@
       "participantsNoSlots_one": "{{count}} sign-up (no time slots yet)",
       "participantsNoSlots_other": "{{count}} sign-ups (no time slots yet)",
       "editLoading": "Opening…",
+      "internalOnlyFilter": "Internal opportunities only",
       "loadMore": "Load more"
     },
     "orgDashboard": {
@@ -1077,7 +1094,8 @@
         "MeetingProposed": "New meeting proposal for <titleSpan>{{title}}</titleSpan>",
         "MeetingAccepted": "A meeting for <titleSpan>{{title}}</titleSpan> was accepted",
         "MeetingDeclined": "A meeting for <titleSpan>{{title}}</titleSpan> was declined",
-        "MeetingCancelled": "A meeting for <titleSpan>{{title}}</titleSpan> was cancelled"
+        "MeetingCancelled": "A meeting for <titleSpan>{{title}}</titleSpan> was cancelled",
+        "MembersOnlyOpportunityPublished": "New internal opportunity: <titleSpan>{{title}}</titleSpan>"
       }
     },
     "language": {

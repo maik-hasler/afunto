@@ -28,4 +28,5 @@ public sealed record VolunteerOpportunitySummary(
 	int CurrentParticipantCount,
 	string Status,
 	string? BannerImageUrl,
-	string? OrganizationLogoUrl = null);
+	string? OrganizationLogoUrl = null,
+	bool MembersOnly = false);

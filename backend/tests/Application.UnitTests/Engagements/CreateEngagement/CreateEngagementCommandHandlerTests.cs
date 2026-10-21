@@ -143,6 +143,65 @@ public class CreateEngagementCommandHandlerTests
 		await act.Should().ThrowAsync<ResultFailureException>().WithMessage("*not found*");
 	}
 
+	private void SetupMembersOnlyOpportunity(VolunteerOpportunityId opportunityId)
+	{
+		var opportunity = VolunteerOpportunity.Create(
+			OrganizationId.New(),
+			"Test Opportunity",
+			null,
+			"Description",
+			null,
+			false,
+			TestAddress,
+			Occurrence.OneTime,
+			ParticipationType.IndividualContact,
+			CheckInMethod.None,
+			_pinGenerator,
+			status: OpportunityStatus.Draft,
+			validUntil: DateTimeOffset.UtcNow.AddDays(30),
+			membersOnly: true).Value;
+		opportunity.Publish().ThrowIfFailure();
+
+		_opportunityRepo.FindAsync(opportunityId, Arg.Any<CancellationToken>())
+			.Returns(opportunity);
+	}
+
+	[Test]
+	public async Task Handle_ShouldThrowNotFound_WhenMembersOnlyAndVolunteerIsNotMember(
+		CancellationToken cancellationToken)
+	{
+		// Arrange
+		var opportunityId = VolunteerOpportunityId.New();
+		SetupMembersOnlyOpportunity(opportunityId);
+		_dbContext.IsMemberAsync(Arg.Any<OrganizationId>(), Arg.Any<UserId>(), Arg.Any<CancellationToken>())
+			.Returns(false);
+		var command = new CreateEngagementCommand(opportunityId, UserId.New(), TimeSlotId: null, "Ich helfe gerne!");
+
+		// Act
+		Func<Task> act = async () => await _sut.Handle(command, cancellationToken);
+
+		// Assert
+		await act.Should().ThrowAsync<ResultFailureException>().WithMessage("*not found*");
+	}
+
+	[Test]
+	public async Task Handle_ShouldCreateEngagement_WhenMembersOnlyAndVolunteerIsMember(
+		CancellationToken cancellationToken)
+	{
+		// Arrange
+		var opportunityId = VolunteerOpportunityId.New();
+		SetupMembersOnlyOpportunity(opportunityId);
+		_dbContext.IsMemberAsync(Arg.Any<OrganizationId>(), Arg.Any<UserId>(), Arg.Any<CancellationToken>())
+			.Returns(true);
+		var command = new CreateEngagementCommand(opportunityId, UserId.New(), TimeSlotId: null, "Ich helfe gerne!");
+
+		// Act
+		var engagement = await _sut.Handle(command, cancellationToken);
+
+		// Assert
+		engagement.OpportunityId.Should().Be(opportunityId);
+	}
+
 	[Test]
 	[Arguments(OpportunityStatus.Draft)]
 	[Arguments(OpportunityStatus.Unpublished)]

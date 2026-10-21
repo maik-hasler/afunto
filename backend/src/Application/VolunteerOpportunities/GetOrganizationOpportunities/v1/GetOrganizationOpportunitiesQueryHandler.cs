@@ -31,6 +31,7 @@ internal sealed class GetOrganizationOpportunitiesQueryHandler(
 			request.Status,
 			pageNumber,
 			pageSize,
+			request.MembersOnly,
 			cancellationToken);
 	}
 }

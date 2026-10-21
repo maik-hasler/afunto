@@ -56,6 +56,7 @@ internal sealed class UpdateVolunteerOpportunityCommandHandler(
 		opportunity.ChangeCheckInMethod(request.CheckInMethod, pinGenerator, DateTimeOffset.UtcNow, request.CheckInPin).ThrowIfFailure();
 		opportunity.SwitchParticipationType(request.ParticipationType);
 		opportunity.SetValidUntil(request.ValidUntil, DateTimeOffset.UtcNow).ThrowIfFailure();
+		opportunity.SetMembersOnly(request.MembersOnly);
 
 		var relocated =
 			prevIsRemote != request.IsRemote ||

@@ -6,6 +6,7 @@ using Application.Common.Messaging;
 using Application.VolunteerOpportunities.GetVolunteerOpportunityDateAvailability.v1;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
+using System.Security.Claims;
 
 namespace Api.VolunteerOpportunities.GetVolunteerOpportunityDateAvailability.v1;
 
@@ -33,6 +34,7 @@ internal sealed class GetVolunteerOpportunityDateAvailabilityEndpoint
 		[AsParameters] GetVolunteerOpportunityDateAvailabilityRequest request,
 		HttpRequest httpRequest,
 		[FromServices] ISender sender,
+		ClaimsPrincipal user,
 		CancellationToken cancellationToken)
 	{
 		if (request.To < request.From)
@@ -67,7 +69,8 @@ internal sealed class GetVolunteerOpportunityDateAvailabilityEndpoint
 			request.RadiusKm,
 			request.Categories,
 			request.Tag,
-			request.Keyword);
+			request.Keyword,
+			Guid.TryParse(user.FindFirstValue("sub"), out var uid) ? uid : null);
 
 		var result = await sender.Send(query, cancellationToken);
 

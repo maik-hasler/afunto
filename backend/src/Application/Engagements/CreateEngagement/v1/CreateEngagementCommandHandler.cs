@@ -25,6 +25,12 @@ internal sealed class CreateEngagementCommandHandler(
 		if (opportunity is null)
 			throw new ResultFailureException(Error.NotFound("VolunteerOpportunity.NotFound", $"Volunteer opportunity with id '{request.OpportunityId.Value}' was not found."));
 
+		// A members-only opportunity does not exist for anyone outside the organization, so
+		// answer exactly as for an unknown id rather than confirming it is there (afunto#2406).
+		if (opportunity.MembersOnly
+			&& !await dbContext.IsMemberAsync(opportunity.OrganizationId, request.VolunteerId, cancellationToken))
+			throw new ResultFailureException(Error.NotFound("VolunteerOpportunity.NotFound", $"Volunteer opportunity with id '{request.OpportunityId.Value}' was not found."));
+
 		if (opportunity.Status != OpportunityStatus.Published)
 			throw new ResultFailureException(Error.Conflict("Engagement.OpportunityNotPublished", "Conflict: this opportunity is not open for sign-ups."));
 

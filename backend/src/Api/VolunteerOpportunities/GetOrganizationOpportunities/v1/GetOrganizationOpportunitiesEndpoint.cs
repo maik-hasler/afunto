@@ -34,6 +34,7 @@ internal sealed class GetOrganizationOpportunitiesEndpoint
 		[FromQuery] string status,
 		[FromQuery] int pageNumber,
 		[FromQuery] int pageSize,
+		[FromQuery] bool? membersOnly,
 		[FromServices] ISender sender,
 		ClaimsPrincipal user,
 		CancellationToken cancellationToken)
@@ -54,7 +55,7 @@ internal sealed class GetOrganizationOpportunitiesEndpoint
 			: throw new ResultFailureException(Error.Validation("User.InvalidId", "Invalid user."));
 
 		var opportunities = await sender.Send(
-			new GetOrganizationOpportunitiesQuery(organizationId, userId, parsedStatus, pageNumber, pageSize),
+			new GetOrganizationOpportunitiesQuery(organizationId, userId, parsedStatus, pageNumber, pageSize, membersOnly),
 			cancellationToken);
 
 		return Results.Ok(opportunities);

@@ -9,7 +9,11 @@ import { FloatingField } from "./shared";
 import type { OpportunityFormValues } from "./schema";
 import { ChevronDownIcon, ExclamationTriangleIcon, PhotoIcon } from "../icons";
 import { IMAGE_UPLOAD_ACCEPT, getImageUploadHint } from "../../lib/imageUpload";
-import { inputSurfaceClass, labelClass } from "../../lib/formClasses";
+import {
+	checkboxClass,
+	inputSurfaceClass,
+	labelClass,
+} from "../../lib/formClasses";
 
 const CATEGORY_VALUES = [
 	"Social",
@@ -387,6 +391,24 @@ export default function BasicsStep({
 					/>
 				</div>
 			</section>
+
+			<label
+				htmlFor="opportunity-members-only"
+				className="flex cursor-pointer items-start gap-3 rounded-xl border border-gray-200 px-4 py-3"
+			>
+				<input
+					type="checkbox"
+					id="opportunity-members-only"
+					className={`mt-0.5 h-4 w-4 ${checkboxClass}`}
+					{...register("membersOnly")}
+				/>
+				<span className="text-sm font-medium text-gray-800">
+					{t("createOpportunity.fieldMembersOnly")}
+					<span className="mt-0.5 block text-xs font-normal text-gray-500">
+						{t("createOpportunity.fieldMembersOnlyHint")}
+					</span>
+				</span>
+			</label>
 		</div>
 	);
 }

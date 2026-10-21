@@ -12,7 +12,8 @@ public sealed record VolunteerOpportunityDateAvailabilityFilter(
 	double? RadiusKm = null,
 	string[]? Categories = null,
 	string? Tag = null,
-	string? Keyword = null)
+	string? Keyword = null,
+	Guid? RequestingUserId = null)
 {
 	public bool HasRadius => CenterLatitude.HasValue && CenterLongitude.HasValue && RadiusKm is > 0;
 }

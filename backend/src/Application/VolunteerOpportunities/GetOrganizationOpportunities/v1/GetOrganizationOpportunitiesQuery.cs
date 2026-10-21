@@ -11,5 +11,6 @@ public sealed record GetOrganizationOpportunitiesQuery(
 	UserId RequestingUserId,
 	OpportunityStatus Status,
 	int PageNumber,
-	int PageSize)
+	int PageSize,
+	bool? MembersOnly = null)
 	: IQuery<PagedList<VolunteerOpportunitySummary>>;

@@ -323,7 +323,7 @@ namespace Infrastructure.Persistence.Migrations
 
 					b.ToTable("notification", null, t =>
 						{
-							t.HasCheckConstraint("ck_notification_kind_valid", "kind IN ('EngagementCreated', 'EngagementConfirmed', 'EngagementCancelled', 'EngagementWithdrawn', 'OpportunityUpdated', 'OpportunityDeleted', 'OpportunityUnpublished', 'OpportunityCancelled', 'InvitationReceived', 'InvitationAccepted', 'InvitationDeclined', 'FeedbackSubmitted', 'MeetingProposed', 'MeetingAccepted', 'MeetingDeclined', 'MeetingCancelled')");
+							t.HasCheckConstraint("ck_notification_kind_valid", "kind IN ('EngagementCreated', 'EngagementConfirmed', 'EngagementCancelled', 'EngagementWithdrawn', 'OpportunityUpdated', 'OpportunityDeleted', 'OpportunityUnpublished', 'OpportunityCancelled', 'InvitationReceived', 'InvitationAccepted', 'InvitationDeclined', 'FeedbackSubmitted', 'MeetingProposed', 'MeetingAccepted', 'MeetingDeclined', 'MeetingCancelled', 'MembersOnlyOpportunityPublished')");
 						});
 				});
 
@@ -874,6 +874,12 @@ namespace Infrastructure.Persistence.Migrations
 					b.Property<bool>("IsRemote")
 						.HasColumnType("boolean")
 						.HasColumnName("is_remote");
+
+					b.Property<bool>("MembersOnly")
+						.ValueGeneratedOnAdd()
+						.HasColumnType("boolean")
+						.HasDefaultValue(false)
+						.HasColumnName("members_only");
 
 					b.Property<DateTimeOffset?>("ModifiedOn")
 						.HasColumnType("timestamp with time zone")

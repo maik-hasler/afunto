@@ -11,6 +11,7 @@ import type {
 } from "../client";
 import { useApiClient } from "../hooks/useApiClient";
 import { useLoadMore } from "../hooks/useLoadMore";
+import AssignMemberDialog from "../components/AssignMemberDialog";
 import ConfirmDialog from "../components/ConfirmDialog";
 import MeetingDetails from "../components/MeetingDetails";
 import MeetingFormModal, {
@@ -69,7 +70,7 @@ type MeetingFormTarget =
 
 export default function EngagementManagementPage() {
 	const { opportunityId } = useParams<{ opportunityId: string }>();
-	const { isOrganizer } = useOutletContext<OrgAppContext>();
+	const { isOrganizer, org } = useOutletContext<OrgAppContext>();
 	const api = useApiClient();
 	const { t, i18n } = useTranslation();
 	const quotes = quoteMarks(i18n.language);
@@ -122,6 +123,7 @@ export default function EngagementManagementPage() {
 	const [checkingIn, setCheckingIn] = useState<string | null>(null);
 	const [undoingCheckIn, setUndoingCheckIn] = useState<string | null>(null);
 	const [qrScannerOpen, setQrScannerOpen] = useState(false);
+	const [assignOpen, setAssignOpen] = useState(false);
 
 	const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 	const [bulkConfirming, setBulkConfirming] = useState(false);
@@ -756,6 +758,32 @@ export default function EngagementManagementPage() {
 						{t("checkIn.qrScanButton")}
 					</Button>
 				</div>
+			)}
+
+			{isOrganizer && opportunity?.status === "Published" && (
+				<div className="mb-6">
+					<Button
+						type="button"
+						onClick={() => setAssignOpen(true)}
+						data-testid="assign-member-button"
+					>
+						{t("assignMember.button")}
+					</Button>
+				</div>
+			)}
+
+			{assignOpen && opportunityId && (
+				<AssignMemberDialog
+					opportunityId={opportunityId}
+					members={org.members}
+					timeSlots={opportunity?.timeSlots ?? []}
+					onClose={() => setAssignOpen(false)}
+					onAssigned={() => {
+						setAssignOpen(false);
+						reloadEngagements();
+						dispatchToast("success", t("assignMember.success"));
+					}}
+				/>
 			)}
 
 			<div className={`mb-6 ${cardClass} sm:p-5`}>

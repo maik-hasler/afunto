@@ -49,6 +49,11 @@ public sealed class VolunteerOpportunity
 
 	public OpportunityStatus Status { get; private set; }
 
+	// Hidden from everyone but the owning organization's members (organizers included) -
+	// listings, details, sitemap and sign-up all treat a non-member as if it did not exist
+	// (afunto#2406).
+	public bool MembersOnly { get; private set; }
+
 	public string? CancellationReason { get; private set; }
 
 	public string? BannerImageUrl { get; private set; }
@@ -99,7 +104,8 @@ public sealed class VolunteerOpportunity
 		IPinGenerator pinGenerator,
 		string? checkInPin,
 		DateTimeOffset? validUntil,
-		DateTimeOffset now)
+		DateTimeOffset now,
+		bool membersOnly)
 		: base(id)
 	{
 		OrganizationId = organizationId;
@@ -116,6 +122,7 @@ public sealed class VolunteerOpportunity
 		_tags = new List<string>(tags);
 		Status = status;
 		ValidUntil = validUntil;
+		MembersOnly = membersOnly;
 		if (checkInMethod == CheckInMethod.PINCode)
 			CheckInPin = checkInPin ?? pinGenerator.GeneratePin();
 	}
@@ -215,7 +222,8 @@ public sealed class VolunteerOpportunity
 		OpportunityStatus status = OpportunityStatus.Published,
 		string? checkInPin = null,
 		DateTimeOffset? validUntil = null,
-		DateTimeOffset? now = null)
+		DateTimeOffset? now = null,
+		bool membersOnly = false)
 	{
 		var validTitleDeLength = EnsureValidTitleLength(titleDe);
 		if (validTitleDeLength.IsFailure)
@@ -286,10 +294,14 @@ public sealed class VolunteerOpportunity
 			pinGenerator,
 			checkInPin,
 			validUntil,
-			now ?? DateTimeOffset.UtcNow);
+			now ?? DateTimeOffset.UtcNow,
+			membersOnly);
 
 		if (!isRemote && address is not null && address.Latitude is null)
 			opportunity.AddEvent(new VolunteerOpportunityGeocodingRequestedDomainEvent(opportunity.Id));
+
+		if (status == OpportunityStatus.Published)
+			opportunity.AddEvent(new VolunteerOpportunityPublishedDomainEvent(opportunity.Id, organizationId));
 
 		return opportunity;
 	}
@@ -365,6 +377,8 @@ public sealed class VolunteerOpportunity
 		AddEvent(new VolunteerOpportunityCancelledDomainEvent(Id, OrganizationId, reason));
 		return Result.Success();
 	}
+
+	public void SetMembersOnly(bool membersOnly) => MembersOnly = membersOnly;
 
 	public Result SetBannerImageUrl(string url)
 	{

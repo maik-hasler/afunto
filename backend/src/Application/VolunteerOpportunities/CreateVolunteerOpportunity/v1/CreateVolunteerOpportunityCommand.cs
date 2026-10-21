@@ -22,5 +22,6 @@ public sealed record CreateVolunteerOpportunityCommand(
 	OpportunityStatus Status,
 	UserId RequestingUserId,
 	string? CheckInPin = null,
-	DateTimeOffset? ValidUntil = null)
+	DateTimeOffset? ValidUntil = null,
+	bool MembersOnly = false)
 	: ICommand<VolunteerOpportunity>;

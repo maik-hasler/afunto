@@ -17,5 +17,6 @@ public enum NotificationKind
 	MeetingProposed,
 	MeetingAccepted,
 	MeetingDeclined,
-	MeetingCancelled
+	MeetingCancelled,
+	MembersOnlyOpportunityPublished
 }

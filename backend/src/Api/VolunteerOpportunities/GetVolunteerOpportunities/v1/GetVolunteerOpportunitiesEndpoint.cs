@@ -7,6 +7,7 @@ using Application.Common.Pagination;
 using Application.VolunteerOpportunities.GetVolunteerOpportunities.v1;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
+using System.Security.Claims;
 
 namespace Api.VolunteerOpportunities.GetVolunteerOpportunities.v1;
 
@@ -30,6 +31,7 @@ internal sealed class GetVolunteerOpportunitiesEndpoint
 	private static async Task<IResult> GetVolunteerOpportunitiesAsync(
 		[AsParameters] GetVolunteerOpportunitiesRequest request,
 		[FromServices] ISender sender,
+		ClaimsPrincipal user,
 		CancellationToken cancellationToken)
 	{
 		if (request.PageNumber < 1)
@@ -63,7 +65,8 @@ internal sealed class GetVolunteerOpportunitiesEndpoint
 			request.RadiusKm,
 			request.Categories,
 			request.Tag,
-			request.Keyword);
+			request.Keyword,
+			Guid.TryParse(user.FindFirstValue("sub"), out var uid) ? uid : null);
 
 		var result = await sender.Send(query, cancellationToken);
 

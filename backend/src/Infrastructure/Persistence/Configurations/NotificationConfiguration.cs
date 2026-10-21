@@ -20,7 +20,7 @@ internal sealed class NotificationConfiguration
 			"kind IN ('EngagementCreated', 'EngagementConfirmed', 'EngagementCancelled', 'EngagementWithdrawn', " +
 			"'OpportunityUpdated', 'OpportunityDeleted', 'OpportunityUnpublished', 'OpportunityCancelled', 'InvitationReceived', " +
 			"'InvitationAccepted', 'InvitationDeclined', 'FeedbackSubmitted', 'MeetingProposed', 'MeetingAccepted', " +
-			"'MeetingDeclined', 'MeetingCancelled')"));
+			"'MeetingDeclined', 'MeetingCancelled', 'MembersOnlyOpportunityPublished')"));
 
 		builder.Property(n => n.Id)
 			.HasConversion(

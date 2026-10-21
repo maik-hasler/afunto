@@ -18,4 +18,5 @@ public sealed record UpdateVolunteerOpportunityRequest(
 	string? Category,
 	IReadOnlyList<string>? Tags,
 	[MaxLength(6)] string? CheckInPin,
-	DateTimeOffset? ValidUntil);
+	DateTimeOffset? ValidUntil,
+	bool MembersOnly = false);

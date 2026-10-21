@@ -28,7 +28,7 @@ public class GetOrganizationOpportunitiesQueryHandlerTests
 			.IsMemberAsync(Arg.Any<OrganizationId>(), Arg.Any<UserId>(), Arg.Any<CancellationToken>())
 			.Returns(true);
 		_readRepository
-			.GetPagedSummariesByOrganizationAsync(Arg.Any<Guid>(), Arg.Any<OpportunityStatus>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>())
+			.GetPagedSummariesByOrganizationAsync(Arg.Any<Guid>(), Arg.Any<OpportunityStatus>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<bool?>(), Arg.Any<CancellationToken>())
 			.Returns(new PagedList<VolunteerOpportunitySummary>([], 0, 1, 10));
 		_sut = new GetOrganizationOpportunitiesQueryHandler(_readRepository, _dbContext);
 	}
@@ -45,6 +45,7 @@ public class GetOrganizationOpportunitiesQueryHandlerTests
 				Arg.Do<OpportunityStatus>(s => capturedStatus = s),
 				Arg.Do<int>(p => capturedPageNumber = p),
 				Arg.Do<int>(s => capturedPageSize = s),
+				Arg.Any<bool?>(),
 				Arg.Any<CancellationToken>())
 			.Returns(new PagedList<VolunteerOpportunitySummary>([], 0, 1, 10));
 
@@ -113,6 +114,6 @@ public class GetOrganizationOpportunitiesQueryHandlerTests
 		(await act.Should().ThrowAsync<ResultFailureException>())
 			.Which.Error.Type.Should().Be(ErrorType.Forbidden);
 		await _readRepository.DidNotReceive().GetPagedSummariesByOrganizationAsync(
-			Arg.Any<Guid>(), Arg.Any<OpportunityStatus>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>());
+			Arg.Any<Guid>(), Arg.Any<OpportunityStatus>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<bool?>(), Arg.Any<CancellationToken>());
 	}
 }

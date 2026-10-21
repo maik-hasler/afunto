@@ -36,6 +36,7 @@ public interface IVolunteerOpportunityReadRepository
 		OpportunityStatus status,
 		int pageNumber,
 		int pageSize,
+		bool? membersOnly,
 		CancellationToken cancellationToken = default);
 
 	ValueTask<IReadOnlyList<OrganizationCalendarEventDto>> GetCalendarEventsAsync(

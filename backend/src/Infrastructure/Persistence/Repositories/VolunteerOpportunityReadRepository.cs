@@ -34,6 +34,7 @@ internal sealed class VolunteerOpportunityReadRepository(
 
 		return await dbContext.VolunteerOpportunitiesQuery
 			.Where(vo => vo.Status == OpportunityStatus.Published)
+			.Where(vo => !vo.MembersOnly)
 			.Where(vo => vo.TimeSlots.Any(ts => ts.EndDateTime >= now) || (!vo.TimeSlots.Any() && vo.ValidUntil != null && vo.ValidUntil >= now))
 			.Select(vo => new SitemapEntry(vo.Id.Value, vo.ModifiedOn ?? vo.CreatedOn))
 			.ToListAsync(cancellationToken);
@@ -54,7 +55,8 @@ internal sealed class VolunteerOpportunityReadRepository(
 			filter.Categories,
 			filter.Tag,
 			filter.Keyword,
-			ResolveBoundingBox(filter.CenterLatitude, filter.CenterLongitude, filter.RadiusKm));
+			ResolveBoundingBox(filter.CenterLatitude, filter.CenterLongitude, filter.RadiusKm),
+			ResolveViewer(filter.RequestingUserId));
 
 		// DateFrom/DateTo describe one window, so a slot has to satisfy both bounds at once.
 		// Testing them as two separate Any() calls let a series with slots on 03/10/17 match a
@@ -124,6 +126,7 @@ internal sealed class VolunteerOpportunityReadRepository(
 					.FirstOrDefault(),
 				vo.Status,
 				vo.BannerImageUrl,
+				vo.MembersOnly,
 			});
 
 		if (filter.HasRadius)
@@ -160,6 +163,7 @@ internal sealed class VolunteerOpportunityReadRepository(
 					s.NextTimeSlotEnd,
 					s.Status,
 					s.BannerImageUrl,
+					s.MembersOnly,
 					DistanceKm = 6371.0 * 2.0 * Math.Atan2(
 						Math.Sqrt(Math.Pow(Math.Sin((s.Latitude!.Value - centerLat) * Math.PI / 180.0 / 2.0), 2) +
 							Math.Cos(centerLat * Math.PI / 180.0) * Math.Cos(s.Latitude.Value * Math.PI / 180.0) *
@@ -192,7 +196,7 @@ internal sealed class VolunteerOpportunityReadRepository(
 						x.Street, x.HouseNumber, x.ZipCode, x.City, x.Latitude, x.Longitude, x.IsRemote, x.Occurrence,
 						x.ParticipationType, x.CheckInMethod, x.Category, x.Tags, x.CreatedOn, x.ValidUntil, x.NextTimeSlotStart, x.NextTimeSlotEnd,
 						x.Status, x.BannerImageUrl,
-						maxPMap.GetValueOrDefault(x.Id.Value, 0), partCountMap.GetValueOrDefault(x.Id.Value, 0));
+						maxPMap.GetValueOrDefault(x.Id.Value, 0), partCountMap.GetValueOrDefault(x.Id.Value, 0), x.MembersOnly);
 				})
 				.ToList();
 
@@ -221,7 +225,7 @@ internal sealed class VolunteerOpportunityReadRepository(
 					x.Street, x.HouseNumber, x.ZipCode, x.City, x.Latitude, x.Longitude, x.IsRemote, x.Occurrence,
 					x.ParticipationType, x.CheckInMethod, x.Category, x.Tags, x.CreatedOn, x.ValidUntil, x.NextTimeSlotStart, x.NextTimeSlotEnd,
 					x.Status, x.BannerImageUrl,
-					maxParticipantsMap.GetValueOrDefault(x.Id.Value, 0), participantCountMap.GetValueOrDefault(x.Id.Value, 0));
+					maxParticipantsMap.GetValueOrDefault(x.Id.Value, 0), participantCountMap.GetValueOrDefault(x.Id.Value, 0), x.MembersOnly);
 			})
 			.ToList();
 
@@ -243,7 +247,8 @@ internal sealed class VolunteerOpportunityReadRepository(
 			filter.Categories,
 			filter.Tag,
 			filter.Keyword,
-			ResolveBoundingBox(filter.CenterLatitude, filter.CenterLongitude, filter.RadiusKm));
+			ResolveBoundingBox(filter.CenterLatitude, filter.CenterLongitude, filter.RadiusKm),
+			ResolveViewer(filter.RequestingUserId));
 
 		var slots = await query
 			.SelectMany(vo => vo.TimeSlots
@@ -297,6 +302,19 @@ internal sealed class VolunteerOpportunityReadRepository(
 			.ToDictionaryAsync(x => x.Id.Value, x => (x.Name, x.LogoUrl), cancellationToken);
 	}
 
+	private static UserId? ResolveViewer(Guid? requestingUserId) =>
+		requestingUserId is Guid id ? UserId.Create(id).GetValueOrThrow() : null;
+
+	// A members-only opportunity exists only for the owning organization's members
+	// (organizers included); anyone else, signed in or not, gets no row at all (afunto#2406).
+	private IQueryable<VolunteerOpportunity> ApplyMembersOnlyVisibility(
+		IQueryable<VolunteerOpportunity> source,
+		UserId? viewerId) =>
+		viewerId is UserId viewer
+			? source.Where(vo => !vo.MembersOnly ||
+				dbContext.OrganizationMembershipsQuery.Any(m => m.OrganizationId == vo.OrganizationId && m.UserId == viewer))
+			: source.Where(vo => !vo.MembersOnly);
+
 	private IQueryable<VolunteerOpportunity> ApplyPubliclyListedFilters(
 		IQueryable<VolunteerOpportunity> source,
 		DateTimeOffset now,
@@ -306,9 +324,10 @@ internal sealed class VolunteerOpportunityReadRepository(
 		string[]? categories,
 		string? tag,
 		string? keyword,
-		GeoBoundingBox? boundingBox)
+		GeoBoundingBox? boundingBox,
+		UserId? viewerId)
 	{
-		var query = source
+		var query = ApplyMembersOnlyVisibility(source, viewerId)
 			.Where(vo => vo.Status == OpportunityStatus.Published)
 
 			.Where(vo => vo.TimeSlots.Any(ts => ts.EndDateTime >= now) || (!vo.TimeSlots.Any() && vo.ValidUntil != null && vo.ValidUntil >= now));
@@ -453,7 +472,8 @@ internal sealed class VolunteerOpportunityReadRepository(
 		OpportunityStatus status,
 		string? bannerImageUrl,
 		int? totalMaxParticipants,
-		int currentParticipantCount) =>
+		int currentParticipantCount,
+		bool membersOnly = false) =>
 		new(
 			id,
 			titleDe,
@@ -482,7 +502,8 @@ internal sealed class VolunteerOpportunityReadRepository(
 			currentParticipantCount,
 			status.ToString(),
 			bannerImageUrl,
-			orgLogoUrl);
+			orgLogoUrl,
+			membersOnly);
 
 	public async ValueTask<VolunteerOpportunityDetails?> GetDetailsAsync(
 		Guid opportunityId,
@@ -517,12 +538,25 @@ internal sealed class VolunteerOpportunityReadRepository(
 				x.vo.CreatedOn,
 				x.vo.ValidUntil,
 				x.vo.Status,
+				x.vo.MembersOnly,
 				BannerImageUrl = x.vo.BannerImageUrl
 			})
 			.FirstOrDefaultAsync(cancellationToken);
 
 		if (result is null)
 			return null;
+
+		if (result.MembersOnly)
+		{
+			var isMember = requestingUserId is Guid memberUserId &&
+				await dbContext.IsMemberAsync(
+					result.OrganizationId,
+					UserId.Create(memberUserId).GetValueOrThrow(),
+					cancellationToken);
+
+			if (!isMember)
+				return null;
+		}
 
 		if (result.Status != OpportunityStatus.Published)
 		{
@@ -615,7 +649,8 @@ internal sealed class VolunteerOpportunityReadRepository(
 			currentParticipantCount,
 			result.Status.ToString(),
 			result.BannerImageUrl,
-			currentUserEngagements);
+			currentUserEngagements,
+			result.MembersOnly);
 	}
 
 	public async ValueTask<IReadOnlyList<VolunteerOpportunitySummary>> GetSummariesByOrganizationAsync(
@@ -626,8 +661,10 @@ internal sealed class VolunteerOpportunityReadRepository(
 		var organizationId_ = OrganizationId.Create(organizationId).GetValueOrThrow();
 		var now = DateTimeOffset.UtcNow;
 
+		// Only the public organization profile reads this, and that response is shared
+		// between viewers - members-only opportunities never belong on it (afunto#2406).
 		var orgQuery = dbContext.VolunteerOpportunitiesQuery
-			.Where(vo => vo.OrganizationId == organizationId_);
+			.Where(vo => vo.OrganizationId == organizationId_ && !vo.MembersOnly);
 
 		if (status is OpportunityStatus s)
 			orgQuery = orgQuery.Where(vo => vo.Status == s);
@@ -707,6 +744,7 @@ internal sealed class VolunteerOpportunityReadRepository(
 		OpportunityStatus status,
 		int pageNumber,
 		int pageSize,
+		bool? membersOnly,
 		CancellationToken cancellationToken = default)
 	{
 		var organizationId_ = OrganizationId.Create(organizationId).GetValueOrThrow();
@@ -714,6 +752,9 @@ internal sealed class VolunteerOpportunityReadRepository(
 
 		var orgQuery = dbContext.VolunteerOpportunitiesQuery
 			.Where(vo => vo.OrganizationId == organizationId_ && vo.Status == status);
+
+		if (membersOnly is bool wantMembersOnly)
+			orgQuery = orgQuery.Where(vo => vo.MembersOnly == wantMembersOnly);
 
 		var totalCount = await orgQuery.CountAsync(cancellationToken);
 
@@ -763,6 +804,7 @@ internal sealed class VolunteerOpportunityReadRepository(
 					.FirstOrDefault(),
 				x.vo.Status,
 				x.vo.BannerImageUrl,
+				x.vo.MembersOnly,
 			})
 			.ToListAsync(cancellationToken);
 
@@ -777,7 +819,7 @@ internal sealed class VolunteerOpportunityReadRepository(
 				x.Street, x.HouseNumber, x.ZipCode, x.City, x.Latitude, x.Longitude, x.IsRemote, x.Occurrence,
 				x.ParticipationType, x.CheckInMethod, x.Category, x.Tags, x.CreatedOn, x.ValidUntil, x.NextTimeSlotStart, x.NextTimeSlotEnd,
 				x.Status, x.BannerImageUrl,
-				maxParticipantsMap.GetValueOrDefault(x.Id, 0), participantCountMap.GetValueOrDefault(x.Id, 0)))
+				maxParticipantsMap.GetValueOrDefault(x.Id, 0), participantCountMap.GetValueOrDefault(x.Id, 0), x.MembersOnly))
 			.ToList();
 
 		return new PagedList<VolunteerOpportunitySummary>(items, totalCount, pageNumber, pageSize);
@@ -804,6 +846,7 @@ internal sealed class VolunteerOpportunityReadRepository(
 				vo.TitleEn,
 				vo.Color,
 				vo.Status,
+				vo.MembersOnly,
 				TimeSlots = vo.TimeSlots
 					.Where(ts => ts.StartDateTime >= from && ts.StartDateTime <= to)
 					.OrderBy(ts => ts.StartDateTime)
@@ -844,7 +887,8 @@ internal sealed class VolunteerOpportunityReadRepository(
 						ts.EndDateTime,
 						ts.MaxParticipants,
 						slotCounts.GetValueOrDefault(ts.SlotId, 0)))
-					.ToList()))
+					.ToList(),
+				r.MembersOnly))
 			.ToList();
 	}
 }

@@ -51,6 +51,12 @@ export type AdminUserListItem = {
     realmRoles: Array<string>;
 };
 
+export type AssignMemberToOpportunityRequest = {
+    memberId: string;
+    timeSlotId: null | string;
+    message: null | string;
+};
+
 export type AuditLogEntry = {
     id: string;
     actorUserId: string;
@@ -202,6 +208,7 @@ export type CreateVolunteerOpportunityRequest = {
     isDraft: null | boolean;
     checkInPin: null | string;
     validUntil: null | Date;
+    membersOnly?: boolean;
 };
 
 export type CreateVolunteerOpportunityResponse = {
@@ -226,6 +233,7 @@ export type CreateVolunteerOpportunityResponse = {
     createdOn: Date;
     status: string;
     validUntil: null | Date;
+    membersOnly: boolean;
 };
 
 export type CurrentUserEngagementInfo = {
@@ -407,6 +415,7 @@ export type OrganizationCalendarEventDto = {
     color: null | string;
     status: string;
     timeSlots: Array<CalendarTimeSlotDto>;
+    membersOnly?: boolean;
 };
 
 export type OrganizationDashboardResponse = {
@@ -731,6 +740,7 @@ export type UpdateVolunteerOpportunityRequest = {
     tags: null | Array<string>;
     checkInPin: null | string;
     validUntil: null | Date;
+    membersOnly?: boolean;
 };
 
 export type VolunteerOpportunityAvailableDate = {
@@ -765,6 +775,7 @@ export type VolunteerOpportunityDetails = {
     status: string;
     bannerImageUrl: null | string;
     currentUserEngagements: Array<CurrentUserEngagementInfo>;
+    membersOnly?: boolean;
 };
 
 export type VolunteerOpportunitySummary = {
@@ -796,6 +807,7 @@ export type VolunteerOpportunitySummary = {
     status: string;
     bannerImageUrl: null | string;
     organizationLogoUrl?: null | string;
+    membersOnly?: boolean;
 };
 
 export type DeleteOpportunityBannerData = {
@@ -1392,6 +1404,7 @@ export type GetOrganizationOpportunitiesData = {
         status: string;
         pageNumber: number;
         pageSize: number;
+        membersOnly?: boolean;
     };
     url: '/v1/organizations/{organizationId}/opportunities';
 };
@@ -4737,6 +4750,53 @@ export type BulkCancelEngagementsResponses = {
 };
 
 export type BulkCancelEngagementsResponse = BulkCancelEngagementsResponses[keyof BulkCancelEngagementsResponses];
+
+export type AssignMemberToOpportunityData = {
+    body: AssignMemberToOpportunityRequest;
+    path: {
+        opportunityId: string;
+    };
+    query?: never;
+    url: '/v1/volunteer-opportunities/{opportunityId}/assignments';
+};
+
+export type AssignMemberToOpportunityErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Unauthorized
+     */
+    401: ProblemDetails;
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+    /**
+     * Conflict
+     */
+    409: ProblemDetails;
+    /**
+     * Internal Server Error
+     */
+    500: ProblemDetails;
+};
+
+export type AssignMemberToOpportunityError = AssignMemberToOpportunityErrors[keyof AssignMemberToOpportunityErrors];
+
+export type AssignMemberToOpportunityResponses = {
+    /**
+     * Created
+     */
+    201: EngagementStatusResponse;
+};
+
+export type AssignMemberToOpportunityResponse = AssignMemberToOpportunityResponses[keyof AssignMemberToOpportunityResponses];
 
 export type ListAuditLogsData = {
     body?: never;

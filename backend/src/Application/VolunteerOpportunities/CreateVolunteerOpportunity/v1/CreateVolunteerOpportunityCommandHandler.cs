@@ -37,7 +37,8 @@ internal sealed class CreateVolunteerOpportunityCommandHandler(
 			request.Tags,
 			request.Status,
 			request.CheckInPin,
-			request.ValidUntil).GetValueOrThrow();
+			request.ValidUntil,
+			membersOnly: request.MembersOnly).GetValueOrThrow();
 
 		await dbContext.VolunteerOpportunities.AddAsync(opportunity, cancellationToken);
 

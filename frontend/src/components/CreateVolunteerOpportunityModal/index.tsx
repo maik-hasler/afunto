@@ -187,6 +187,7 @@ const DEFAULT_VALUES: OpportunityFormValues = {
 	category: undefined,
 	tags: [],
 	validUntil: "",
+	membersOnly: false,
 };
 
 function formFromOpportunity(
@@ -210,6 +211,7 @@ function formFromOpportunity(
 		category: opp.category ?? undefined,
 		tags: opp.tags ?? [],
 		validUntil: opp.validUntil ? toDateInputValue(opp.validUntil) : "",
+		membersOnly: opp.membersOnly ?? false,
 	};
 }
 
@@ -957,6 +959,7 @@ export default function CreateVolunteerOpportunityModal({
 						validUntil: values.validUntil
 							? endOfDayFromDateInput(values.validUntil)
 							: null,
+						membersOnly: values.membersOnly,
 					},
 				});
 				if (bannerFile) {
@@ -998,6 +1001,7 @@ export default function CreateVolunteerOpportunityModal({
 							validUntil: values.validUntil
 								? endOfDayFromDateInput(values.validUntil)
 								: null,
+							membersOnly: values.membersOnly,
 						},
 					});
 				} else {
@@ -1022,6 +1026,7 @@ export default function CreateVolunteerOpportunityModal({
 							validUntil: values.validUntil
 								? endOfDayFromDateInput(values.validUntil)
 								: null,
+							membersOnly: values.membersOnly,
 							isDraft: asDraft || publishScheduledSlotsAfterCreate,
 						},
 					});
