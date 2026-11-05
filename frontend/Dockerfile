@@ -1,4 +1,4 @@
-FROM node:25.9.0-slim AS build
+FROM node:26.12.1-slim AS build
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
 # Node 25 no longer bundles corepack (nodejs/corepack#783), so it needs an explicit
