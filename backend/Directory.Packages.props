@@ -7,26 +7,26 @@
 		<PackageVersion Include="Asp.Versioning.Http" Version="[10.2.3]" />
 		<PackageVersion Include="Asp.Versioning.Mvc.ApiExplorer" Version="[10.2.1]" />
 		<PackageVersion Include="Asp.Versioning.OpenApi" Version="[10.2.3]" />
-		<PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="[10.0.12]" />
-		<PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="[10.0.12]" />
-		<PackageVersion Include="Microsoft.Extensions.ApiDescription.Server" Version="[10.0.12]" PrivateAssets="All" />
+		<PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="[11.0.0]" />
+		<PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="[11.0.0]" />
+		<PackageVersion Include="Microsoft.Extensions.ApiDescription.Server" Version="[11.0.0]" PrivateAssets="All" />
 		<PackageVersion Include="NSwag.MSBuild" Version="[14.7.1]" PrivateAssets="All" />
 		<PackageVersion Include="AWSSDK.S3" Version="[4.0.104.3]" />
 		<PackageVersion Include="EFCore.NamingConventions" Version="[10.0.1]" />
-		<PackageVersion Include="Microsoft.EntityFrameworkCore" Version="[10.0.12]" />
-		<PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="[10.0.12]" PrivateAssets="All" />
-		<PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="[10.0.12]" />
-		<PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="[10.0.12]" />
-		<PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="[10.0.12]" />
-		<PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="[10.0.12]" />
-		<PackageVersion Include="Microsoft.Extensions.Diagnostics.Abstractions" Version="[10.0.12]" />
-		<PackageVersion Include="Microsoft.Extensions.Http" Version="[10.0.12]" />
-		<PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="[10.0.12]" />
-		<PackageVersion Include="Microsoft.Extensions.Caching.Abstractions" Version="[10.0.12]" />
-		<PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="[10.0.12]" />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore" Version="[11.0.0]" />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="[11.0.0]" PrivateAssets="All" />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="[11.0.0]" />
+		<PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="[11.0.0]" />
+		<PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="[11.0.0]" />
+		<PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="[11.0.0]" />
+		<PackageVersion Include="Microsoft.Extensions.Diagnostics.Abstractions" Version="[11.0.0]" />
+		<PackageVersion Include="Microsoft.Extensions.Http" Version="[11.0.0]" />
+		<PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="[11.0.0]" />
+		<PackageVersion Include="Microsoft.Extensions.Caching.Abstractions" Version="[11.0.0]" />
+		<PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="[11.0.0]" />
 		<PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="[10.0.3]" />
-		<PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="[10.10.0]" />
-		<PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="[10.10.0]" />
+		<PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="[11.0.0]" />
+		<PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="[11.0.0]" />
 		<PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="[1.19.1]" />
 		<PackageVersion Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.18.0-beta.1" />
 		<PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="[1.19.1]" />
@@ -37,10 +37,10 @@
 		<PackageVersion Include="Aspire.Hosting.JavaScript" Version="[13.6.1]" />
 		<PackageVersion Include="Aspire.Hosting.Testing" Version="[13.6.1]" />
 		<!-- Transitive via Aspire.Hosting (StreamJsonRpc): pinned past GHSA-qhrr-8q5h-9q3h until Aspire ships a fixed version itself. -->
-		<PackageVersion Include="MessagePack" Version="[2.5.307]" />
+		<PackageVersion Include="MessagePack" Version="[3.1.12]" />
 		<PackageVersion Include="AwesomeAssertions" Version="[9.6.0]" />
 		<PackageVersion Include="Deque.AxeCore.Playwright" Version="[4.13.0]" />
-		<PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="[10.0.12]" />
+		<PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="[11.0.0]" />
 		<PackageVersion Include="Microsoft.Extensions.Diagnostics.Testing" Version="[10.10.0]" />
 		<PackageVersion Include="NetArchTest.Rules" Version="[1.3.2]" />
 		<PackageVersion Include="NSubstitute" Version="[6.2.0]" />
